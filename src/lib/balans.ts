@@ -10,11 +10,11 @@ export type WorkoutKind = "styrka" | "kondition" | "rörlighet" | "vila";
 export interface Profile {
   name: string;
   goal: Goal;
-  goalOther?: string;
-  level?: Level;
+  goalOther?: string | undefined;
+  level?: Level | undefined;
   equipment: Equipment[];
   days: number[]; // 0=mån … 6=sön
-  diet?: Diet;
+  diet?: Diet | undefined;
   sessionMin: number;
   hideCalories: boolean;
   waterGoal: number;
@@ -26,8 +26,8 @@ export interface Meal {
   type: MealType;
   name: string;
   amount: string;
-  kcal?: number;
-  protein?: number;
+  kcal?: number | undefined;
+  protein?: number | undefined;
 }
 
 export interface Favorite {
@@ -35,15 +35,15 @@ export interface Favorite {
   name: string;
   amount: string;
   type: MealType;
-  kcal?: number;
-  protein?: number;
+  kcal?: number | undefined;
+  protein?: number | undefined;
 }
 
 export interface Exercise {
   name: string;
-  sets?: number;
-  reps?: number;
-  timeSec?: number;
+  sets?: number | undefined;
+  reps?: number | undefined;
+  timeSec?: number | undefined;
   restSec: number;
   done: boolean;
 }
@@ -56,14 +56,14 @@ export interface Workout {
   durationMin: number;
   exercises: Exercise[];
   status: "planerat" | "klart";
-  feeling?: number; // 1–5
-  note?: string;
+  feeling?: number | undefined; // 1–5
+  note?: string | undefined;
 }
 
 export interface DayHabits {
   water: number;
-  sleepH?: number;
-  recovery?: number; // 1–5
+  sleepH?: number | undefined;
+  recovery?: number | undefined; // 1–5
 }
 
 export interface State {
@@ -129,16 +129,16 @@ export function dateKey(d = new Date()) {
   return `${y}-${m}-${day}`;
 }
 export function addDays(key: string, n: number) {
-  const [y, m, d] = key.split("-").map(Number);
+  const [y = 0, m = 1, d = 1] = key.split("-").map(Number);
   return dateKey(new Date(y, m - 1, d + n));
 }
 export function weekdayIndex(key: string) {
-  const [y, m, d] = key.split("-").map(Number);
+  const [y = 0, m = 1, d = 1] = key.split("-").map(Number);
   return (new Date(y, m - 1, d).getDay() + 6) % 7;
 }
 export const WEEKDAYS = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
 export function prettyDate(key: string) {
-  const [y, m, d] = key.split("-").map(Number);
+  const [y = 0, m = 1, d = 1] = key.split("-").map(Number);
   return new Date(y, m - 1, d).toLocaleDateString("sv-SE", { weekday: "long", day: "numeric", month: "long" });
 }
 
@@ -234,7 +234,7 @@ export function generateWorkout(opts: {
   return {
     id: uid(),
     date,
-    title: titles[kind][Math.floor(Math.random() * 3)],
+    title: titles[kind]![Math.floor(Math.random() * 3)]!,
     kind,
     durationMin: minutes,
     exercises,
@@ -251,7 +251,7 @@ function kindForGoal(goal: Goal, i: number): WorkoutKind {
     annat: ["styrka", "kondition", "rörlighet"],
   };
   const c = cycles[goal];
-  return c[i % c.length];
+  return c[i % c.length]!;
 }
 
 /* ---------------- Måltidsförslag ---------------- */
