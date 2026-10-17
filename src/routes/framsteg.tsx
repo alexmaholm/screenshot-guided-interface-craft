@@ -147,7 +147,7 @@ function Progress() {
           <span>Vattenmål (glas)</span>
           <Input type="number" min={1} max={20} className="h-12 w-24 rounded-xl" value={p.waterGoal} onChange={(e) => update((st) => ({ ...st, profile: { ...st.profile!, waterGoal: Math.min(20, Math.max(1, Number(e.target.value) || 1)) } }))} />
         </label>
-        <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => { if (confirm("Börja om? All din data raderas.")) resetAll(); }}>
+        <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => { if (confirm("Börja om? All din data raderas.")) resetAll(); return undefined; }}>
           Börja om från början
         </Button>
         <p className="text-xs text-muted-foreground">Balans ger generell inspiration och ersätter inte vård eller individuell kostrådgivning.</p>

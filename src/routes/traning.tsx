@@ -12,8 +12,8 @@ import {
 } from "@/lib/balans";
 
 export const Route = createFileRoute("/traning")({
-  validateSearch: (s: Record<string, unknown>): { starta?: string } => ({
-    starta: typeof s.starta === "string" ? s.starta : undefined,
+  validateSearch: (s: Record<string, unknown>): { starta?: string | undefined } => ({
+    starta: typeof s["starta"] === "string" ? s["starta"] : undefined,
   }),
   head: () => ({
     meta: [

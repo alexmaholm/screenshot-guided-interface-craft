@@ -11,12 +11,12 @@ import {
   type Meal, type MealType,
 } from "@/lib/balans";
 
-type Search = { ny?: boolean; typ?: MealType };
+type Search = { ny?: boolean | undefined; typ?: MealType | undefined };
 
 export const Route = createFileRoute("/mat")({
-  validateSearch: (s: Record<string, unknown>): Search => ({
-    ny: s.ny === true || s.ny === "true" ? true : undefined,
-    typ: MEAL_TYPES.includes(s.typ as MealType) ? (s.typ as MealType) : undefined,
+  validateSearch: (s: Record<string, unknown>): Search => ({ // eslint-disable-line
+    ny: s["ny"] === true || s["ny"] === "true" ? true : undefined,
+    typ: MEAL_TYPES.includes(s["typ"] as MealType) ? (s["typ"] as MealType) : undefined,
   }),
   head: () => ({
     meta: [
