@@ -1,3 +1,4 @@
+import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Droplets, Moon, Utensils, Dumbbell, Sparkles, Plus, Minus, Play } from "lucide-react";
 import { AppShell, PageLoading } from "@/components/AppShell";
@@ -11,6 +12,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Planera och följ mat, träning och vila på ett ställe – enkelt och utan pekpinnar." },
       { property: "og:title", content: "Balans – mat, träning och återhämtning" },
       { property: "og:description", content: "Din dag med mat, träning och vila samlat på ett ställe." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,
@@ -76,6 +79,8 @@ function Today() {
           </Link>
         </div>
       </section>
+
+      <RecoveryMeals profile={p} workout={[...s.workouts].reverse().find((w) => w.date === today && w.status === "klart" && w.kind !== "vila")} date={today} />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Måltider" value={`${loggedTypes.size}/4`} icon={<Utensils className="h-5 w-5" />} />

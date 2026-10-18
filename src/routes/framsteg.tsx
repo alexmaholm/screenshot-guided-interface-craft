@@ -1,3 +1,4 @@
+import { DietaryPreferences } from "@/components/DietaryPreferences";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -13,6 +14,8 @@ export const Route = createFileRoute("/framsteg")({
       { name: "description", content: "Veckosammanfattning av pass, måltider och vanor – med fokus på kontinuitet." },
       { property: "og:title", content: "Framsteg – Balans" },
       { property: "og:description", content: "Se din vecka med träning, mat och vanor." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ProgressPage,
@@ -118,7 +121,7 @@ function Progress() {
             <form className="flex gap-2" onSubmit={(e) => {
               e.preventDefault();
               const v = Number(weight.replace(",", "."));
-              if (!v || v < 20 || v > 400) return toast.error("Ange en vikt i kilo, t.ex. 72,5");
+              if (!Number.isFinite(v) || v < 20 || v > 400) { toast.error("Ange en vikt i kilo, t.ex. 72,5"); return; }
               update((st) => ({ ...st, body: [...st.body.filter((b) => b.date !== today), { date: today, weight: v }] }));
               setWeight("");
               toast.success("Sparat");
@@ -147,6 +150,7 @@ function Progress() {
           <span>Vattenmål (glas)</span>
           <Input type="number" min={1} max={20} className="h-12 w-24 rounded-xl" value={p.waterGoal} onChange={(e) => update((st) => ({ ...st, profile: { ...st.profile!, waterGoal: Math.min(20, Math.max(1, Number(e.target.value) || 1)) } }))} />
         </label>
+        <div className="border-t pt-4"><h3 className="mb-4 font-semibold">Mina kostval</h3><DietaryPreferences profile={p} onChange={(patch) => update((st) => st.profile ? { ...st, profile: { ...st.profile, ...patch } } : st)} /></div>
         <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => { if (confirm("Börja om? All din data raderas.")) resetAll(); return undefined; }}>
           Börja om från början
         </Button>

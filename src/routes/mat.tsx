@@ -1,3 +1,4 @@
+import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Star, Trash2, Plus, ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/mat")({
       { name: "description", content: "Logga måltider, spara favoriter och hitta förslag som passar din kost." },
       { property: "og:title", content: "Mat – Balans" },
       { property: "og:description", content: "Enkel måltidslogg med favoriter och förslag." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: MatPage,
@@ -89,8 +92,9 @@ function Mat() {
         </Button>
       </header>
 
-      <section className="card-soft flex items-center justify-between gap-4 p-5">
-        <div className="flex gap-6">
+      <RecoveryMeals profile={p} workout={[...s.workouts].reverse().find((w) => w.date === date && w.status === "klart" && w.kind !== "vila")} date={date} />
+      <section className="card-soft flex flex-wrap items-center justify-between gap-4 p-5">
+        <div className="flex flex-wrap gap-4">
           <div><p className="text-xs text-muted-foreground">Måltider</p><p className="text-2xl font-bold">{meals.length}</p></div>
           <div><p className="text-xs text-muted-foreground">Protein ca</p><p className="text-2xl font-bold">{totP} g</p></div>
           {showKcal && <div><p className="text-xs text-muted-foreground">Energi ca</p><p className="text-2xl font-bold">{totK} kcal</p></div>}
@@ -172,14 +176,14 @@ function AddMealDialog({
   useEffect(() => { if (open) { setName(""); setAmount(""); setKcal(""); setProtein(""); setErr(""); } }, [open]);
 
   const recent = Array.from(new Map([...s.meals].reverse().map((m) => [m.name, m])).values()).slice(0, 8);
-  const sugg = suggestionsFor(s.profile?.diet, type);
+  const sugg = suggestionsFor(s.profile?.diet, type, s.profile?.restrictions);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return setErr("Skriv vad du åt.");
     onAdd({ type, name: name.trim(), amount: amount.trim() || "1 portion", kcal: kcal ? Number(kcal) : undefined, protein: protein ? Number(protein) : undefined });
   };
-  const Pick = ({ items }: { items: { name: string; amount: string; kcal?: number; protein?: number }[] }) =>
+  const Pick = ({ items }: { items: { name: string; amount: string; kcal?: number | undefined; protein?: number | undefined }[] }) =>
     items.length === 0 ? (
       <p className="py-6 text-center text-sm text-muted-foreground">Inget här än.</p>
     ) : (
@@ -240,7 +244,7 @@ function AddMealDialog({
         )}
         {tab === "favoriter" && <Pick items={s.favorites} />}
         {tab === "tidigare" && <Pick items={recent} />}
-        {tab === "förslag" && <Pick items={sugg} />}
+        {tab === "förslag" && <><Pick items={sugg} /><p className="text-xs text-muted-foreground">Kontrollera ingredienser och allergenmärkning. Chiapudding avser kokosdryck; lax tillagas med olja.</p></>}
       </DialogContent>
     </Dialog>
   );
