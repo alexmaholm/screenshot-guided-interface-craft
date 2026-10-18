@@ -12,3 +12,4 @@
 - Keep dietary eligibility and recovery selection in `src/lib/balans.ts` so onboarding, meal suggestions, and recovery meals use the same rules.
 - Reuse dietary selectors and recovery recommendations across pages through focused components so restrictions cannot diverge between views.
 - Preserve the existing browser-local storage flow for this milestone; connected accounts and payments require a separate implementation.
+- Bundle fonts through Fontsource CSS imports so rendering does not depend on external font hosts.
