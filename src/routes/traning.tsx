@@ -1,3 +1,4 @@
+import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Check, Clock, RefreshCw, CalendarDays, Plus, Play, ArrowLeft } from "lucide-react";
@@ -21,6 +22,8 @@ export const Route = createFileRoute("/traning")({
       { name: "description", content: "Personliga pass för styrka, kondition och rörlighet – flytta, byt och bocka av." },
       { property: "og:title", content: "Träning – Balans" },
       { property: "og:description", content: "Träningspass anpassade efter mål, nivå och utrustning." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: TrainingPage,
@@ -45,7 +48,6 @@ function Training() {
 
   useEffect(() => {
     if (search.starta) setActiveId(search.starta);
-    else if ("starta" in search) setCreating(true);
   }, [search]);
 
   const monday = addDays(today, -weekdayIndex(today));
@@ -93,6 +95,7 @@ function Training() {
         </div>
       </section>
 
+      <RecoveryMeals profile={p} workout={[...s.workouts].reverse().find((w) => w.date === today && w.status === "klart" && w.kind !== "vila")} date={today} />
       <h2 className="text-lg font-semibold">Kommande pass</h2>
       {upcoming.length === 0 ? (
         <div className="card-soft p-6 text-center text-muted-foreground">Inga planerade pass. Skapa ett när det passar dig.</div>

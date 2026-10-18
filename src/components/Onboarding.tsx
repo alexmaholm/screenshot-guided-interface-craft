@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Leaf, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DietaryPreferences } from "@/components/DietaryPreferences";
 import { Input } from "@/components/ui/input";
-import { completeOnboarding, WEEKDAYS, type Diet, type Equipment, type Goal, type Level, type Profile } from "@/lib/balans";
+import { completeOnboarding, WEEKDAYS, type Equipment, type Goal, type Level, type Profile } from "@/lib/balans";
 
 const GOALS: { v: Goal; l: string; d: string }[] = [
   { v: "energi", l: "Mer energi", d: "Orka mer i vardagen" },
@@ -23,13 +24,7 @@ const EQ: { v: Equipment; l: string }[] = [
   { v: "kettlebell", l: "Kettlebell" },
   { v: "gym", l: "Gym" },
 ];
-const DIETS: { v: Diet; l: string }[] = [
-  { v: "allt", l: "Äter det mesta" },
-  { v: "vegetariskt", l: "Vegetariskt" },
-  { v: "veganskt", l: "Veganskt" },
-  { v: "pescetariskt", l: "Pescetariskt" },
-  { v: "glutenfritt", l: "Glutenfritt" },
-];
+
 
 export function Onboarding() {
   const [step, setStep] = useState(0);
@@ -145,14 +140,7 @@ export function Onboarding() {
         {step === 5 && (
           <section>
             <h1 className="text-3xl font-bold">Hur äter du helst?</h1>
-            <p className="mt-2 text-muted-foreground">Används för måltidsförslag. Hoppa gärna över.</p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {DIETS.map((d) => (
-                <button key={d.v} aria-pressed={p.diet === d.v} onClick={() => set({ diet: d.v })} className="chip">
-                  {d.l}
-                </button>
-              ))}
-            </div>
+            <div className="mt-6"><DietaryPreferences profile={p} onChange={set} /></div>
             <label className="mt-8 flex min-h-12 items-center gap-3 rounded-2xl bg-card p-4">
               <input type="checkbox" className="h-5 w-5 accent-[var(--primary)]" checked={p.hideCalories} onChange={(e) => set({ hideCalories: e.target.checked })} />
               <span>Dölj kalorier i appen</span>
@@ -171,7 +159,7 @@ export function Onboarding() {
             className="h-12 rounded-full"
             onClick={() => {
               if (step === 2) set({ level: undefined });
-              if (step === 5) set({ diet: undefined });
+              if (step === 5) { completeOnboarding({ ...p, diet: undefined, restrictions: [] }); return; }
               next();
             }}
           >
