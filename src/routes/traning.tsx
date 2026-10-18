@@ -48,7 +48,6 @@ function Training() {
 
   useEffect(() => {
     if (search.starta) setActiveId(search.starta);
-    else if ("starta" in search) setCreating(true);
   }, [search]);
 
   const monday = addDays(today, -weekdayIndex(today));
