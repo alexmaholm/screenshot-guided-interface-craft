@@ -4,6 +4,22 @@ export type Goal = "energi" | "styrka" | "kondition" | "vanor" | "annat";
 export type Level = "nybörjare" | "van" | "erfaren";
 export type Equipment = "ingen" | "hantlar" | "gummiband" | "gym" | "kettlebell";
 export type Diet = "allt" | "vegetariskt" | "veganskt" | "pescetariskt" | "glutenfritt";
+export type Restriction = "gluten" | "laktos" | "mjolk" | "notter" | "soja" | "agg";
+export const RESTRICTIONS: { value: Restriction; label: string }[] = [
+  { value: "gluten", label: "Glutenfritt" },
+  { value: "laktos", label: "Laktosfritt" },
+  { value: "mjolk", label: "Mjölkfritt" },
+  { value: "notter", label: "Utan nötter och jordnötter" },
+  { value: "soja", label: "Utan soja" },
+  { value: "agg", label: "Utan ägg" },
+];
+export const DIETS: { value: Diet; label: string }[] = [
+  { value: "allt", label: "Äter det mesta" },
+  { value: "vegetariskt", label: "Vegetariskt" },
+  { value: "veganskt", label: "Veganskt" },
+  { value: "pescetariskt", label: "Pescetariskt" },
+  { value: "glutenfritt", label: "Glutenfritt" },
+];
 export type MealType = "frukost" | "lunch" | "middag" | "mellanmål";
 export type WorkoutKind = "styrka" | "kondition" | "rörlighet" | "vila";
 
@@ -15,6 +31,7 @@ export interface Profile {
   equipment: Equipment[];
   days: number[]; // 0=mån … 6=sön
   diet?: Diet | undefined;
+  restrictions?: Restriction[] | undefined;
   sessionMin: number;
   hideCalories: boolean;
   waterGoal: number;
@@ -89,7 +106,7 @@ function load(): State {
   } catch {
     state = empty;
   }
-  return state!;
+  return state ?? empty;
 }
 
 export function update(fn: (s: State) => State) {
@@ -226,7 +243,7 @@ export function generateWorkout(opts: {
       ? { name: e.name, sets: kind === "rörlighet" ? 1 : 2 + lvl, timeSec: kind === "rörlighet" ? 60 : 30 + lvl * 10, restSec: kind === "rörlighet" ? 15 : 30, done: false }
       : { name: e.name, sets: 2 + lvl, reps: [10, 10, 8][lvl], restSec: 60 + lvl * 15, done: false },
   );
-  const titles: Record<string, string[]> = {
+  const titles: Record<Exclude<WorkoutKind, "vila">, string[]> = {
     styrka: ["Helkropp styrka", "Stark bas", "Styrka & stabilitet"],
     kondition: ["Pulshöjare", "Intervaller light", "Energiboost"],
     rörlighet: ["Mjuk rörlighet", "Lätt i kroppen", "Stretch & andning"],
@@ -234,7 +251,7 @@ export function generateWorkout(opts: {
   return {
     id: uid(),
     date,
-    title: titles[kind]![Math.floor(Math.random() * 3)]!,
+    title: titles[kind][Math.floor(Math.random() * 3)] ?? KIND_LABEL[kind],
     kind,
     durationMin: minutes,
     exercises,
@@ -251,7 +268,7 @@ function kindForGoal(goal: Goal, i: number): WorkoutKind {
     annat: ["styrka", "kondition", "rörlighet"],
   };
   const c = cycles[goal];
-  return c[i % c.length]!;
+  return c[i % c.length] ?? "rörlighet";
 }
 
 /* ---------------- Måltidsförslag ---------------- */
@@ -281,9 +298,39 @@ export const SUGGESTIONS: Suggestion[] = [
   { name: "Hummus med morötter", amount: "1 liten skål", type: "mellanmål", kcal: 180, protein: 6, diets: ALL },
   { name: "Proteinyoghurt", amount: "1 burk", type: "mellanmål", kcal: 150, protein: 17, diets: ["allt", "vegetariskt", "pescetariskt", "glutenfritt"] },
 ];
-export function suggestionsFor(diet: Diet | undefined, type?: MealType) {
+// Ingredients assumed by the curated suggestions. Missing metadata is never eligible.
+const CONTAINS: Record<string, Restriction[]> = {
+  "Havregrynsgröt med bär och nötter": ["gluten", "notter"],
+  "Kvarg med banan och müsli": ["gluten", "laktos", "mjolk", "notter"],
+  "Äggröra på surdegsbröd": ["gluten", "agg", "mjolk", "laktos"],
+  "Chiapudding med mango": [], // Prepared with coconut drink.
+  "Linsgryta med ris": [],
+  "Kycklingsallad med quinoa": [],
+  "Halloumiwrap med grönsaker": ["gluten", "mjolk", "laktos"],
+  "Ugnsbakad lax med potatis": [], // Prepared with oil, not butter.
+  "Tofu-wok med nudlar": ["gluten", "soja"],
+  "Kikärtscurry med ris": [], // Prepared with coconut milk.
+  "Köttfärssås med pasta": ["gluten"],
+  "Äpple och jordnötssmör": ["notter"],
+  "Hummus med morötter": [],
+  "Proteinyoghurt": ["mjolk", "laktos"],
+};
+
+export function suggestionsFor(diet: Diet | undefined, type?: MealType, restrictions: Restriction[] = []) {
   const d = diet ?? "allt";
-  return SUGGESTIONS.filter((s) => s.diets.includes(d) && (!type || s.type === type));
+  return SUGGESTIONS.filter((s) => {
+    const contains = CONTAINS[s.name];
+    return contains !== undefined && s.diets.includes(d) && (!type || s.type === type)
+      && restrictions.every((r) => !contains.includes(r));
+  });
+}
+
+export function recoverySuggestions(profile: Profile, workout: Workout | undefined): Suggestion[] {
+  if (!workout || workout.status !== "klart" || workout.kind === "vila") return [];
+  return suggestionsFor(profile.diet, undefined, profile.restrictions)
+    .filter((meal) => meal.type === "lunch" || meal.type === "middag")
+    .sort((a, b) => workout.kind === "styrka" ? b.protein - a.protein : a.kcal - b.kcal)
+    .slice(0, 3);
 }
 
 /* ---------------- Onboarding: skapa plan + exempeldata ---------------- */
@@ -309,7 +356,7 @@ export function completeOnboarding(p: Profile) {
       workouts.push(w);
     }
     if (off < 0) {
-      const sug = suggestionsFor(p.diet);
+      const sug = suggestionsFor(p.diet, undefined, p.restrictions);
       for (const t of MEAL_TYPES) {
         if (t === "mellanmål" && Math.random() < 0.4) continue;
         const opts = sug.filter((s) => s.type === t);
@@ -319,10 +366,10 @@ export function completeOnboarding(p: Profile) {
       habits[date] = { water: 4 + Math.floor(Math.random() * 5), sleepH: 6.5 + Math.round(Math.random() * 3) / 2, recovery: 3 + Math.floor(Math.random() * 3) };
     }
   }
-  const breakfast = suggestionsFor(p.diet, "frukost")[0];
+  const breakfast = suggestionsFor(p.diet, "frukost", p.restrictions)[0];
   if (breakfast) meals.push({ id: uid(), date: today, type: "frukost", name: breakfast.name, amount: breakfast.amount, kcal: breakfast.kcal, protein: breakfast.protein });
   habits[today] = { water: 2 };
-  const favorites: Favorite[] = suggestionsFor(p.diet)
+  const favorites: Favorite[] = suggestionsFor(p.diet, undefined, p.restrictions)
     .slice(0, 3)
     .map((s) => ({ id: uid(), name: s.name, amount: s.amount, type: s.type, kcal: s.kcal, protein: s.protein }));
   update(() => ({ profile: p, meals, favorites, workouts, habits, body: [] }));

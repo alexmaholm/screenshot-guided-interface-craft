@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep dietary eligibility and recovery selection in `src/lib/balans.ts` so onboarding, meal suggestions, and recovery meals use the same rules.
+- Reuse dietary selectors and recovery recommendations across pages through focused components so restrictions cannot diverge between views.
+- Preserve the existing browser-local storage flow for this milestone; connected accounts and payments require a separate implementation.
