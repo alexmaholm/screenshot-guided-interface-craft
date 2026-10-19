@@ -45,3 +45,20 @@ describe("Recovery meals", () => {
     expect(results.map((s) => s.name)).toEqual(["Linsgryta med ris", "Kikärtscurry med ris"]);
   });
 });
+import { foodsFor, portion, FOODS, macroTargets } from "@/lib/balans";
+describe("livsmedelsbas", () => {
+  it("glutenfri profil får inte havregryn med gluten", () => {
+    expect(foodsFor("allt", ["gluten"]).some((f) => f.name === "Havregryn")).toBe(false);
+  });
+  it("vegansk kost utesluter ägg och mjölk", () => {
+    const names = foodsFor("veganskt").map((f) => f.name);
+    expect(names).not.toContain("Ägg");
+    expect(names).not.toContain("Mellanmjölk");
+  });
+  it("2 st ägg = 110 g", () => {
+    expect(portion(FOODS.find((f) => f.name === "Ägg")!, 2, "st").grams).toBe(110);
+  });
+  it("styrkemål ger 1,8 g protein per kg", () => {
+    expect(macroTargets({ ...profile, goal: "styrka" }, 80).protein).toBe(144);
+  });
+});
