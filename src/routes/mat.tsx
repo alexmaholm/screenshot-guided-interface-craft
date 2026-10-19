@@ -1,4 +1,7 @@
 import { RecoveryMeals } from "@/components/RecoveryMeals";
+import { MacroSummary } from "@/components/MacroSummary";
+import { WaterTracker } from "@/components/WaterTracker";
+import { FoodSearch } from "@/components/FoodSearch";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Star, Trash2, Plus, ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
@@ -8,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  addDays, dateKey, MEAL_LABEL, MEAL_TYPES, prettyDate, suggestionsFor, uid, update, useBalans,
+  addDays, dateKey, macroTargets, sumMacros, MEAL_LABEL, MEAL_TYPES, prettyDate, suggestionsFor, uid, update, useBalans,
   type Meal, type MealType,
 } from "@/lib/balans";
 
@@ -56,8 +59,8 @@ function Mat() {
 
   const meals = s.meals.filter((m) => m.date === date);
   const showKcal = !p.hideCalories;
-  const totK = meals.reduce((a, m) => a + (m.kcal ?? 0), 0);
-  const totP = meals.reduce((a, m) => a + (m.protein ?? 0), 0);
+  const eaten = sumMacros(meals);
+  const target = macroTargets(p, s.body.at(-1)?.weight);
   const isToday = date === dateKey();
 
   const addMeal = (m: Omit<Meal, "id" | "date">) => {
@@ -71,7 +74,7 @@ function Mat() {
       ...st,
       favorites: existing
         ? st.favorites.filter((f) => f.id !== existing.id)
-        : [...st.favorites, { id: uid(), name: m.name, amount: m.amount, type: m.type, kcal: m.kcal, protein: m.protein }],
+        : [...st.favorites, { id: uid(), name: m.name, amount: m.amount, type: m.type, kcal: m.kcal, protein: m.protein, carbs: m.carbs, fat: m.fat }],
     }));
     toast(existing ? "Borttagen från favoriter" : "Sparad som favorit");
   };
@@ -93,20 +96,20 @@ function Mat() {
       </header>
 
       <RecoveryMeals profile={p} workout={[...s.workouts].reverse().find((w) => w.date === date && w.status === "klart" && w.kind !== "vila")} date={date} />
-      <section className="card-soft flex flex-wrap items-center justify-between gap-4 p-5">
-        <div className="flex flex-wrap gap-4">
-          <div><p className="text-xs text-muted-foreground">Måltider</p><p className="text-2xl font-bold">{meals.length}</p></div>
-          <div><p className="text-xs text-muted-foreground">Protein ca</p><p className="text-2xl font-bold">{totP} g</p></div>
-          {showKcal && <div><p className="text-xs text-muted-foreground">Energi ca</p><p className="text-2xl font-bold">{totK} kcal</p></div>}
+      <section className="card-soft space-y-4 p-5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Dagens näring</h2>
+          <button
+            className="flex min-h-11 items-center gap-2 rounded-full px-3 text-sm text-muted-foreground hover:bg-muted"
+            onClick={() => update((st) => ({ ...st, profile: { ...st.profile!, hideCalories: !p.hideCalories } }))}
+          >
+            {showKcal ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showKcal ? "Dölj kalorier" : "Visa kalorier"}
+          </button>
         </div>
-        <button
-          className="flex min-h-11 items-center gap-2 rounded-full px-3 text-sm text-muted-foreground hover:bg-muted"
-          onClick={() => update((st) => ({ ...st, profile: { ...st.profile!, hideCalories: !p.hideCalories } }))}
-        >
-          {showKcal ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          {showKcal ? "Dölj kalorier" : "Visa kalorier"}
-        </button>
+        <MacroSummary eaten={eaten} target={target} showKcal={showKcal} />
       </section>
+      <WaterTracker date={date} />
 
       {MEAL_TYPES.map((t) => {
         const list = meals.filter((m) => m.type === t);
@@ -130,7 +133,9 @@ function Mat() {
                         <p className="font-medium">{m.name}</p>
                         <p className="text-sm text-muted-foreground">
                           {m.amount}
-                          {m.protein ? ` · ${m.protein} g protein` : ""}
+                          {m.protein ? ` · ${m.protein} g P` : ""}
+                          {m.carbs ? ` · ${m.carbs} g K` : ""}
+                          {m.fat ? ` · ${m.fat} g F` : ""}
                           {showKcal && m.kcal ? ` · ${m.kcal} kcal` : ""}
                         </p>
                       </div>
@@ -166,7 +171,7 @@ function AddMealDialog({
   onAdd: (m: Omit<Meal, "id" | "date">) => void; showKcal: boolean;
 }) {
   const s = useBalans()!;
-  const [tab, setTab] = useState<"egen" | "favoriter" | "tidigare" | "förslag">("egen");
+  const [tab, setTab] = useState<"sök" | "egen" | "favoriter" | "tidigare" | "förslag">("sök");
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [kcal, setKcal] = useState("");
@@ -183,14 +188,14 @@ function AddMealDialog({
     if (!name.trim()) return setErr("Skriv vad du åt.");
     onAdd({ type, name: name.trim(), amount: amount.trim() || "1 portion", kcal: kcal ? Number(kcal) : undefined, protein: protein ? Number(protein) : undefined });
   };
-  const Pick = ({ items }: { items: { name: string; amount: string; kcal?: number | undefined; protein?: number | undefined }[] }) =>
+  const Pick = ({ items }: { items: { name: string; amount: string; kcal?: number | undefined; protein?: number | undefined; carbs?: number | undefined; fat?: number | undefined }[] }) =>
     items.length === 0 ? (
       <p className="py-6 text-center text-sm text-muted-foreground">Inget här än.</p>
     ) : (
       <ul className="max-h-72 space-y-2 overflow-y-auto">
         {items.map((i) => (
           <li key={i.name}>
-            <button onClick={() => onAdd({ type, name: i.name, amount: i.amount, kcal: i.kcal, protein: i.protein })} className="flex min-h-14 w-full items-center justify-between gap-2 rounded-2xl bg-muted px-4 py-2 text-left hover:bg-secondary">
+            <button onClick={() => onAdd({ type, name: i.name, amount: i.amount, kcal: i.kcal, protein: i.protein, carbs: i.carbs, fat: i.fat })} className="flex min-h-14 w-full items-center justify-between gap-2 rounded-2xl bg-muted px-4 py-2 text-left hover:bg-secondary">
               <span>
                 <span className="block font-medium">{i.name}</span>
                 <span className="text-sm text-muted-foreground">{i.amount}{showKcal && i.kcal ? ` · ${i.kcal} kcal` : ""}</span>
@@ -211,11 +216,12 @@ function AddMealDialog({
             <button key={t} className="chip" aria-pressed={type === t} onClick={() => setType(t)}>{MEAL_LABEL[t]}</button>
           ))}
         </div>
-        <div className="grid grid-cols-4 gap-1 rounded-full bg-muted p-1 text-sm" role="tablist">
-          {(["egen", "favoriter", "tidigare", "förslag"] as const).map((t) => (
-            <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`min-h-10 rounded-full capitalize ${tab === t ? "bg-card font-semibold shadow-sm" : ""}`}>{t}</button>
+        <div className="grid grid-cols-5 gap-1 rounded-full bg-muted p-1 text-sm" role="tablist">
+          {(["sök", "egen", "favoriter", "tidigare", "förslag"] as const).map((t) => (
+            <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`min-h-10 rounded-full text-xs capitalize sm:text-sm ${tab === t ? "bg-card font-semibold shadow-sm" : ""}`}>{t}</button>
           ))}
         </div>
+        {tab === "sök" && <FoodSearch showKcal={showKcal} onPick={(f) => onAdd({ type, ...f })} />}
         {tab === "egen" && (
           <form onSubmit={submit} className="space-y-3">
             <div>

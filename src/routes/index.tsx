@@ -1,6 +1,7 @@
 import { RecoveryMeals } from "@/components/RecoveryMeals";
+import { WaterTracker } from "@/components/WaterTracker";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Droplets, Moon, Utensils, Dumbbell, Sparkles, Plus, Minus, Play } from "lucide-react";
+import { Droplets, Moon, Utensils, Dumbbell, Sparkles, Play } from "lucide-react";
 import { AppShell, PageLoading } from "@/components/AppShell";
 import { Onboarding } from "@/components/Onboarding";
 import { dateKey, dayTip, KIND_LABEL, MEAL_LABEL, MEAL_TYPES, prettyDate, update, useBalans } from "@/lib/balans";
@@ -89,28 +90,7 @@ function Today() {
         <Stat label="Sömn" value={h.sleepH ? `${h.sleepH} h` : "–"} icon={<Moon className="h-5 w-5" />} />
       </section>
 
-      <section className="card-soft p-5">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold">Vatten</h2>
-            <p className="text-sm text-muted-foreground">Varje glas räknas.</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button aria-label="Ta bort ett glas" onClick={() => setHabit({ water: Math.max(0, h.water - 1) })} className="grid h-12 w-12 place-items-center rounded-full bg-muted">
-              <Minus className="h-5 w-5" />
-            </button>
-            <span className="w-8 text-center text-xl font-bold" aria-live="polite">{h.water}</span>
-            <button aria-label="Lägg till ett glas" onClick={() => setHabit({ water: h.water + 1 })} className="grid h-12 w-12 place-items-center rounded-full bg-primary text-primary-foreground">
-              <Plus className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-        <div className="mt-4 flex gap-1.5" aria-hidden>
-          {Array.from({ length: p.waterGoal }).map((_, i) => (
-            <div key={i} className={`h-3 flex-1 rounded-full ${i < h.water ? "bg-mint" : "bg-muted"}`} />
-          ))}
-        </div>
-      </section>
+      <WaterTracker date={today} />
 
       <section className="card-soft p-5">
         <h2 className="text-lg font-semibold">Återhämtning</h2>
