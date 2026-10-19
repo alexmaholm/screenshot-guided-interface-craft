@@ -1,7 +1,7 @@
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { WaterTracker } from "@/components/WaterTracker";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Droplets, Moon, Utensils, Dumbbell, Sparkles, Play } from "lucide-react";
+import { Droplets, Moon, Utensils, Dumbbell, Sparkles, Plus, Play } from "lucide-react";
 import { AppShell, PageLoading } from "@/components/AppShell";
 import { Onboarding } from "@/components/Onboarding";
 import { dateKey, dayTip, KIND_LABEL, MEAL_LABEL, MEAL_TYPES, prettyDate, update, useBalans } from "@/lib/balans";
