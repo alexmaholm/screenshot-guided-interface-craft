@@ -45,6 +45,8 @@ export interface Meal {
   amount: string;
   kcal?: number | undefined;
   protein?: number | undefined;
+  carbs?: number | undefined;
+  fat?: number | undefined;
 }
 
 export interface Favorite {
@@ -54,6 +56,8 @@ export interface Favorite {
   type: MealType;
   kcal?: number | undefined;
   protein?: number | undefined;
+  carbs?: number | undefined;
+  fat?: number | undefined;
 }
 
 export interface Exercise {
@@ -388,3 +392,97 @@ export function dayTip(w: Workout | undefined, mealsToday: Meal[]): string {
     return "Inför styrkepass kan det kännas bra att ha ätit en vanlig måltid några timmar innan. Lyssna på din kropp.";
   return "Inför konditionspass passar något lättsmält. Ta med en vattenflaska och värm upp lugnt.";
 }
+
+/* ---------------- Livsmedelsbas & makron ---------------- */
+
+export type Unit = "g" | "dl" | "msk" | "st";
+export interface Food {
+  name: string;
+  /** Per 100 g */
+  kcal: number; protein: number; carbs: number; fat: number;
+  /** Grams per unit */
+  units: Partial<Record<Unit, number>>;
+  contains: Restriction[];
+  animal?: "kott" | "fisk" | "mejeri" | "agg" | undefined;
+}
+
+export const FOODS: Food[] = [
+  { name: "Havregryn", kcal: 370, protein: 13, carbs: 59, fat: 7, units: { g: 1, dl: 35 }, contains: ["gluten"] },
+  { name: "Glutenfria havregryn", kcal: 370, protein: 13, carbs: 59, fat: 7, units: { g: 1, dl: 35 }, contains: [] },
+  { name: "Mellanmjölk", kcal: 46, protein: 3.5, carbs: 4.8, fat: 1.5, units: { g: 1, dl: 100 }, contains: ["mjolk", "laktos"], animal: "mejeri" },
+  { name: "Havredryck", kcal: 45, protein: 1, carbs: 7, fat: 1.5, units: { g: 1, dl: 100 }, contains: [] },
+  { name: "Kvarg naturell", kcal: 63, protein: 11, carbs: 4, fat: 0.2, units: { g: 1, dl: 110 }, contains: ["mjolk", "laktos"], animal: "mejeri" },
+  { name: "Grekisk yoghurt 2 %", kcal: 75, protein: 9, carbs: 4, fat: 2, units: { g: 1, dl: 105 }, contains: ["mjolk", "laktos"], animal: "mejeri" },
+  { name: "Ägg", kcal: 140, protein: 12.5, carbs: 0.5, fat: 10, units: { g: 1, st: 55 }, contains: ["agg"], animal: "agg" },
+  { name: "Banan", kcal: 95, protein: 1.1, carbs: 21, fat: 0.3, units: { g: 1, st: 120 }, contains: [] },
+  { name: "Äpple", kcal: 52, protein: 0.3, carbs: 12, fat: 0.2, units: { g: 1, st: 150 }, contains: [] },
+  { name: "Blåbär", kcal: 50, protein: 0.7, carbs: 10, fat: 0.6, units: { g: 1, dl: 65 }, contains: [] },
+  { name: "Kycklingfilé, tillagad", kcal: 150, protein: 30, carbs: 0, fat: 3, units: { g: 1, st: 130 }, contains: [], animal: "kott" },
+  { name: "Nötfärs 10 %, stekt", kcal: 215, protein: 26, carbs: 0, fat: 12, units: { g: 1 }, contains: [], animal: "kott" },
+  { name: "Lax, ugnsbakad", kcal: 200, protein: 22, carbs: 0, fat: 12, units: { g: 1, st: 125 }, contains: [], animal: "fisk" },
+  { name: "Tonfisk i vatten", kcal: 105, protein: 24, carbs: 0, fat: 1, units: { g: 1, st: 120 }, contains: [], animal: "fisk" },
+  { name: "Tofu", kcal: 125, protein: 13, carbs: 2, fat: 7, units: { g: 1 }, contains: ["soja"] },
+  { name: "Kikärtor, kokta", kcal: 140, protein: 7, carbs: 18, fat: 2.5, units: { g: 1, dl: 70 }, contains: [] },
+  { name: "Röda linser, kokta", kcal: 115, protein: 9, carbs: 17, fat: 0.4, units: { g: 1, dl: 80 }, contains: [] },
+  { name: "Ris, kokt", kcal: 130, protein: 2.7, carbs: 28, fat: 0.3, units: { g: 1, dl: 65 }, contains: [] },
+  { name: "Pasta, kokt", kcal: 150, protein: 5.5, carbs: 30, fat: 0.9, units: { g: 1, dl: 45 }, contains: ["gluten"] },
+  { name: "Potatis, kokt", kcal: 75, protein: 1.8, carbs: 16, fat: 0.1, units: { g: 1, st: 80 }, contains: [] },
+  { name: "Quinoa, kokt", kcal: 120, protein: 4.4, carbs: 21, fat: 1.9, units: { g: 1, dl: 70 }, contains: [] },
+  { name: "Knäckebröd", kcal: 340, protein: 10, carbs: 60, fat: 2, units: { g: 1, st: 12 }, contains: ["gluten"] },
+  { name: "Fullkornsbröd", kcal: 245, protein: 9, carbs: 42, fat: 3.5, units: { g: 1, st: 35 }, contains: ["gluten"] },
+  { name: "Hårdost 17 %", kcal: 280, protein: 27, carbs: 0, fat: 17, units: { g: 1, st: 10 }, contains: ["mjolk"], animal: "mejeri" },
+  { name: "Smör", kcal: 740, protein: 0.5, carbs: 0.5, fat: 82, units: { g: 1, msk: 12 }, contains: ["mjolk"], animal: "mejeri" },
+  { name: "Rapsolja", kcal: 900, protein: 0, carbs: 0, fat: 100, units: { g: 1, msk: 9 }, contains: [] },
+  { name: "Jordnötssmör", kcal: 600, protein: 25, carbs: 13, fat: 50, units: { g: 1, msk: 16 }, contains: ["notter"] },
+  { name: "Mandlar", kcal: 600, protein: 21, carbs: 7, fat: 52, units: { g: 1, dl: 60 }, contains: ["notter"] },
+  { name: "Avokado", kcal: 160, protein: 2, carbs: 2, fat: 15, units: { g: 1, st: 140 }, contains: [] },
+  { name: "Broccoli", kcal: 35, protein: 3, carbs: 4, fat: 0.4, units: { g: 1, dl: 35 }, contains: [] },
+  { name: "Tomat", kcal: 20, protein: 0.9, carbs: 3, fat: 0.2, units: { g: 1, st: 100 }, contains: [] },
+  { name: "Morot", kcal: 40, protein: 0.9, carbs: 8, fat: 0.2, units: { g: 1, st: 70 }, contains: [] },
+  { name: "Hummus", kcal: 250, protein: 7, carbs: 14, fat: 18, units: { g: 1, msk: 15 }, contains: [] },
+];
+
+export const UNIT_LABEL: Record<Unit, string> = { g: "g", dl: "dl", msk: "msk", st: "st" };
+
+const DIET_EXCLUDES: Record<Diet, NonNullable<Food["animal"]>[]> = {
+  allt: [], glutenfritt: [], vegetariskt: ["kott", "fisk"], pescetariskt: ["kott"], veganskt: ["kott", "fisk", "mejeri", "agg"],
+};
+
+/** Foods eligible for the profile's diet and restrictions (same rules as meal suggestions). */
+export function foodsFor(diet: Diet | undefined, restrictions: Restriction[] = [], query = "") {
+  const d = diet ?? "allt";
+  const r = d === "glutenfritt" ? [...restrictions, "gluten" as Restriction] : restrictions;
+  const q = query.trim().toLowerCase();
+  return FOODS.filter((f) => !(f.animal && DIET_EXCLUDES[d].includes(f.animal))
+    && r.every((x) => !f.contains.includes(x)) && (!q || f.name.toLowerCase().includes(q)));
+}
+
+export function portion(food: Food, qty: number, unit: Unit) {
+  const grams = qty * (food.units[unit] ?? 1);
+  const k = grams / 100;
+  const r1 = (n: number) => Math.round(n * k * 10) / 10;
+  return { grams, kcal: Math.round(food.kcal * k), protein: r1(food.protein), carbs: r1(food.carbs), fat: r1(food.fat) };
+}
+
+export interface MacroTargets { kcal: number; protein: number; carbs: number; fat: number }
+/** Simple daily targets from latest weight (default 70 kg) and goal. */
+export function macroTargets(profile: Profile, weightKg?: number): MacroTargets {
+  const w = weightKg && weightKg > 30 ? weightKg : 70;
+  const kcal = Math.round((w * 31 + (profile.days.length >= 4 ? 150 : 0)) / 10) * 10;
+  const protein = Math.round(w * (profile.goal === "styrka" ? 1.8 : 1.4));
+  const fat = Math.round((kcal * 0.3) / 9);
+  const carbs = Math.max(0, Math.round((kcal - protein * 4 - fat * 9) / 4));
+  return { kcal, protein, carbs, fat };
+}
+
+export function sumMacros(meals: Meal[]): MacroTargets {
+  const r = (n: number) => Math.round(n);
+  return {
+    kcal: r(meals.reduce((a, m) => a + (m.kcal ?? 0), 0)),
+    protein: r(meals.reduce((a, m) => a + (m.protein ?? 0), 0)),
+    carbs: r(meals.reduce((a, m) => a + (m.carbs ?? 0), 0)),
+    fat: r(meals.reduce((a, m) => a + (m.fat ?? 0), 0)),
+  };
+}
+
+export const GLASS_ML = 250;
