@@ -1,12 +1,13 @@
 # Next milestone
-- [ ] Lägg till kolhydrater och fett i egen mat och kontrollera sparade värden.
-- [ ] Visa och kontrollera en förhandsvisning av alla ändringar i denna etapp.
+- [x] Lägg till kolhydrater och fett i egen mat och kontrollera sparade värden.
+- [x] Visa och kontrollera en förhandsvisning av alla ändringar i denna etapp.
 - [x] Add dietary restrictions in onboarding and settings, with consistent meal filtering.
 - [x] Show and log personalized recovery meals after completed workouts.
 - [x] Fix weight submission, load fonts, show save confirmations, and replace default browser titles.
 - [x] Etapp 1 – Svensk råvarubas: sökbar livsmedelslista med mått (g, dl, msk, st) och automatisk döljning av livsmedel som inte passar kost eller allergier.
 - [x] Etapp 2 – Makron i realtid: energi, protein, kolhydrater och fett mot dagliga mål, med kvarvarande mängd.
 - [x] Etapp 2 – Vattentracker: glas om 250 ml mot dagligt mål, på mat- och hemsidan.
-- [ ] Etapp 3 – Hälsoscore och dagliga vanor (vatten, frukt & grönt, sömn, regelbundna måltider) med uppmuntrande feedback.
-- [ ] Etapp 4 – Smarta vardagsrekommendationer: måltider som fyller dagens kvarvarande luckor.
+- [x] Etapp 3 – Hälsoscore och dagliga vanor (vatten, frukt & grönt, sömn, regelbundna måltider) med uppmuntrande feedback.
+- [ ] Etapp 4 – Träningslyft: 100+ sökbara övningspresets, egna övningar, beskrivningar, tips, lätta videor, set/reps/vikt, historik, vilotimer och muskelåterhämtning.
+- [ ] Smarta vardagsrekommendationer: måltider som fyller dagens kvarvarande luckor.
 - [ ] Stämma av namnbyte från Balans samt prissättning för gratis- och PRO-nivå.
