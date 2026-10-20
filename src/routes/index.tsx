@@ -1,5 +1,6 @@
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { WaterTracker } from "@/components/WaterTracker";
+import { DailyHabits } from "@/components/DailyHabits";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Droplets, Moon, Utensils, Dumbbell, Sparkles, Plus, Play } from "lucide-react";
 import { AppShell, PageLoading } from "@/components/AppShell";
@@ -32,8 +33,9 @@ function Index() {
 }
 
 function Today() {
-  const s = useBalans()!;
-  const p = s.profile!;
+  const s = useBalans();
+  const p = s?.profile;
+  if (!s || !p) return null;
   const today = dateKey();
   const meals = s.meals.filter((m) => m.date === today);
   const workout = s.workouts.find((w) => w.date === today);
@@ -91,6 +93,7 @@ function Today() {
       </section>
 
       <WaterTracker date={today} />
+      <DailyHabits date={today} />
 
       <section className="card-soft p-5">
         <h2 className="text-lg font-semibold">Återhämtning</h2>
@@ -102,19 +105,6 @@ function Today() {
             </button>
           ))}
         </div>
-        <label className="mt-4 flex items-center gap-3 text-sm">
-          Sömn i natt
-          <select
-            className="h-12 rounded-xl border bg-card px-3"
-            value={h.sleepH ?? ""}
-            onChange={(e) => setHabit({ sleepH: e.target.value ? Number(e.target.value) : undefined })}
-          >
-            <option value="">Välj</option>
-            {[4, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 10].map((v) => (
-              <option key={v} value={v}>{v} timmar</option>
-            ))}
-          </select>
-        </label>
       </section>
 
       <section className="card-soft p-5">

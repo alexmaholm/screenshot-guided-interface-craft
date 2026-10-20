@@ -2,6 +2,8 @@ import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { MacroSummary } from "@/components/MacroSummary";
 import { WaterTracker } from "@/components/WaterTracker";
 import { FoodSearch } from "@/components/FoodSearch";
+import { DailyHabits } from "@/components/DailyHabits";
+import { parseNutrition } from "@/lib/habits";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Star, Trash2, Plus, ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
@@ -41,8 +43,8 @@ function MatPage() {
 }
 
 function Mat() {
-  const s = useBalans()!;
-  const p = s.profile!;
+  const s = useBalans();
+  const p = s?.profile;
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/mat" });
   const [date, setDate] = useState(dateKey());
@@ -57,6 +59,7 @@ function Mat() {
     }
   }, [search.ny, search.typ, navigate]);
 
+  if (!s || !p) return null;
   const meals = s.meals.filter((m) => m.date === date);
   const showKcal = !p.hideCalories;
   const eaten = sumMacros(meals);
@@ -101,7 +104,7 @@ function Mat() {
           <h2 className="text-lg font-semibold">Dagens näring</h2>
           <button
             className="flex min-h-11 items-center gap-2 rounded-full px-3 text-sm text-muted-foreground hover:bg-muted"
-            onClick={() => update((st) => ({ ...st, profile: { ...st.profile!, hideCalories: !p.hideCalories } }))}
+            onClick={() => update((st) => st.profile ? ({ ...st, profile: { ...st.profile, hideCalories: !p.hideCalories } }) : st)}
           >
             {showKcal ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             {showKcal ? "Dölj kalorier" : "Visa kalorier"}
@@ -110,6 +113,7 @@ function Mat() {
         <MacroSummary eaten={eaten} target={target} showKcal={showKcal} />
       </section>
       <WaterTracker date={date} />
+      <DailyHabits date={date} />
 
       {MEAL_TYPES.map((t) => {
         const list = meals.filter((m) => m.type === t);
@@ -170,15 +174,19 @@ function AddMealDialog({
   open: boolean; onOpenChange: (o: boolean) => void; type: MealType; setType: (t: MealType) => void;
   onAdd: (m: Omit<Meal, "id" | "date">) => void; showKcal: boolean;
 }) {
-  const s = useBalans()!;
+  const s = useBalans();
   const [tab, setTab] = useState<"sök" | "egen" | "favoriter" | "tidigare" | "förslag">("sök");
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [kcal, setKcal] = useState("");
   const [protein, setProtein] = useState("");
+  const [carbs, setCarbs] = useState("");
+  const [fat, setFat] = useState("");
   const [err, setErr] = useState("");
 
-  useEffect(() => { if (open) { setName(""); setAmount(""); setKcal(""); setProtein(""); setErr(""); } }, [open]);
+  useEffect(() => { if (open) { setName(""); setAmount(""); setKcal(""); setProtein(""); setCarbs(""); setFat(""); setErr(""); } }, [open]);
+
+  if (!s) return null;
 
   const recent = Array.from(new Map([...s.meals].reverse().map((m) => [m.name, m])).values()).slice(0, 8);
   const sugg = suggestionsFor(s.profile?.diet, type, s.profile?.restrictions);
@@ -186,7 +194,9 @@ function AddMealDialog({
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return setErr("Skriv vad du åt.");
-    onAdd({ type, name: name.trim(), amount: amount.trim() || "1 portion", kcal: kcal ? Number(kcal) : undefined, protein: protein ? Number(protein) : undefined });
+    const nutrition = parseNutrition({ kcal, protein, carbs, fat });
+    if (!nutrition) return setErr("Ange näringsvärden som är 0 eller större.");
+    onAdd({ type, name: name.trim(), amount: amount.trim() || "1 portion", ...nutrition });
   };
   const Pick = ({ items }: { items: { name: string; amount: string; kcal?: number | undefined; protein?: number | undefined; carbs?: number | undefined; fat?: number | undefined }[] }) =>
     items.length === 0 ? (
@@ -236,15 +246,24 @@ function AddMealDialog({
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="mp" className="text-sm font-medium">Protein (g, valfritt)</label>
-                <Input id="mp" type="number" min={0} inputMode="numeric" className="mt-1 h-12 rounded-xl" value={protein} onChange={(e) => setProtein(e.target.value)} />
+                <Input id="mp" inputMode="decimal" className="mt-1 h-12 rounded-xl" value={protein} onChange={(e) => setProtein(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor="mc" className="text-sm font-medium">Kolhydrater (g, valfritt)</label>
+                <Input id="mc" inputMode="decimal" className="mt-1 h-12 rounded-xl" value={carbs} onChange={(e) => setCarbs(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor="mf" className="text-sm font-medium">Fett (g, valfritt)</label>
+                <Input id="mf" inputMode="decimal" className="mt-1 h-12 rounded-xl" value={fat} onChange={(e) => setFat(e.target.value)} />
               </div>
               {showKcal && (
                 <div>
                   <label htmlFor="mk" className="text-sm font-medium">Kalorier (valfritt)</label>
-                  <Input id="mk" type="number" min={0} inputMode="numeric" className="mt-1 h-12 rounded-xl" value={kcal} onChange={(e) => setKcal(e.target.value)} />
+                  <Input id="mk" inputMode="decimal" className="mt-1 h-12 rounded-xl" value={kcal} onChange={(e) => setKcal(e.target.value)} />
                 </div>
               )}
             </div>
+            <p className="text-xs text-muted-foreground">Näringsvärden för hela mängden du loggar.</p>
             <Button type="submit" className="h-12 w-full rounded-full">Spara måltid</Button>
           </form>
         )}
