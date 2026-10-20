@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { improvements, lastWeight } from "@/lib/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   addDays, dateKey, generateWorkout, KIND_LABEL, prettyDate, update, useBalans, weekdayIndex, WEEKDAYS,
@@ -189,13 +191,21 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
 }
 
 function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void; onPatch: (fn: (w: Workout) => Workout) => void }) {
+  const all = useBalans()?.workouts ?? [];
   const [feeling, setFeeling] = useState(w.feeling);
   const [note, setNote] = useState(w.note ?? "");
   const done = w.exercises.filter((e) => e.done).length;
   const toggle = (i: number) => onPatch((x) => ({ ...x, exercises: x.exercises.map((e, j) => (j === i ? { ...e, done: !e.done } : e)) }));
+  const setKg = (i: number, v: string) => {
+    const n = v === "" ? undefined : Number(v.replace(",", "."));
+    if (n !== undefined && (!Number.isFinite(n) || n < 0)) return;
+    onPatch((x) => ({ ...x, exercises: x.exercises.map((e, j) => (j === i ? { ...e, weightKg: n } : e)) }));
+  };
   const finish = () => {
+    const ups = improvements(w, all);
     onPatch((x) => ({ ...x, status: "klart", feeling, note }));
-    toast.success("Passet är loggat – bra jobbat!");
+    if (ups.length) ups.forEach((u) => toast.success(`Nytt framsteg! +${u.diffKg} kg i ${u.name.toLowerCase()} sedan förra passet 🎉`));
+    else toast.success("Passet är loggat – bra jobbat!");
     onBack();
   };
   return (
@@ -210,9 +220,11 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
         <p className="mt-2 text-sm">{done} av {w.exercises.length} klara</p>
       </header>
       <ul className="space-y-3">
-        {w.exercises.map((e, i) => (
-          <li key={i}>
-            <button onClick={() => toggle(i)} aria-pressed={e.done} className="card-soft flex min-h-20 w-full items-center gap-4 p-4 text-left">
+        {w.exercises.map((e, i) => {
+          const prev = lastWeight(e.name, w.id, all);
+          return (
+          <li key={i} className="card-soft p-4">
+            <button onClick={() => toggle(i)} aria-pressed={e.done} className="flex min-h-12 w-full items-center gap-4 text-left">
               <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 ${e.done ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>
                 {e.done && <Check className="h-5 w-5" />}
               </span>
@@ -224,8 +236,15 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
                 </span>
               </span>
             </button>
+            {e.reps ? (
+              <div className="mt-3 flex items-center gap-2 pl-14">
+                <Input aria-label={`Vikt för ${e.name}, kg`} type="number" inputMode="decimal" min={0} step={0.5} placeholder="Vikt" className="h-10 w-24" value={e.weightKg ?? ""} onChange={(ev) => setKg(i, ev.target.value)} />
+                <span className="text-sm text-muted-foreground">kg{prev ? ` · förra passet ${prev} kg` : ""}</span>
+              </div>
+            ) : null}
           </li>
-        ))}
+          );
+        })}
       </ul>
       <section className="card-soft space-y-3 p-5">
         <h2 className="text-lg font-semibold">Hur kändes det?</h2>
