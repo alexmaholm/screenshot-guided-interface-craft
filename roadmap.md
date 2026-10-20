@@ -1,4 +1,6 @@
 # Next milestone
+- [ ] Lägg till kolhydrater och fett i egen mat och kontrollera sparade värden.
+- [ ] Visa och kontrollera en förhandsvisning av alla ändringar i denna etapp.
 - [x] Add dietary restrictions in onboarding and settings, with consistent meal filtering.
 - [x] Show and log personalized recovery meals after completed workouts.
 - [x] Fix weight submission, load fonts, show save confirmations, and replace default browser titles.

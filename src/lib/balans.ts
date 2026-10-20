@@ -83,6 +83,7 @@ export interface Workout {
 
 export interface DayHabits {
   water: number;
+  produce?: number | undefined;
   sleepH?: number | undefined;
   recovery?: number | undefined; // 1–5
 }
