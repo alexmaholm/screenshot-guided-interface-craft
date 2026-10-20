@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { improvements, lastWeight } from "@/lib/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   addDays, dateKey, generateWorkout, KIND_LABEL, prettyDate, update, useBalans, weekdayIndex, WEEKDAYS,
