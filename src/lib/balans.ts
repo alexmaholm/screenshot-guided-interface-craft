@@ -67,6 +67,7 @@ export interface Exercise {
   timeSec?: number | undefined;
   restSec: number;
   done: boolean;
+  weightKg?: number | undefined;
 }
 
 export interface Workout {
