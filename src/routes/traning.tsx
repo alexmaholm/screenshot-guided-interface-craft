@@ -1,7 +1,8 @@
 import { RecoveryMeals } from "@/components/RecoveryMeals";
+import { ExercisePicker, useExerciseLibrary } from "@/components/ExercisePicker";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Check, Clock, RefreshCw, CalendarDays, Plus, Play, ArrowLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Clock, RefreshCw, CalendarDays, Plus, Play, ArrowLeft, Timer } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import {
   addDays, dateKey, generateWorkout, KIND_LABEL, prettyDate, update, useBalans, weekdayIndex, WEEKDAYS,
   type Workout, type WorkoutKind,
 } from "@/lib/balans";
+import { MUSCLES, muscleRecovery, recoveryStatus } from "@/lib/exercises";
 
 export const Route = createFileRoute("/traning")({
   validateSearch: (s: Record<string, unknown>): { starta?: string | undefined } => ({
