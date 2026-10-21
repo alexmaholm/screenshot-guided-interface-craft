@@ -99,6 +99,8 @@ function Training() {
         </div>
       </section>
 
+      <MuscleRecovery workouts={s.workouts} today={today} />
+
       <RecoveryMeals profile={p} workout={[...s.workouts].reverse().find((w) => w.date === today && w.status === "klart" && w.kind !== "vila")} date={today} />
       <h2 className="text-lg font-semibold">Kommande pass</h2>
       {upcoming.length === 0 ? (
@@ -192,10 +194,59 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
   );
 }
 
+function MuscleRecovery({ workouts, today }: { workouts: Workout[]; today: string }) {
+  const rec = muscleRecovery(workouts, today);
+  const trained = MUSCLES.filter((m) => m.value !== "kondition" && rec[m.value] !== undefined);
+  if (trained.length === 0) return null;
+  return (
+    <section className="card-soft p-4" aria-label="Muskelåterhämtning">
+      <h2 className="text-sm font-semibold">Muskelåterhämtning</h2>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {trained.map((m) => {
+          const st = recoveryStatus(rec[m.value]);
+          const cls = st.tone === "redo" ? "bg-secondary text-primary" : st.tone === "snart" ? "bg-muted text-foreground" : "bg-coral/15 text-coral";
+          return <span key={m.value} className={`rounded-full px-3 py-1.5 text-xs font-medium ${cls}`}>{m.label}: {st.label}</span>;
+        })}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">Muskler mår bra av cirka 2 dagars vila mellan tunga pass.</p>
+    </section>
+  );
+}
+
+function RestTimer({ seconds }: { seconds: number }) {
+  const [left, setLeft] = useState<number | null>(null);
+  const ref = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => () => { if (ref.current) clearInterval(ref.current); }, []);
+  const start = () => {
+    if (ref.current) clearInterval(ref.current);
+    setLeft(seconds);
+    ref.current = setInterval(() => {
+      setLeft((v) => {
+        if (v === null || v <= 1) {
+          if (ref.current) clearInterval(ref.current);
+          if (v === 1) toast.success("Vilan är över – dags för nästa set! 💪");
+          return null;
+        }
+        return v - 1;
+      });
+    }, 1000);
+  };
+  if (left === null)
+    return <Button variant="outline" size="sm" className="h-9 rounded-full" onClick={start}><Timer className="h-4 w-4" /> Starta vila {fmt(seconds)}</Button>;
+  return (
+    <span className="flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm font-semibold text-primary" role="timer" aria-label="Vilotimer">
+      <Timer className="h-4 w-4" aria-hidden /> {Math.floor(left / 60)}:{String(left % 60).padStart(2, "0")}
+      <button className="underline" onClick={() => { if (ref.current) clearInterval(ref.current); setLeft(null); }}>Avbryt</button>
+    </span>
+  );
+}
+
 function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void; onPatch: (fn: (w: Workout) => Workout) => void }) {
   const all = useBalans()?.workouts ?? [];
+  const library = useExerciseLibrary();
   const [feeling, setFeeling] = useState(w.feeling);
   const [note, setNote] = useState(w.note ?? "");
+  const [picking, setPicking] = useState(false);
   const done = w.exercises.filter((e) => e.done).length;
   const toggle = (i: number) => onPatch((x) => ({ ...x, exercises: x.exercises.map((e, j) => (j === i ? { ...e, done: !e.done } : e)) }));
   const setKg = (i: number, v: string) => {
