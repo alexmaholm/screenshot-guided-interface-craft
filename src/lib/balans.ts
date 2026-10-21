@@ -89,6 +89,15 @@ export interface DayHabits {
   recovery?: number | undefined; // 1–5
 }
 
+export interface CustomExercise {
+  id: string;
+  name: string;
+  muscle: string;
+  equipment: Equipment[];
+  track: "vikt" | "reps" | "tid";
+  note?: string | undefined;
+}
+
 export interface State {
   profile: Profile | null;
   meals: Meal[];
@@ -96,10 +105,11 @@ export interface State {
   workouts: Workout[];
   habits: Record<string, DayHabits>;
   body: { date: string; weight: number }[];
+  customExercises: CustomExercise[];
 }
 
 const KEY = "balans:v1";
-const empty: State = { profile: null, meals: [], favorites: [], workouts: [], habits: {}, body: [] };
+const empty: State = { profile: null, meals: [], favorites: [], workouts: [], habits: {}, body: [], customExercises: [] };
 
 let state: State | null = null;
 const listeners = new Set<() => void>();
@@ -378,7 +388,7 @@ export function completeOnboarding(p: Profile) {
   const favorites: Favorite[] = suggestionsFor(p.diet, undefined, p.restrictions)
     .slice(0, 3)
     .map((s) => ({ id: uid(), name: s.name, amount: s.amount, type: s.type, kcal: s.kcal, protein: s.protein }));
-  update(() => ({ profile: p, meals, favorites, workouts, habits, body: [] }));
+  update(() => ({ profile: p, meals, favorites, workouts, habits, body: [], customExercises: [] }));
 }
 
 /* ---------------- Tips ---------------- */

@@ -1,7 +1,8 @@
 import { RecoveryMeals } from "@/components/RecoveryMeals";
+import { ExercisePicker, useExerciseLibrary } from "@/components/ExercisePicker";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Check, Clock, RefreshCw, CalendarDays, Plus, Play, ArrowLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Clock, RefreshCw, CalendarDays, Plus, Play, ArrowLeft, Timer } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import {
   addDays, dateKey, generateWorkout, KIND_LABEL, prettyDate, update, useBalans, weekdayIndex, WEEKDAYS,
   type Workout, type WorkoutKind,
 } from "@/lib/balans";
+import { MUSCLES, muscleRecovery, recoveryStatus } from "@/lib/exercises";
 
 export const Route = createFileRoute("/traning")({
   validateSearch: (s: Record<string, unknown>): { starta?: string | undefined } => ({
@@ -96,6 +98,8 @@ function Training() {
           })}
         </div>
       </section>
+
+      <MuscleRecovery workouts={s.workouts} today={today} />
 
       <RecoveryMeals profile={p} workout={[...s.workouts].reverse().find((w) => w.date === today && w.status === "klart" && w.kind !== "vila")} date={today} />
       <h2 className="text-lg font-semibold">Kommande pass</h2>
@@ -190,10 +194,58 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
   );
 }
 
+function MuscleRecovery({ workouts, today }: { workouts: Workout[]; today: string }) {
+  const rec = muscleRecovery(workouts, today);
+  const trained = MUSCLES.filter((m) => m.value !== "kondition" && rec[m.value] !== undefined);
+  if (trained.length === 0) return null;
+  return (
+    <section className="card-soft p-4" aria-label="Muskelåterhämtning">
+      <h2 className="text-sm font-semibold">Muskelåterhämtning</h2>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {trained.map((m) => {
+          const st = recoveryStatus(rec[m.value]);
+          const cls = st.tone === "redo" ? "bg-secondary text-primary" : st.tone === "snart" ? "bg-muted text-foreground" : "bg-coral/15 text-coral";
+          return <span key={m.value} className={`rounded-full px-3 py-1.5 text-xs font-medium ${cls}`}>{m.label}: {st.label}</span>;
+        })}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">Muskler mår bra av cirka 2 dagars vila mellan tunga pass.</p>
+    </section>
+  );
+}
+
+function RestTimer({ seconds }: { seconds: number }) {
+  const [left, setLeft] = useState<number | null>(null);
+  const ref = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => () => { if (ref.current) clearInterval(ref.current); }, []);
+  const start = () => {
+    if (ref.current) clearInterval(ref.current);
+    setLeft(seconds);
+    ref.current = setInterval(() => {
+      setLeft((v) => {
+        if (v === null || v <= 1) {
+          if (ref.current) clearInterval(ref.current);
+          if (v === 1) toast.success("Vilan är över – dags för nästa set! 💪");
+          return null;
+        }
+        return v - 1;
+      });
+    }, 1000);
+  };
+  if (left === null)
+    return <Button variant="outline" size="sm" className="h-9 rounded-full" onClick={start}><Timer className="h-4 w-4" /> Starta vila {fmt(seconds)}</Button>;
+  return (
+    <span className="flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm font-semibold text-primary" role="timer" aria-label="Vilotimer">
+      <Timer className="h-4 w-4" aria-hidden /> {Math.floor(left / 60)}:{String(left % 60).padStart(2, "0")}
+      <button className="underline" onClick={() => { if (ref.current) clearInterval(ref.current); setLeft(null); }}>Avbryt</button>
+    </span>
+  );
+}
+
 function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void; onPatch: (fn: (w: Workout) => Workout) => void }) {
   const all = useBalans()?.workouts ?? [];
   const [feeling, setFeeling] = useState(w.feeling);
   const [note, setNote] = useState(w.note ?? "");
+  const [picking, setPicking] = useState(false);
   const done = w.exercises.filter((e) => e.done).length;
   const toggle = (i: number) => onPatch((x) => ({ ...x, exercises: x.exercises.map((e, j) => (j === i ? { ...e, done: !e.done } : e)) }));
   const setKg = (i: number, v: string) => {
@@ -236,16 +288,30 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
                 </span>
               </span>
             </button>
-            {e.reps ? (
-              <div className="mt-3 flex items-center gap-2 pl-14">
-                <Input aria-label={`Vikt för ${e.name}, kg`} type="number" inputMode="decimal" min={0} step={0.5} placeholder="Vikt" className="h-10 w-24" value={e.weightKg ?? ""} onChange={(ev) => setKg(i, ev.target.value)} />
-                <span className="text-sm text-muted-foreground">kg{prev ? ` · förra passet ${prev} kg` : ""}</span>
-              </div>
-            ) : null}
+            <div className="mt-3 flex flex-wrap items-center gap-2 pl-14">
+              {e.reps ? (
+                <>
+                  <Input aria-label={`Vikt för ${e.name}, kg`} type="number" inputMode="decimal" min={0} step={0.5} placeholder="Vikt" className="h-10 w-24" value={e.weightKg ?? ""} onChange={(ev) => setKg(i, ev.target.value)} />
+                  <span className="text-sm text-muted-foreground">kg{prev ? ` · förra passet ${prev} kg` : ""}</span>
+                </>
+              ) : null}
+              {e.restSec > 0 ? <RestTimer seconds={e.restSec} /> : null}
+            </div>
           </li>
           );
         })}
       </ul>
+      <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setPicking(true)}><Plus /> Lägg till övning</Button>
+      <ExercisePicker open={picking} onOpenChange={setPicking} onPick={(ex) => {
+        const last = lastWeight(ex.name, w.id, all);
+        onPatch((x) => ({
+          ...x,
+          exercises: [...x.exercises, ex.track === "tid"
+            ? { name: ex.name, sets: 2, timeSec: 40, restSec: ex.restSec, done: false }
+            : { name: ex.name, sets: 3, reps: 10, restSec: ex.restSec, done: false, weightKg: ex.track === "vikt" ? last : undefined }],
+        }));
+        toast.success(`${ex.name} tillagd i passet`);
+      }} />
       <section className="card-soft space-y-3 p-5">
         <h2 className="text-lg font-semibold">Hur kändes det?</h2>
         <div className="flex flex-wrap gap-2">
