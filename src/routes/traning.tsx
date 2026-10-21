@@ -289,16 +289,30 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
                 </span>
               </span>
             </button>
-            {e.reps ? (
-              <div className="mt-3 flex items-center gap-2 pl-14">
-                <Input aria-label={`Vikt för ${e.name}, kg`} type="number" inputMode="decimal" min={0} step={0.5} placeholder="Vikt" className="h-10 w-24" value={e.weightKg ?? ""} onChange={(ev) => setKg(i, ev.target.value)} />
-                <span className="text-sm text-muted-foreground">kg{prev ? ` · förra passet ${prev} kg` : ""}</span>
-              </div>
-            ) : null}
+            <div className="mt-3 flex flex-wrap items-center gap-2 pl-14">
+              {e.reps ? (
+                <>
+                  <Input aria-label={`Vikt för ${e.name}, kg`} type="number" inputMode="decimal" min={0} step={0.5} placeholder="Vikt" className="h-10 w-24" value={e.weightKg ?? ""} onChange={(ev) => setKg(i, ev.target.value)} />
+                  <span className="text-sm text-muted-foreground">kg{prev ? ` · förra passet ${prev} kg` : ""}</span>
+                </>
+              ) : null}
+              {e.restSec > 0 ? <RestTimer seconds={e.restSec} /> : null}
+            </div>
           </li>
           );
         })}
       </ul>
+      <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setPicking(true)}><Plus /> Lägg till övning</Button>
+      <ExercisePicker open={picking} onOpenChange={setPicking} onPick={(ex) => {
+        const last = lastWeight(ex.name, w.id, all);
+        onPatch((x) => ({
+          ...x,
+          exercises: [...x.exercises, ex.track === "tid"
+            ? { name: ex.name, sets: 2, timeSec: 40, restSec: ex.restSec, done: false }
+            : { name: ex.name, sets: 3, reps: 10, restSec: ex.restSec, done: false, weightKg: ex.track === "vikt" ? last : undefined }],
+        }));
+        toast.success(`${ex.name} tillagd i passet`);
+      }} />
       <section className="card-soft space-y-3 p-5">
         <h2 className="text-lg font-semibold">Hur kändes det?</h2>
         <div className="flex flex-wrap gap-2">
