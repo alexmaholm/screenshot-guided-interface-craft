@@ -243,7 +243,6 @@ function RestTimer({ seconds }: { seconds: number }) {
 
 function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void; onPatch: (fn: (w: Workout) => Workout) => void }) {
   const all = useBalans()?.workouts ?? [];
-  const library = useExerciseLibrary();
   const [feeling, setFeeling] = useState(w.feeling);
   const [note, setNote] = useState(w.note ?? "");
   const [picking, setPicking] = useState(false);
