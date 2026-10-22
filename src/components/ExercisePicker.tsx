@@ -4,8 +4,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { uid, update, useBalans, type CustomExercise, type Equipment } from "@/lib/balans";
-import { EXERCISES, MUSCLES, searchExercises, type ExercisePreset, type Muscle, type TrackType } from "@/lib/exercises";
+import { dateKey, uid, update, useBalans, type CustomExercise, type Equipment } from "@/lib/balans";
+import { EXERCISES, FOCUSES, MUSCLES, muscleRecovery, recommendExercises, searchExercises, type TrainingFocus, type ExercisePreset, type Muscle, type TrackType } from "@/lib/exercises";
 
 const EQ_LABEL: Record<Equipment, string> = { ingen: "Kroppsvikt", hantlar: "Hantlar", gummiband: "Gummiband", gym: "Gym", kettlebell: "Kettlebell" };
 const TRACK_LABEL: Record<TrackType, string> = { vikt: "Vikt + reps", reps: "Reps", tid: "Tid" };
@@ -34,16 +34,36 @@ export function ExercisePicker({ open, onOpenChange, onPick }: {
   const [muscle, setMuscle] = useState<Muscle | undefined>();
   const [detail, setDetail] = useState<ExercisePreset | null>(null);
   const [creating, setCreating] = useState(false);
-  const results = useMemo(() => searchExercises(all, q, muscle, p.equipment), [all, q, muscle, p.equipment]);
+  const [smart, setSmart] = useState(true);
+  const [wishes, setWishes] = useState(p.trainingWishes ?? "");
+  const rec = useMemo(() => muscleRecovery(s.workouts, dateKey()), [s.workouts]);
+  const filtered = useMemo(() => searchExercises(all, q, muscle, p.equipment), [all, q, muscle, p.equipment]);
+  const results = useMemo(() => (smart ? recommendExercises(filtered, p.trainingFocus, wishes, rec) : filtered), [smart, filtered, p.trainingFocus, wishes, rec]);
+  const setFocus = (f: TrainingFocus) => update((st) => ({ ...st, profile: st.profile ? { ...st.profile, trainingFocus: st.profile.trainingFocus === f ? undefined : f } : st.profile }));
+  const saveWishes = () => update((st) => ({ ...st, profile: st.profile ? { ...st.profile, trainingWishes: wishes.trim() || undefined } : st.profile }));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85vh] flex-col rounded-3xl">
+      <DialogContent className="flex max-h-[90vh] flex-col overflow-y-auto rounded-3xl">
         <DialogHeader><DialogTitle className="font-display text-2xl">Välj övning</DialogTitle></DialogHeader>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <Input className="h-12 rounded-2xl pl-9" placeholder="Sök bland 100+ övningar…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Sök övning" />
         </div>
+        <div className="flex gap-2">
+          <button className="chip flex-1 justify-center" aria-pressed={smart} onClick={() => setSmart(true)}>Passar dig</button>
+          <button className="chip flex-1 justify-center" aria-pressed={!smart} onClick={() => setSmart(false)}>Alla övningar</button>
+        </div>
+        {smart && (
+          <div className="space-y-2 rounded-2xl bg-secondary p-3">
+            <p className="text-sm font-semibold text-primary">Vad vill du uppnå?</p>
+            <div className="flex flex-wrap gap-2">
+              {FOCUSES.map((f) => <button key={f.value} className="chip" aria-pressed={p.trainingFocus === f.value} onClick={() => setFocus(f.value)}>{f.label}</button>)}
+            </div>
+            <Input className="h-11 rounded-2xl bg-background" placeholder="Egna önskemål, t.ex. rygg och axlar, skonsamt för knäna" value={wishes} onChange={(e) => setWishes(e.target.value)} onBlur={saveWishes} aria-label="Egna önskemål" />
+            <p className="text-xs text-muted-foreground">Vi väljer övningar efter ditt fokus, dina önskemål, din utrustning och vilka muskler som är utvilade.</p>
+          </div>
+        )}
         <div className="flex flex-wrap gap-2">
           <button className="chip" aria-pressed={!muscle} onClick={() => setMuscle(undefined)}>Alla</button>
           {MUSCLES.map((m) => (
@@ -51,7 +71,7 @@ export function ExercisePicker({ open, onOpenChange, onPick }: {
           ))}
         </div>
         <Button variant="outline" className="h-11 rounded-full" onClick={() => setCreating(true)}><Plus /> Skapa egen övning</Button>
-        <ul className="-mx-1 flex-1 space-y-2 overflow-y-auto px-1" aria-label="Övningslista">
+        <ul className="-mx-1 space-y-2 px-1" aria-label="Övningslista">
           {results.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">Inga övningar matchar – prova ett annat sökord eller skapa en egen.</li>}
           {results.map((e) => (
             <li key={e.id} className="card-soft flex items-center gap-2 p-3">

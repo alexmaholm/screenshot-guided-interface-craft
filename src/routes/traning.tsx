@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { improvements, lastWeight } from "@/lib/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  addDays, dateKey, generateWorkout, KIND_LABEL, prettyDate, update, useBalans, weekdayIndex, WEEKDAYS,
+  addDays, dateKey, generateWorkout, uid, KIND_LABEL, prettyDate, update, useBalans, weekdayIndex, WEEKDAYS,
   type Workout, type WorkoutKind,
 } from "@/lib/balans";
 import { MUSCLES, muscleRecovery, recoveryStatus } from "@/lib/exercises";
@@ -130,7 +130,8 @@ function Training() {
       <CreateDialog open={creating} onOpenChange={(o) => { setCreating(o); if (!o) navigate({ search: {}, replace: true }); }} onCreate={(w) => {
         update((st) => ({ ...st, workouts: [...st.workouts, w] }));
         setCreating(false);
-        toast.success("Pass skapat");
+        if (w.exercises.length === 0 && w.kind !== "vila") { setActiveId(w.id); toast.success("Tomt pass skapat – välj dina övningar"); }
+        else toast.success("Pass skapat");
       }} />
 
       <Dialog open={!!moving} onOpenChange={(o) => !o && setMoving(null)}>
@@ -159,6 +160,12 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
   const [kind, setKind] = useState<WorkoutKind>("styrka");
   const [min, setMin] = useState(p.sessionMin);
   const [date, setDate] = useState(today);
+  const [blank, setBlank] = useState(false);
+  const create = () => {
+    if (blank && kind !== "vila") {
+      onCreate({ id: uid(), date, title: "Mitt eget pass", kind, durationMin: min, exercises: [], status: "planerat" });
+    } else onCreate(generateWorkout({ kind, level: p.level ?? "nybörjare", equipment: p.equipment, minutes: min, date }));
+  };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-3xl">
@@ -185,9 +192,22 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
             <button key={d} className="chip" aria-pressed={date === d} onClick={() => setDate(d)}>{d === today ? "Idag" : WEEKDAYS[weekdayIndex(d)]}</button>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">Anpassas efter din nivå och utrustning: {p.equipment.join(", ")}.</p>
-        <Button className="h-12 rounded-full" onClick={() => onCreate(generateWorkout({ kind, level: p.level ?? "nybörjare", equipment: p.equipment, minutes: min, date }))}>
-          Skapa pass
+        {kind !== "vila" && (
+          <>
+            <p className="text-sm font-medium">Hur vill du börja?</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button className="chip flex-col items-start rounded-2xl! py-3! text-left" aria-pressed={!blank} onClick={() => setBlank(false)}>
+                <span className="font-semibold">Färdigt förslag</span><span className="text-xs opacity-80">Övningar valda åt dig</span>
+              </button>
+              <button className="chip flex-col items-start rounded-2xl! py-3! text-left" aria-pressed={blank} onClick={() => setBlank(true)}>
+                <span className="font-semibold">Blankt pass</span><span className="text-xs opacity-80">Välj övningarna själv</span>
+              </button>
+            </div>
+          </>
+        )}
+        <p className="text-xs text-muted-foreground">{blank ? "Du får smarta förslag efter ditt fokus när du lägger till övningar." : `Anpassas efter din nivå och utrustning: ${p.equipment.join(", ")}.`}</p>
+        <Button className="h-12 rounded-full" onClick={create}>
+          {blank && kind !== "vila" ? "Skapa och välj övningar" : "Skapa pass"}
         </Button>
       </DialogContent>
     </Dialog>
@@ -245,7 +265,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
   const all = useBalans()?.workouts ?? [];
   const [feeling, setFeeling] = useState(w.feeling);
   const [note, setNote] = useState(w.note ?? "");
-  const [picking, setPicking] = useState(false);
+  const [picking, setPicking] = useState(w.exercises.length === 0 && w.status !== "klart");
   const done = w.exercises.filter((e) => e.done).length;
   const toggle = (i: number) => onPatch((x) => ({ ...x, exercises: x.exercises.map((e, j) => (j === i ? { ...e, done: !e.done } : e)) }));
   const setKg = (i: number, v: string) => {
