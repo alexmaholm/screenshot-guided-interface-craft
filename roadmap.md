@@ -11,3 +11,4 @@
 - [ ] Etapp 4 – Träningslyft: 100+ sökbara övningspresets, egna övningar, beskrivningar, tips, lätta videor, set/reps/vikt, historik, vilotimer och muskelåterhämtning.
 - [ ] Smarta vardagsrekommendationer: måltider som fyller dagens kvarvarande luckor.
 - [ ] Stämma av namnbyte från Balans samt prissättning för gratis- och PRO-nivå.
+- [x] Starta pass: välj färdigt förslag eller blankt pass + smart filtrering efter "Ditt fokus" och egna önskemål (inte ordet "intention").
