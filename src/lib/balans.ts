@@ -35,6 +35,8 @@ export interface Profile {
   sessionMin: number;
   hideCalories: boolean;
   waterGoal: number;
+  trainingFocus?: import("@/lib/exercises").TrainingFocus | undefined;
+  trainingWishes?: string | undefined;
 }
 
 export interface Meal {

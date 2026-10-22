@@ -205,3 +205,43 @@ export function recoveryStatus(days: number | undefined): { label: string; tone:
   if (days === 1) return { label: "Vilat 1 dag", tone: "snart" };
   return { label: `Vilat ${days} dagar`, tone: "redo" };
 }
+
+/* ---------------- Ditt fokus: smarta rekommendationer ---------------- */
+
+export type TrainingFocus = "muskler" | "forma" | "flas" | "energi";
+export const FOCUSES: { value: TrainingFocus; label: string; desc: string }[] = [
+  { value: "muskler", label: "Bygga muskler & styrka", desc: "Tyngre basövningar med vikt" },
+  { value: "forma", label: "Forma kroppen i lugn takt", desc: "Helkropp och puls, hållbart" },
+  { value: "flas", label: "Bättre flås & uthållighet", desc: "Kondition och tempo" },
+  { value: "energi", label: "Mer energi & rörelseglädje", desc: "Skonsamt och roligt" },
+];
+
+const WISH_MUSCLES: [RegExp, Muscle][] = [
+  [/bröst/, "bröst"], [/rygg/, "rygg"], [/ben|lår/, "ben"], [/axl/, "axlar"],
+  [/arm|biceps|triceps/, "armar"], [/bål|mage|core/, "bål"], [/rump|säte/, "rumpa"],
+  [/kondition|flås|puls/, "kondition"],
+];
+const JOINT_HEAVY = /hopp|jump|burpee|utfall|sprint|box/i;
+
+/** Poängsätt en övning efter fokus, egna önskemål och muskelåterhämtning. Högre = bättre match. */
+export function focusScore(e: ExercisePreset, focus: TrainingFocus | undefined, wishes: string, rec: Record<Muscle, number | undefined>): number {
+  let s = 0;
+  if (focus === "muskler") s += (e.track === "vikt" ? 3 : 0) + (e.muscle === "kondition" ? -2 : 0);
+  if (focus === "forma") s += (e.muscle === "helkropp" || e.muscle === "kondition" ? 3 : 1);
+  if (focus === "flas") s += (e.muscle === "kondition" ? 4 : e.track === "tid" ? 2 : 0);
+  if (focus === "energi") s += (e.track !== "vikt" ? 2 : 0) + (JOINT_HEAVY.test(e.name + e.nameEn) ? -1 : 1);
+  const w = wishes.toLowerCase();
+  for (const [re, m] of WISH_MUSCLES) if (re.test(w) && (e.muscle === m || e.secondary === m)) s += 4;
+  if (/knä|skonsam|lugn|led/.test(w) && JOINT_HEAVY.test(e.name + e.nameEn)) s -= 5;
+  const st = recoveryStatus(rec[e.muscle]).tone;
+  s += st === "vila" ? -3 : st === "snart" ? -1 : 1;
+  return s;
+}
+
+export function recommendExercises(all: ExercisePreset[], focus: TrainingFocus | undefined, wishes: string, rec: Record<Muscle, number | undefined>): ExercisePreset[] {
+  return all
+    .map((e, i) => ({ e, i, s: focusScore(e, focus, wishes, rec) }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s || a.i - b.i)
+    .map((x) => x.e);
+}
