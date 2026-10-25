@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
+import { StrengthProgress } from "@/components/StrengthProgress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addDays, dateKey, prettyDate, resetAll, update, useBalans, weekdayIndex, WEEKDAYS } from "@/lib/balans";
@@ -68,6 +69,8 @@ function Progress() {
         <Box label="Vatten snitt" value={`${waterAvg.toFixed(1)} glas`} />
         <Box label="Sömn snitt" value={sleepAvg ? `${sleepAvg.toFixed(1)} h` : "–"} />
       </section>
+
+      <StrengthProgress workouts={s.workouts} />
 
       <section className="card-soft p-5">
         <h2 className="text-lg font-semibold">Måltider per dag</h2>

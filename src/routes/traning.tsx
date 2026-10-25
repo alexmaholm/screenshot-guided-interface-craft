@@ -16,6 +16,7 @@ import {
   type Workout, type WorkoutKind,
 } from "@/lib/balans";
 import { MUSCLES, muscleRecovery, recoveryStatus } from "@/lib/exercises";
+import { MuscleMap } from "@/components/MuscleMap";
 
 export const Route = createFileRoute("/traning")({
   validateSearch: (s: Record<string, unknown>): { starta?: string | undefined } => ({
@@ -101,7 +102,7 @@ function Training() {
         </div>
       </section>
 
-      <MuscleRecovery workouts={s.workouts} today={today} />
+      <MuscleMap workouts={s.workouts} today={today} />
 
       <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setBrowsing(true)}><Dumbbell /> Övningsbank</Button>
       <ExercisePicker open={browsing} onOpenChange={setBrowsing} onPick={(ex) => toast(`${ex.name} – lägg till den när du startar ett pass`)} />
@@ -216,31 +217,6 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
         </Button>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function MuscleRecovery({ workouts, today }: { workouts: Workout[]; today: string }) {
-  const rec = muscleRecovery(workouts, today);
-  const trained = MUSCLES.filter((m) => m.value !== "kondition" && rec[m.value] !== undefined);
-  if (trained.length === 0) return (
-    <section className="card-soft p-4" aria-label="Muskelåterhämtning">
-      <h2 className="text-sm font-semibold">Muskelåterhämtning</h2>
-      <p className="mt-2 text-sm"><span className="rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-primary">Alla muskler: redo</span></p>
-      <p className="mt-2 text-xs text-muted-foreground">Avsluta ett pass så ser du här hur varje muskelgrupp återhämtar sig.</p>
-    </section>
-  );
-  return (
-    <section className="card-soft p-4" aria-label="Muskelåterhämtning">
-      <h2 className="text-sm font-semibold">Muskelåterhämtning</h2>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {trained.map((m) => {
-          const st = recoveryStatus(rec[m.value]);
-          const cls = st.tone === "redo" ? "bg-secondary text-primary" : st.tone === "snart" ? "bg-muted text-foreground" : "bg-coral/15 text-coral";
-          return <span key={m.value} className={`rounded-full px-3 py-1.5 text-xs font-medium ${cls}`}>{m.label}: {st.label}</span>;
-        })}
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">Muskler mår bra av cirka 2 dagars vila mellan tunga pass.</p>
-    </section>
   );
 }
 
