@@ -15,7 +15,6 @@ import {
   addDays, dateKey, generateWorkout, uid, KIND_LABEL, prettyDate, update, useBalans, weekdayIndex, WEEKDAYS,
   type Workout, type WorkoutKind,
 } from "@/lib/balans";
-import { MUSCLES, muscleRecovery, recoveryStatus } from "@/lib/exercises";
 import { MuscleMap } from "@/components/MuscleMap";
 
 export const Route = createFileRoute("/traning")({
