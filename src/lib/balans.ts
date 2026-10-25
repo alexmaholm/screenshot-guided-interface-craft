@@ -117,10 +117,11 @@ export interface State {
   habits: Record<string, DayHabits>;
   body: { date: string; weight: number }[];
   customExercises: CustomExercise[];
+  templates: import("@/lib/templates").WorkoutTemplate[];
 }
 
 const KEY = "balans:v1";
-const empty: State = { profile: null, meals: [], favorites: [], workouts: [], habits: {}, body: [], customExercises: [] };
+const empty: State = { profile: null, meals: [], favorites: [], workouts: [], habits: {}, body: [], customExercises: [], templates: [] };
 
 let state: State | null = null;
 const listeners = new Set<() => void>();
