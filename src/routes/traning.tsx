@@ -2,7 +2,7 @@ import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { ExercisePicker, useExerciseLibrary } from "@/components/ExercisePicker";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Check, Clock, RefreshCw, CalendarDays, Plus, Minus, X, Play, ArrowLeft, Timer, Dumbbell } from "lucide-react";
+import { Check, Clock, RefreshCw, CalendarDays, Plus, Minus, X, Play, ArrowLeft, Timer, Dumbbell, Info, Bookmark, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,9 @@ import {
   type Workout, type WorkoutKind,
 } from "@/lib/balans";
 import { MuscleMap } from "@/components/MuscleMap";
+import { ExerciseDemo } from "@/components/ExerciseDemo";
+import { EXERCISES } from "@/lib/exercises";
+import { BUILT_IN_TEMPLATES, templateFromWorkout, workoutFromTemplate } from "@/lib/templates";
 
 export const Route = createFileRoute("/traning")({
   validateSearch: (s: Record<string, unknown>): { starta?: string | undefined } => ({
@@ -166,6 +169,8 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
   const [min, setMin] = useState(p.sessionMin);
   const [date, setDate] = useState(today);
   const [blank, setBlank] = useState(false);
+  const [mode, setMode] = useState<"forslag" | "blankt" | "mall">("forslag");
+  const mine = useBalans()!.templates ?? [];
   const create = () => {
     if (blank && kind !== "vila") {
       onCreate({ id: uid(), date, title: "Mitt eget pass", kind, durationMin: min, exercises: [], status: "planerat" });
@@ -196,20 +201,41 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
         {kind !== "vila" && (
           <>
             <p className="text-sm font-medium">Hur vill du börja?</p>
-            <div className="grid grid-cols-2 gap-2">
-              <button className="chip flex-col items-start rounded-2xl! py-3! text-left" aria-pressed={!blank} onClick={() => setBlank(false)}>
-                <span className="font-semibold">Färdigt förslag</span><span className="text-xs opacity-80">Övningar valda åt dig</span>
-              </button>
-              <button className="chip flex-col items-start rounded-2xl! py-3! text-left" aria-pressed={blank} onClick={() => setBlank(true)}>
-                <span className="font-semibold">Blankt pass</span><span className="text-xs opacity-80">Välj övningarna själv</span>
-              </button>
+            <div className="grid grid-cols-3 gap-2">
+              {([["forslag", "Förslag", "Valt åt dig"], ["mall", "Mall", "Färdigt upplägg"], ["blankt", "Blankt", "Välj själv"]] as const).map(([m, t, d]) => (
+                <button key={m} className="chip flex-col items-start rounded-2xl! py-3! text-left" aria-pressed={mode === m} onClick={() => { setMode(m); setBlank(m === "blankt"); }}>
+                  <span className="font-semibold">{t}</span><span className="text-xs opacity-80">{d}</span>
+                </button>
+              ))}
             </div>
           </>
         )}
+        {kind !== "vila" && mode === "mall" ? (
+          <div className="max-h-64 space-y-2 overflow-y-auto">
+            {mine.length > 0 && <p className="text-xs font-semibold uppercase text-muted-foreground">Mina mallar</p>}
+            {mine.map((t) => (
+              <div key={t.id} className="flex items-center gap-2">
+                <button className="card-soft flex-1 p-3 text-left" onClick={() => onCreate(workoutFromTemplate(t, date))}>
+                  <span className="block font-semibold">{t.title}</span><span className="text-xs text-muted-foreground">{t.exercises.length} övningar · {t.durationMin} min</span>
+                </button>
+                <button aria-label={`Ta bort mallen ${t.title}`} className="grid h-11 w-11 place-items-center text-muted-foreground" onClick={() => update((x) => ({ ...x, templates: (x.templates ?? []).filter((y) => y.id !== t.id) }))}><Trash2 className="h-4 w-4" /></button>
+              </div>
+            ))}
+            <p className="text-xs font-semibold uppercase text-muted-foreground">Färdiga mallar</p>
+            {BUILT_IN_TEMPLATES.map((t) => (
+              <button key={t.id} className="card-soft block w-full p-3 text-left" onClick={() => onCreate(workoutFromTemplate(t, date))}>
+                <span className="block font-semibold">{t.title}</span><span className="text-xs text-muted-foreground">{t.exercises.map((e) => e.name).join(" · ")}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <>
         <p className="text-xs text-muted-foreground">{blank ? "Du får smarta förslag efter ditt fokus när du lägger till övningar." : `Anpassas efter din nivå och utrustning: ${p.equipment.join(", ")}.`}</p>
         <Button className="h-12 rounded-full" onClick={create}>
           {blank && kind !== "vila" ? "Skapa och välj övningar" : "Skapa pass"}
         </Button>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -252,6 +278,13 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
   const [picking, setPicking] = useState(w.exercises.length === 0 && w.status !== "klart");
   const done = w.exercises.filter((e) => e.done).length;
   const [restTrigger, setRestTrigger] = useState<Record<number, number>>({});
+  const [demo, setDemo] = useState<string | null>(null);
+  const demoEx = demo ? EXERCISES.find((x) => x.name === demo) : undefined;
+  const saveTemplate = () => {
+    if (!w.exercises.length) return;
+    update((x) => ({ ...x, templates: [...(x.templates ?? []), templateFromWorkout(w)] }));
+    toast.success("Sparat under Mina mallar");
+  };
   const patchEx = (i: number, fn: (e: Exercise) => Exercise) => onPatch((x) => ({ ...x, exercises: x.exercises.map((e, j) => (j === i ? fn(e) : e)) }));
   const toggle = (i: number) => patchEx(i, (e) => { const d = !e.done; return withRows(e, setRows(e).map((r) => ({ ...r, done: d }))); });
   const toggleSet = (i: number, s: number) => {
@@ -301,6 +334,9 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
                 </span>
               </span>
             </button>
+            {EXERCISES.some((x) => x.name === e.name) && (
+              <button onClick={() => setDemo(e.name)} className="mt-1 flex min-h-10 items-center gap-1.5 text-sm font-medium text-primary"><Info className="h-4 w-4" /> Se hur övningen går till</button>
+            )}
             <div className="mt-3 flex items-center justify-between">
               <span className="text-sm font-medium">Antal set</span>
               <div className="flex items-center gap-2">
@@ -334,6 +370,19 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
         })}
       </ul>
       <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setPicking(true)}><Plus /> Lägg till övning</Button>
+      <Button variant="ghost" className="h-11 w-full rounded-full" disabled={!w.exercises.length} onClick={saveTemplate}><Bookmark /> Spara som mall</Button>
+      <Dialog open={!!demoEx} onOpenChange={(o) => !o && setDemo(null)}>
+        <DialogContent className="rounded-3xl">
+          {demoEx && (
+            <>
+              <DialogHeader><DialogTitle className="font-display text-2xl">{demoEx.name}</DialogTitle></DialogHeader>
+              <ExerciseDemo ex={demoEx} className="mx-auto h-48 w-48" />
+              <p className="text-sm">{demoEx.desc}</p>
+              {demoEx.tips.length > 0 && <ul className="list-inside list-disc text-sm text-muted-foreground">{demoEx.tips.map((t) => <li key={t}>{t}</li>)}</ul>}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
       <ExercisePicker open={picking} onOpenChange={setPicking} onPick={(ex) => {
         const last = lastWeight(ex.name, w.id, all);
         onPatch((x) => ({
