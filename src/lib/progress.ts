@@ -1,4 +1,33 @@
-import type { Workout } from "@/lib/balans";
+import type { Exercise, SetEntry, Workout } from "@/lib/balans";
+
+/** Per-set rows for an exercise; older saved exercises get rows built from sets/reps/weight. */
+export function setRows(e: Exercise): SetEntry[] {
+  if (e.log) return e.log;
+  return Array.from({ length: Math.max(1, e.sets ?? 1) }, () => ({ reps: e.reps, timeSec: e.timeSec, kg: e.weightKg, done: e.done }));
+}
+
+/** Writes rows back and keeps summary fields (sets, reps, heaviest kg, done) in sync for history and progress. */
+export function withRows(e: Exercise, rows: SetEntry[]): Exercise {
+  const kgs = rows.map((r) => r.kg ?? 0).filter((k) => k > 0);
+  return {
+    ...e,
+    log: rows,
+    sets: rows.length,
+    reps: e.reps !== undefined ? rows[0]?.reps ?? e.reps : undefined,
+    weightKg: kgs.length ? Math.max(...kgs) : undefined,
+    done: rows.length > 0 && rows.every((r) => r.done),
+  };
+}
+
+/** Adds a set copying the previous one, or removes the last set (minimum one). */
+export function changeSetCount(e: Exercise, delta: 1 | -1): Exercise {
+  const rows = setRows(e);
+  if (delta === 1) {
+    const last = rows[rows.length - 1];
+    return withRows(e, [...rows, { reps: last?.reps, timeSec: last?.timeSec, kg: last?.kg, done: false }]);
+  }
+  return rows.length <= 1 ? e : withRows(e, rows.slice(0, -1));
+}
 
 export interface Improvement { name: string; diffKg: number }
 

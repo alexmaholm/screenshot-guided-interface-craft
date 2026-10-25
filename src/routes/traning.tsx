@@ -2,13 +2,14 @@ import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { ExercisePicker, useExerciseLibrary } from "@/components/ExercisePicker";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Check, Clock, RefreshCw, CalendarDays, Plus, Play, ArrowLeft, Timer, Dumbbell } from "lucide-react";
+import { Check, Clock, RefreshCw, CalendarDays, Plus, Minus, X, Play, ArrowLeft, Timer, Dumbbell } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { improvements, lastWeight } from "@/lib/progress";
+import { changeSetCount, improvements, lastWeight, setRows, withRows } from "@/lib/progress";
+import type { Exercise } from "@/lib/balans";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   addDays, dateKey, generateWorkout, uid, KIND_LABEL, prettyDate, update, useBalans, weekdayIndex, WEEKDAYS,
@@ -243,10 +244,12 @@ function MuscleRecovery({ workouts, today }: { workouts: Workout[]; today: strin
   );
 }
 
-function RestTimer({ seconds }: { seconds: number }) {
+function RestTimer({ seconds, trigger = 0 }: { seconds: number; trigger?: number }) {
   const [left, setLeft] = useState<number | null>(null);
   const ref = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => () => { if (ref.current) clearInterval(ref.current); }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (trigger > 0) start(); }, [trigger]);
   const start = () => {
     if (ref.current) clearInterval(ref.current);
     setLeft(seconds);
@@ -277,11 +280,18 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
   const [note, setNote] = useState(w.note ?? "");
   const [picking, setPicking] = useState(w.exercises.length === 0 && w.status !== "klart");
   const done = w.exercises.filter((e) => e.done).length;
-  const toggle = (i: number) => onPatch((x) => ({ ...x, exercises: x.exercises.map((e, j) => (j === i ? { ...e, done: !e.done } : e)) }));
-  const setKg = (i: number, v: string) => {
+  const [restTrigger, setRestTrigger] = useState<Record<number, number>>({});
+  const patchEx = (i: number, fn: (e: Exercise) => Exercise) => onPatch((x) => ({ ...x, exercises: x.exercises.map((e, j) => (j === i ? fn(e) : e)) }));
+  const toggle = (i: number) => patchEx(i, (e) => { const d = !e.done; return withRows(e, setRows(e).map((r) => ({ ...r, done: d }))); });
+  const toggleSet = (i: number, s: number) => {
+    const row = setRows(w.exercises[i]!)[s];
+    if (row && !row.done) setRestTrigger((t) => ({ ...t, [i]: (t[i] ?? 0) + 1 }));
+    patchEx(i, (e) => withRows(e, setRows(e).map((r, k) => (k === s ? { ...r, done: !r.done } : r))));
+  };
+  const setRow = (i: number, s: number, field: "reps" | "timeSec" | "kg", v: string) => {
     const n = v === "" ? undefined : Number(v.replace(",", "."));
     if (n !== undefined && (!Number.isFinite(n) || n < 0)) return;
-    onPatch((x) => ({ ...x, exercises: x.exercises.map((e, j) => (j === i ? { ...e, weightKg: n } : e)) }));
+    patchEx(i, (e) => withRows(e, setRows(e).map((r, k) => (k === s ? { ...r, [field]: n } : r))));
   };
   const finish = () => {
     const ups = improvements(w, all);
@@ -304,6 +314,8 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
       <ul className="space-y-3">
         {w.exercises.map((e, i) => {
           const prev = lastWeight(e.name, w.id, all);
+          const rows = setRows(e);
+          const timed = !e.reps && !!e.timeSec;
           return (
           <li key={i} className="card-soft p-4">
             <button onClick={() => toggle(i)} aria-pressed={e.done} className="flex min-h-12 w-full items-center gap-4 text-left">
@@ -313,20 +325,37 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
               <span className="flex-1">
                 <span className={`block font-semibold ${e.done ? "line-through opacity-60" : ""}`}>{e.name}</span>
                 <span className="text-sm text-muted-foreground">
-                  {e.sets ? `${e.sets} set × ` : ""}{e.reps ? `${e.reps} reps` : e.timeSec ? fmt(e.timeSec) : ""}
-                  {e.restSec ? <> · <Clock className="inline h-3.5 w-3.5" aria-hidden /> vila {fmt(e.restSec)}</> : null}
+                  {prev ? `Förra passet ${prev} kg` : null}
+                  {e.restSec ? <>{prev ? " · " : ""}<Clock className="inline h-3.5 w-3.5" aria-hidden /> vila {fmt(e.restSec)}</> : null}
                 </span>
               </span>
             </button>
-            <div className="mt-3 flex flex-wrap items-center gap-2 pl-14">
-              {e.reps ? (
-                <>
-                  <Input aria-label={`Vikt för ${e.name}, kg`} type="number" inputMode="decimal" min={0} step={0.5} placeholder="Vikt" className="h-10 w-24" value={e.weightKg ?? ""} onChange={(ev) => setKg(i, ev.target.value)} />
-                  <span className="text-sm text-muted-foreground">kg{prev ? ` · förra passet ${prev} kg` : ""}</span>
-                </>
-              ) : null}
-              {e.restSec > 0 ? <RestTimer seconds={e.restSec} /> : null}
+            <div className="mt-3 flex items-center justify-between">
+              <span className="text-sm font-medium">Antal set</span>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" className="h-10 w-10 rounded-full" aria-label="Ta bort set" disabled={rows.length <= 1} onClick={() => patchEx(i, (x) => changeSetCount(x, -1))}><Minus className="h-4 w-4" /></Button>
+                <span className="w-6 text-center text-lg font-bold" aria-live="polite">{rows.length}</span>
+                <Button variant="outline" size="icon" className="h-10 w-10 rounded-full" aria-label="Lägg till set" onClick={() => patchEx(i, (x) => changeSetCount(x, 1))}><Plus className="h-4 w-4" /></Button>
+              </div>
             </div>
+            <ol className="mt-3 space-y-2">
+              {rows.map((r, s) => (
+                <li key={s} className="flex items-center gap-2">
+                  <span className="w-6 text-sm font-semibold text-muted-foreground">{s + 1}</span>
+                  <Input aria-label={`${timed ? "Sekunder" : "Reps"} set ${s + 1}`} type="number" inputMode="numeric" min={0} className="h-10 w-16 px-2 text-center" value={(timed ? r.timeSec : r.reps) ?? ""} onChange={(ev) => setRow(i, s, timed ? "timeSec" : "reps", ev.target.value)} />
+                  <span className="text-xs text-muted-foreground">{timed ? "sek" : "reps"}</span>
+                  {!timed && (
+                    <>
+                      <Input aria-label={`Vikt set ${s + 1}, kg`} type="number" inputMode="decimal" min={0} step={0.5} placeholder="–" className="h-10 w-16 px-2 text-center" value={r.kg ?? ""} onChange={(ev) => setRow(i, s, "kg", ev.target.value)} />
+                      <span className="text-xs text-muted-foreground">kg</span>
+                    </>
+                  )}
+                  <button aria-label={`Set ${s + 1} klart`} aria-pressed={r.done} onClick={() => toggleSet(i, s)} className={`ml-auto grid h-10 w-10 place-items-center rounded-full border-2 ${r.done ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}><Check className="h-4 w-4" /></button>
+                  <button aria-label={`Ta bort set ${s + 1}`} disabled={rows.length <= 1} onClick={() => patchEx(i, (x) => withRows(x, setRows(x).filter((_, k) => k !== s)))} className="grid h-10 w-8 place-items-center text-muted-foreground disabled:opacity-30"><X className="h-4 w-4" /></button>
+                </li>
+              ))}
+            </ol>
+            {e.restSec > 0 ? <div className="mt-3"><RestTimer seconds={e.restSec} trigger={restTrigger[i] ?? 0} /></div> : null}
           </li>
           );
         })}
