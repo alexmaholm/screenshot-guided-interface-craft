@@ -210,6 +210,13 @@ export const EXERCISES: ExercisePreset[] = [
   r(["Jacob's ladder", "Jacob's ladder", "kondition", ["gym"], "tid", "Klättra på den rullande stegmaskinen.", "Håll ett jämnt, kontrollerat tempo."], 45),
   r(["Viking press", "Viking press", "axlar", ["gym"], "vikt", "Pressa handtagen uppåt i viking press-stativet.", "Axelvänlig press med neutralt grepp."], 90),
   r(["Multihip", "Multi hip machine", "rumpa", ["gym"], "vikt", "Arbeta benet i alla riktningar mot motstånd.", "Bra för höft och rumpa runt om."], 45),
+  r(["Maghjul", "Ab rollout", "bål", ["ingen", "gym"], "reps", "Stå på knä, rulla hjulet framåt så långt du kontrollerar och dra tillbaka med magen.", "Svanka inte – håll rumpan spänd och ryggen rund lätt."], 45),
+  r(["Trap bar marklyft", "Hex bar deadlift", "rygg", ["gym"], "vikt", "Stå inne i stången, fatta handtagen och res dig med rak rygg.", "Tryck golvet ifrån dig och lås höften i toppen."], 90),
+  r(["Lutande hantelcurl", "Incline dumbbell curl", "armar", ["hantlar", "gym"], "vikt", "Sitt på lutad bänk med armarna hängande och curla upp hantlarna.", "Låt armarna hänga rakt ner – armbågarna still."], 45),
+  r(["Gående utfall", "Walking lunges", "ben", ["ingen", "hantlar"], "reps", "Kliv framåt i utfall, sänk bakre knät och fortsätt med nästa ben.", "Rak överkropp och landa på hela foten."], 60),
+  r(["Triceps kickbacks", "Dumbbell triceps kickback", "armar", ["hantlar"], "vikt", "Fäll fram överkroppen, överarmen längs kroppen, sträck armen bakåt.", "Bara underarmen rör sig."], 45),
+  r(["Lutande sidolyft på bänk", "Incline lateral raise", "axlar", ["hantlar", "gym"], "vikt", "Ligg på sidan mot en lutad bänk och lyft hanteln ut till axelhöjd.", "Lätt vikt och långsamt ner."], 45),
+  r(["Slädpress", "Sled push", "kondition", ["gym"], "tid", "Luta dig mot släden med raka armar och driv den framåt med korta kraftiga steg.", "Låg position och tryck från fotbladen."], 90),
 ];
 
 /** Sök och filtrera övningsbiblioteket (presets + egna övningar). */
