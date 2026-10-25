@@ -2,7 +2,7 @@ import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { ExercisePicker, useExerciseLibrary } from "@/components/ExercisePicker";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Check, Clock, RefreshCw, CalendarDays, Plus, Play, ArrowLeft, Timer } from "lucide-react";
+import { Check, Clock, RefreshCw, CalendarDays, Plus, Play, ArrowLeft, Timer, Dumbbell } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,7 @@ function Training() {
   const today = dateKey();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [browsing, setBrowsing] = useState(false);
   const [moving, setMoving] = useState<Workout | null>(null);
 
   useEffect(() => {
@@ -100,6 +101,9 @@ function Training() {
       </section>
 
       <MuscleRecovery workouts={s.workouts} today={today} />
+
+      <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setBrowsing(true)}><Dumbbell /> Övningsbank</Button>
+      <ExercisePicker open={browsing} onOpenChange={setBrowsing} onPick={(ex) => toast(`${ex.name} – lägg till den när du startar ett pass`)} />
 
       <RecoveryMeals profile={p} workout={[...s.workouts].reverse().find((w) => w.date === today && w.status === "klart" && w.kind !== "vila")} date={today} />
       <h2 className="text-lg font-semibold">Kommande pass</h2>
@@ -217,7 +221,13 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
 function MuscleRecovery({ workouts, today }: { workouts: Workout[]; today: string }) {
   const rec = muscleRecovery(workouts, today);
   const trained = MUSCLES.filter((m) => m.value !== "kondition" && rec[m.value] !== undefined);
-  if (trained.length === 0) return null;
+  if (trained.length === 0) return (
+    <section className="card-soft p-4" aria-label="Muskelåterhämtning">
+      <h2 className="text-sm font-semibold">Muskelåterhämtning</h2>
+      <p className="mt-2 text-sm"><span className="rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-primary">Alla muskler: redo</span></p>
+      <p className="mt-2 text-xs text-muted-foreground">Avsluta ett pass så ser du här hur varje muskelgrupp återhämtar sig.</p>
+    </section>
+  );
   return (
     <section className="card-soft p-4" aria-label="Muskelåterhämtning">
       <h2 className="text-sm font-semibold">Muskelåterhämtning</h2>
