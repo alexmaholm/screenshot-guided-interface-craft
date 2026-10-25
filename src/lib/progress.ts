@@ -54,3 +54,26 @@ export function lastWeight(name: string, currentId: string, all: Workout[]): num
     .flatMap((w) => w.exercises)
     .find((x) => x.name.toLowerCase() === key && x.weightKg)?.weightKg;
 }
+
+export interface StrengthPoint { date: string; kg: number }
+
+/** Heaviest weight per finished workout date for one exercise, oldest first. */
+export function strengthHistory(name: string, all: Workout[]): StrengthPoint[] {
+  const key = name.toLowerCase();
+  const byDate = new Map<string, number>();
+  for (const w of all) {
+    if (w.status !== "klart") continue;
+    for (const e of w.exercises) {
+      if (e.name.toLowerCase() !== key || !e.weightKg) continue;
+      byDate.set(w.date, Math.max(byDate.get(w.date) ?? 0, e.weightKg));
+    }
+  }
+  return [...byDate].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([date, kg]) => ({ date, kg }));
+}
+
+/** Weighted exercises from finished workouts, most frequently logged first. */
+export function trackedExercises(all: Workout[]): string[] {
+  const count = new Map<string, number>();
+  for (const w of all) if (w.status === "klart") for (const e of w.exercises) if (e.weightKg) count.set(e.name, (count.get(e.name) ?? 0) + 1);
+  return [...count].sort((a, b) => b[1] - a[1]).map(([n]) => n);
+}
