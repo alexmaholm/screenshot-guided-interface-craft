@@ -400,7 +400,7 @@ export function completeOnboarding(p: Profile) {
   const favorites: Favorite[] = suggestionsFor(p.diet, undefined, p.restrictions)
     .slice(0, 3)
     .map((s) => ({ id: uid(), name: s.name, amount: s.amount, type: s.type, kcal: s.kcal, protein: s.protein }));
-  update(() => ({ profile: p, meals, favorites, workouts, habits, body: [], customExercises: [] }));
+  update(() => ({ profile: p, meals, favorites, workouts, habits, body: [], customExercises: [], templates: [] }));
 }
 
 /* ---------------- Tips ---------------- */
