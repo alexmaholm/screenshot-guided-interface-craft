@@ -30,6 +30,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-coral: var(--coral);
+  --color-amber: var(--amber);
   --color-coral-foreground: var(--coral-foreground);
   --color-mint: var(--mint);
   --color-sand: var(--sand);
@@ -74,6 +75,7 @@
   --mint: oklch(0.86 0.08 165);
   --sand: oklch(0.89 0.04 80);
   --coral: oklch(0.7 0.14 35);
+  --amber: oklch(0.84 0.13 85);
   --coral-foreground: oklch(0.22 0.04 35);
   --destructive: oklch(0.55 0.19 27);
   --destructive-foreground: oklch(0.98 0 0);
