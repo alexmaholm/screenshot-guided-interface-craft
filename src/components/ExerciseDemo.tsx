@@ -26,9 +26,9 @@ interface Scene {
   bench?: "high" | "low" | "seat"; bar?: boolean; mat?: boolean; dipbars?: boolean; sled?: boolean;
 }
 
-const benchLie = { head: [22, 56], sh: [31, 59], hip: [58, 60], kn: [73, 66], ft: [80, 91] } as const;
-const bentOver = { head: [72, 36], sh: [64, 41], hip: [41, 53], kn: [49, 73], ft: [47, 91] } as const;
-const plankBody = { head: [80, 70], sh: [71, 75], hip: [46, 78], kn: [31, 82], ft: [16, 88] } as const;
+const benchLie: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [22, 56], sh: [31, 59], hip: [58, 60], kn: [73, 66], ft: [80, 91] };
+const bentOver: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [72, 36], sh: [64, 41], hip: [41, 53], kn: [49, 73], ft: [47, 91] };
+const plankBody: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [80, 70], sh: [71, 75], hip: [46, 78], kn: [31, 82], ft: [16, 88] };
 
 const SCENES: Record<Pattern, Scene> = {
   squat: {
