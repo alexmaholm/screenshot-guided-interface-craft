@@ -70,6 +70,15 @@ export interface Exercise {
   restSec: number;
   done: boolean;
   weightKg?: number | undefined;
+  /** Per-set log; when present, sets/weightKg/done are derived from it. */
+  log?: SetEntry[] | undefined;
+}
+
+export interface SetEntry {
+  reps?: number | undefined;
+  timeSec?: number | undefined;
+  kg?: number | undefined;
+  done: boolean;
 }
 
 export interface Workout {
