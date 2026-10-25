@@ -319,6 +319,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
         {w.exercises.map((e, i) => {
           const prev = lastWeight(e.name, w.id, all);
           const rows = setRows(e);
+          const labels = setLabels(rows);
           const timed = !e.reps && !!e.timeSec;
           return (
           <li key={i} className="card-soft p-4">
@@ -348,7 +349,11 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
             <ol className="mt-3 space-y-2">
               {rows.map((r, s) => (
                 <li key={s} className="flex items-center gap-2">
-                  <span className="w-6 text-sm font-semibold text-muted-foreground">{s + 1}</span>
+                  <button
+                    aria-label={`Set ${s + 1}: ${SET_TYPE_NAME[r.type ?? "normal"]}. Tryck för att byta typ`}
+                    onClick={() => patchEx(i, (x) => withRows(x, setRows(x).map((q, k) => (k === s ? { ...q, type: nextSetType(q.type) } : q))))}
+                    className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-bold transition-colors ${SET_TYPE_CLASS[r.type ?? "normal"]}`}
+                  >{labels[s]}</button>
                   <Input aria-label={`${timed ? "Sekunder" : "Reps"} set ${s + 1}`} type="number" inputMode="numeric" min={0} className="h-10 w-16 px-2 text-center" value={(timed ? r.timeSec : r.reps) ?? ""} onChange={(ev) => setRow(i, s, timed ? "timeSec" : "reps", ev.target.value)} />
                   <span className="text-xs text-muted-foreground">{timed ? "sek" : "reps"}</span>
                   {!timed && (
