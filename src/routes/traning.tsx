@@ -346,7 +346,9 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
                   <span className="text-xs text-muted-foreground">{timed ? "sek" : "reps"}</span>
                   {!timed && (
                     <>
-                      <Input aria-label={`Vikt set ${s + 1}, kg`} type="number" inputMode="decimal" min={0} step={0.5} placeholder="–" className="h-10 w-16 px-2 text-center" value={r.kg ?? ""} onChange={(ev) => setRow(i, s, "kg", ev.target.value)} />
+                      <button aria-label={`Minska vikt set ${s + 1}`} onClick={() => setRow(i, s, "kg", String(Math.max(0, (r.kg ?? 0) - 2.5)))} className="grid h-10 w-7 place-items-center rounded-full border border-border text-lg leading-none">−</button>
+                      <Input aria-label={`Vikt set ${s + 1}, kg`} type="number" inputMode="decimal" min={0} step={0.5} placeholder="–" className="h-10 w-14 px-1 text-center" value={r.kg ?? ""} onChange={(ev) => setRow(i, s, "kg", ev.target.value)} />
+                      <button aria-label={`Öka vikt set ${s + 1}`} onClick={() => setRow(i, s, "kg", String((r.kg ?? 0) + 2.5))} className="grid h-10 w-7 place-items-center rounded-full border border-border text-lg leading-none">+</button>
                       <span className="text-xs text-muted-foreground">kg</span>
                     </>
                   )}
