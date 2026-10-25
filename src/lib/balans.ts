@@ -74,11 +74,15 @@ export interface Exercise {
   log?: SetEntry[] | undefined;
 }
 
+export type SetType = "normal" | "warmup" | "drop" | "failure";
+
 export interface SetEntry {
   reps?: number | undefined;
   timeSec?: number | undefined;
   kg?: number | undefined;
   done: boolean;
+  /** Missing means a normal working set. */
+  type?: SetType | undefined;
 }
 
 export interface Workout {
