@@ -184,11 +184,7 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
         {kind !== "vila" && (
           <>
             <p className="text-sm font-medium">Tid</p>
-            <div className="flex flex-wrap gap-2">
-              {[10, 15, 25, 40, 60].map((m) => (
-                <button key={m} className="chip" aria-pressed={min === m} onClick={() => setMin(m)}>{m} min</button>
-              ))}
-            </div>
+            <MinutesInput value={min} onChange={setMin} />
           </>
         )}
         <p className="text-sm font-medium">Dag</p>
@@ -279,7 +275,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
     <div className="space-y-5">
       <button onClick={onBack} className="flex min-h-11 items-center gap-2 font-medium text-primary"><ArrowLeft className="h-5 w-5" /> Alla pass</button>
       <header className="bg-hero rounded-3xl p-6 text-primary-foreground">
-        <p className="text-sm opacity-80">{KIND_LABEL[w.kind]} · {w.durationMin} min</p>
+        <p className="text-sm opacity-80">{KIND_LABEL[w.kind]}</p>
         <h1 className="text-3xl font-bold">{w.title}</h1>
         <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-primary-foreground/20">
           <div className="h-full rounded-full bg-coral transition-all" style={{ width: `${(done / w.exercises.length) * 100}%` }} />
@@ -349,6 +345,8 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
         toast.success(`${ex.name} tillagd i passet`);
       }} />
       <section className="card-soft space-y-3 p-5">
+        <p className="text-sm font-medium">Hur länge tränade du?</p>
+        <MinutesInput value={w.durationMin} onChange={(m) => onPatch((x) => ({ ...x, durationMin: m }))} />
         <h2 className="text-lg font-semibold">Hur kändes det?</h2>
         <div className="flex flex-wrap gap-2">
           {["Tungt", "Utmanande", "Lagom", "Bra", "Superbra"].map((l, i) => (
