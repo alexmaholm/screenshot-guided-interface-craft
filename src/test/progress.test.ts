@@ -33,3 +33,11 @@ describe("set-hantering", () => {
     expect(e.done).toBe(true); expect(e.weightKg).toBe(45);
   });
 });
+
+import { strengthHistory } from "@/lib/progress";
+describe("strengthHistory", () => {
+  it("tyngsta vikt per datum, äldst först, bara klara pass", () => {
+    const h = strengthHistory("Bänkpress", [w("b", "2026-10-05", 60), w("a", "2026-10-01", 50), w("c", "2026-10-07", 70, "planerat")]);
+    expect(h).toEqual([{ date: "2026-10-01", kg: 50 }, { date: "2026-10-05", kg: 60 }]);
+  });
+});
