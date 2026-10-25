@@ -295,3 +295,20 @@ export function recommendExercises(all: ExercisePreset[], focus: TrainingFocus |
     .sort((a, b) => b.s - a.s || a.i - b.i)
     .map((x) => x.e);
 }
+
+/** Hantelövningar loggas per hantel; totalvikten är två hantlar (enarmsövningar räknas också per hantel). */
+export function isDumbbell(name: string): boolean {
+  return /hantel|hantlar|dumbbell/i.test(name);
+}
+export const totalLoadKg = (name: string, kg: number): number => (isDumbbell(name) ? kg * 2 : kg);
+
+/** Liknande övningar: samma rörelsemönster först, sedan samma muskelgrupp. */
+export function similarExercises(all: ExercisePreset[], ex: ExercisePreset, pattern: (e: ExercisePreset) => string, max = 4): ExercisePreset[] {
+  const p = pattern(ex);
+  return all
+    .filter((e) => e.id !== ex.id && (e.muscle === ex.muscle || pattern(e) === p))
+    .map((e) => ({ e, s: (pattern(e) === p ? 2 : 0) + (e.muscle === ex.muscle ? 1 : 0) }))
+    .sort((a, b) => b.s - a.s)
+    .slice(0, max)
+    .map((x) => x.e);
+}

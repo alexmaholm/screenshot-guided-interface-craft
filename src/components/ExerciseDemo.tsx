@@ -223,6 +223,16 @@ export function patternFor(ex: Pick<ExercisePreset, "name" | "muscle">): Pattern
   return m[ex.muscle] ?? "cardio";
 }
 
+/** Primär muskel som visas under figuren. */
+export const PRIMARY: Record<Pattern, string> = {
+  squat: "Framsida lår & rumpa", lunge: "Framsida lår & rumpa", hinge: "Baksida lår, rumpa & ländrygg", bench: "Bröst & triceps",
+  fly: "Bröst", pushup: "Bröst & triceps", ohp: "Axlar", lateral: "Sidodelta (axlar)", front: "Främre delta (axlar)", shrug: "Kappmuskel (trapezius)",
+  vpull: "Latissimus & biceps", row: "Övre rygg & latissimus", curl: "Biceps", triceps: "Triceps", kickback: "Triceps", dips: "Triceps & bröst",
+  core: "Raka magmuskeln", plank: "Hela bålen", rollout: "Raka magmuskeln", legraise: "Nedre mage & höftböjare", hang: "Nedre mage",
+  climber: "Bål & höftböjare", bridge: "Rumpa", hipthrust: "Rumpa", glute: "Rumpa", calf: "Vader", legext: "Framsida lår",
+  legcurl: "Baksida lår", sled: "Framsida lår & rumpa", cardio: "Ben & kondition",
+};
+
 const DUR = "2.6s";
 const ease = { calcMode: "spline", keyTimes: "0;0.5;1", keySplines: "0.45 0 0.55 1;0.45 0 0.55 1" } as const;
 
@@ -240,6 +250,15 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
       <g opacity={far ? 0.55 : 1}>
         <line {...pts} strokeWidth={w + 1.6} strokeLinecap="round" className="stroke-muted-foreground/45">{anim}</line>
         <line {...pts} strokeWidth={w} strokeLinecap="round" className={hot ? "stroke-coral" : "stroke-muted"}>{anim}</line>
+        {hot && (
+          <line {...pts} strokeWidth={w + 4} strokeLinecap="round" className="stroke-coral" filter="url(#glow)">
+            {anim}
+            <animate attributeName="opacity" values="0.15;0.85;0.15" dur={DUR} repeatCount="indefinite" {...ease} />
+          </line>
+        )}
+        {hot && (
+          <line {...pts} strokeWidth={w * 0.35} strokeLinecap="round" className="stroke-card" opacity="0.35">{anim}</line>
+        )}
       </g>
     );
   };
@@ -257,7 +276,10 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
   const benchY = sc.bench === "low" ? 70 : sc.bench === "seat" ? 62 : 63;
 
   return (
-    <svg viewBox="0 0 100 112" role="img" aria-label={`Rörelsedemonstration: ${ex.name}`} className={`rounded-2xl bg-card ${className}`}>
+    <svg viewBox="0 0 100 122" role="img" aria-label={`Rörelsedemonstration: ${ex.name}`} className={`rounded-2xl bg-card ${className}`}>
+      <defs>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" /></filter>
+      </defs>
       <line x1="6" y1="93" x2="94" y2="93" className="stroke-border" strokeWidth="2" strokeLinecap="round" />
       {sc.mat && <rect x="8" y="91" width="84" height="3" rx="1.5" className="fill-accent" />}
       {sc.bar && <g className="stroke-foreground/60" strokeWidth="2.5" strokeLinecap="round"><line x1="28" y1="7" x2="72" y2="7" /><line x1="30" y1="7" x2="30" y2="2" /><line x1="70" y1="7" x2="70" y2="2" /></g>}
@@ -275,6 +297,9 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
       {seg("sh", "hip", 15, "torso")}
       {seg("hip", "kn", 10, "thigh")}{seg("kn", "ft", 7, "shin")}
       {seg("sh", "el", 7, "upper")}{seg("el", "ha", 5.5, "fore")}
+      <line x1={a.sh[0]} y1={a.sh[1]} x2={a.head[0]} y2={a.head[1]} strokeWidth="4" strokeLinecap="round" className="stroke-muted">{an("x1", v("sh", 0))}{an("y1", v("sh", 1))}{an("x2", v("head", 0))}{an("y2", v("head", 1))}</line>
+      {(["ha", "ha2"] as J[]).map((h) => <circle key={h} r="2.6" cx={a[h][0]} cy={a[h][1]} className="fill-muted stroke-muted-foreground/45" strokeWidth="0.6">{an("cx", v(h, 0))}{an("cy", v(h, 1))}</circle>)}
+      {(["ft", "ft2"] as J[]).map((f) => <ellipse key={f} rx="4" ry="1.8" cx={a[f][0] + 2} cy={a[f][1]} className="fill-muted-foreground/60">{an("cx", `${a[f][0] + 2};${b[f][0] + 2};${a[f][0] + 2}`)}{an("cy", v(f, 1))}</ellipse>)}
       <circle r="6.5" cx={a.head[0]} cy={a.head[1]} className="fill-muted stroke-muted-foreground/45" strokeWidth="0.8">{an("cx", v("head", 0))}{an("cy", v("head", 1))}</circle>
       {sc.gear === "barbell" && at(gearAt, <g><circle r="8" className="fill-foreground/70" /><circle r="2.2" className="fill-card" /></g>)}
       {sc.gear === "dumbbell" && at(gearAt, <g className="fill-foreground/70"><rect x="-6" y="-2" width="12" height="4" rx="1" /><rect x="-7" y="-4.5" width="4" height="9" rx="1.5" /><rect x="3" y="-4.5" width="4" height="9" rx="1.5" /></g>)}
@@ -282,6 +307,10 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
       <g className="fill-foreground" fontSize="6.5" fontWeight="600" textAnchor="middle">
         <text x="50" y="106" opacity="1">{fade(1)}1 · {sc.labels[0]}</text>
         <text x="50" y="106" opacity="0">{fade(0)}2 · {sc.labels[1]}</text>
+      </g>
+      <g>
+        <circle cx="12" cy="115.5" r="1.8" className="fill-coral"><animate attributeName="opacity" values="0.3;1;0.3" dur={DUR} repeatCount="indefinite" {...ease} /></circle>
+        <text x="16" y="117.5" fontSize="5.2" className="fill-muted-foreground">Primär muskel: <tspan fontWeight="700" className="fill-foreground">{PRIMARY[patternFor(ex)]}</tspan></text>
       </g>
     </svg>
   );

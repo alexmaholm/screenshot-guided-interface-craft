@@ -17,7 +17,7 @@ import {
 } from "@/lib/balans";
 import { MuscleMap } from "@/components/MuscleMap";
 import { TechniqueCoach } from "@/components/TechniqueCoach";
-import { EXERCISES } from "@/lib/exercises";
+import { EXERCISES, isDumbbell, totalLoadKg } from "@/lib/exercises";
 import { BUILT_IN_TEMPLATES, templateFromWorkout, workoutFromTemplate } from "@/lib/templates";
 
 export const Route = createFileRoute("/traning")({
@@ -356,7 +356,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
                       <button aria-label={`Minska vikt set ${s + 1}`} onClick={() => setRow(i, s, "kg", String(Math.max(0, (r.kg ?? 0) - 2.5)))} className="grid h-10 w-7 place-items-center rounded-full border border-border text-lg leading-none">−</button>
                       <Input aria-label={`Vikt set ${s + 1}, kg`} type="number" inputMode="decimal" min={0} step={0.5} placeholder="–" className="h-10 w-14 px-1 text-center" value={r.kg ?? ""} onChange={(ev) => setRow(i, s, "kg", ev.target.value)} />
                       <button aria-label={`Öka vikt set ${s + 1}`} onClick={() => setRow(i, s, "kg", String((r.kg ?? 0) + 2.5))} className="grid h-10 w-7 place-items-center rounded-full border border-border text-lg leading-none">+</button>
-                      <span className="text-xs text-muted-foreground">kg</span>
+                      <span className="text-xs leading-tight text-muted-foreground">{isDumbbell(e.name) ? <>kg/hantel{r.kg ? <><br />= {totalLoadKg(e.name, r.kg)} kg</> : null}</> : "kg"}</span>
                     </>
                   )}
                   <button aria-label={`Set ${s + 1} klart`} aria-pressed={r.done} onClick={() => toggleSet(i, s)} className={`ml-auto grid h-10 w-10 place-items-center rounded-full border-2 ${r.done ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}><Check className="h-4 w-4" /></button>
