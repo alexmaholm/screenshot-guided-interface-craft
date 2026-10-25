@@ -1,4 +1,14 @@
-import type { Exercise, SetEntry, Workout } from "@/lib/balans";
+import type { Exercise, SetEntry, SetType, Workout } from "@/lib/balans";
+
+const SET_CYCLE: SetType[] = ["normal", "warmup", "drop", "failure"];
+/** Next set type when the set badge is tapped: Normal → W → D → F → Normal. */
+export const nextSetType = (t: SetType | undefined): SetType => SET_CYCLE[(SET_CYCLE.indexOf(t ?? "normal") + 1) % SET_CYCLE.length]!;
+
+/** Badge text: working sets are numbered among themselves; W/D/F use letters. */
+export function setLabels(rows: SetEntry[]): string[] {
+  let n = 0;
+  return rows.map((r) => (r.type === "warmup" ? "W" : r.type === "drop" ? "D" : r.type === "failure" ? "F" : String(++n)));
+}
 
 /** Per-set rows for an exercise; older saved exercises get rows built from sets/reps/weight. */
 export function setRows(e: Exercise): SetEntry[] {
@@ -8,7 +18,8 @@ export function setRows(e: Exercise): SetEntry[] {
 
 /** Writes rows back and keeps summary fields (sets, reps, heaviest kg, done) in sync for history and progress. */
 export function withRows(e: Exercise, rows: SetEntry[]): Exercise {
-  const kgs = rows.map((r) => r.kg ?? 0).filter((k) => k > 0);
+  // Warm-up sets never count as the heaviest lift, so progress and records stay honest.
+  const kgs = rows.filter((r) => r.type !== "warmup").map((r) => r.kg ?? 0).filter((k) => k > 0);
   return {
     ...e,
     log: rows,
