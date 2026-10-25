@@ -1,4 +1,4 @@
-import { ExerciseDemo } from "@/components/ExerciseDemo";
+import { TechniqueCoach } from "@/components/TechniqueCoach";
 import { useMemo, useState } from "react";
 import { Plus, Search, Info } from "lucide-react";
 import { toast } from "sonner";
@@ -89,19 +89,17 @@ export function ExercisePicker({ open, onOpenChange, onPick }: {
         </ul>
 
         <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-          <DialogContent className="rounded-3xl">
+          <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl">
             <DialogHeader><DialogTitle className="font-display text-2xl">{detail?.name}</DialogTitle></DialogHeader>
             {detail && (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">{detail.nameEn ? `${detail.nameEn} · ` : ""}{MUSCLES.find((m) => m.value === detail.muscle)?.label}</p>
-                {!detail.custom && <ExerciseDemo ex={detail} className="mx-auto h-40 w-40" />}
-                <p className="text-sm">{detail.desc}</p>
-                {detail.tips.length > 0 && (
-                  <div className="rounded-2xl bg-secondary p-4">
-                    <p className="text-sm font-semibold text-primary">Tänk på</p>
-                    <ul className="mt-1 list-inside list-disc text-sm">{detail.tips.map((t) => <li key={t}>{t}</li>)}</ul>
-                  </div>
-                )}
+                {detail.custom ? (
+                  <>
+                    <p className="text-sm">{detail.desc}</p>
+                    {detail.tips.length > 0 && <ul className="list-inside list-disc text-sm">{detail.tips.map((t) => <li key={t}>{t}</li>)}</ul>}
+                  </>
+                ) : <TechniqueCoach ex={detail} />}
                 <Button className="h-12 w-full rounded-full" onClick={() => { onPick(detail); setDetail(null); onOpenChange(false); }}>Lägg till i passet</Button>
               </div>
             )}

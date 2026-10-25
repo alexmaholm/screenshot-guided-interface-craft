@@ -16,7 +16,7 @@ import {
   type Workout, type WorkoutKind,
 } from "@/lib/balans";
 import { MuscleMap } from "@/components/MuscleMap";
-import { ExerciseDemo } from "@/components/ExerciseDemo";
+import { TechniqueCoach } from "@/components/TechniqueCoach";
 import { EXERCISES } from "@/lib/exercises";
 import { BUILT_IN_TEMPLATES, templateFromWorkout, workoutFromTemplate } from "@/lib/templates";
 
@@ -372,13 +372,11 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
       <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setPicking(true)}><Plus /> Lägg till övning</Button>
       <Button variant="ghost" className="h-11 w-full rounded-full" disabled={!w.exercises.length} onClick={saveTemplate}><Bookmark /> Spara som mall</Button>
       <Dialog open={!!demoEx} onOpenChange={(o) => !o && setDemo(null)}>
-        <DialogContent className="rounded-3xl">
+        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl">
           {demoEx && (
             <>
               <DialogHeader><DialogTitle className="font-display text-2xl">{demoEx.name}</DialogTitle></DialogHeader>
-              <ExerciseDemo ex={demoEx} className="mx-auto h-48 w-48" />
-              <p className="text-sm">{demoEx.desc}</p>
-              {demoEx.tips.length > 0 && <ul className="list-inside list-disc text-sm text-muted-foreground">{demoEx.tips.map((t) => <li key={t}>{t}</li>)}</ul>}
+              <TechniqueCoach ex={demoEx} />
             </>
           )}
         </DialogContent>
