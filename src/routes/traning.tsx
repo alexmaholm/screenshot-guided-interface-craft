@@ -359,3 +359,17 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
     </div>
   );
 }
+
+function MinutesInput({ value, onChange }: { value: number; onChange: (m: number) => void }) {
+  const set = (n: number) => onChange(Math.max(1, Math.min(600, Math.round(n))));
+  return (
+    <div className="flex items-center gap-2">
+      <Button type="button" variant="outline" size="icon" className="h-11 w-11 rounded-full" aria-label="Minska tid" onClick={() => set(value - 5)}><Minus className="h-4 w-4" /></Button>
+      <Input aria-label="Tid i minuter" type="number" inputMode="numeric" min={1} max={600} className="h-11 w-20 text-center text-lg font-semibold" value={value || ""}
+        onChange={(e) => { const n = Number(e.target.value); if (e.target.value === "") onChange(0); else if (Number.isFinite(n)) set(n); }}
+        onBlur={() => { if (!value) set(1); }} />
+      <span className="text-sm text-muted-foreground">min</span>
+      <Button type="button" variant="outline" size="icon" className="h-11 w-11 rounded-full" aria-label="Öka tid" onClick={() => set(value + 5)}><Plus className="h-4 w-4" /></Button>
+    </div>
+  );
+}
