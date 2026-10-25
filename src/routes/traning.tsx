@@ -8,7 +8,8 @@ import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { changeSetCount, improvements, lastWeight, setRows, withRows } from "@/lib/progress";
+import { changeSetCount, improvements, lastWeight, nextSetType, setLabels, setRows, withRows } from "@/lib/progress";
+import type { SetType } from "@/lib/balans";
 import type { Exercise } from "@/lib/balans";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -43,6 +44,13 @@ function TrainingPage() {
 }
 
 const fmt = (sec: number) => (sec >= 60 ? `${Math.round(sec / 60)} min` : `${sec} s`);
+const SET_TYPE_NAME: Record<SetType, string> = { normal: "arbetsset", warmup: "uppvärmning", drop: "dropset", failure: "till failure" };
+const SET_TYPE_CLASS: Record<SetType, string> = {
+  normal: "bg-secondary text-foreground",
+  warmup: "bg-amber text-coral-foreground",
+  drop: "bg-primary text-primary-foreground",
+  failure: "bg-coral text-coral-foreground",
+};
 
 function Training() {
   const s = useBalans()!;
