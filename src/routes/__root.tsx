@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -121,6 +122,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <PullToRefresh />
       <Outlet />
       <Toaster position="top-center" />
     </QueryClientProvider>
