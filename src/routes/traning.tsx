@@ -2,7 +2,7 @@ import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { ExercisePicker, useExerciseLibrary } from "@/components/ExercisePicker";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Check, Clock, RefreshCw, CalendarDays, Plus, Play, ArrowLeft, Timer } from "lucide-react";
+import { Check, Clock, RefreshCw, CalendarDays, Plus, Play, ArrowLeft, Timer, Dumbbell } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
