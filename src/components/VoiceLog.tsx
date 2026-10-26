@@ -22,7 +22,7 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
   cb.current = onCommand;
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  useEffect(() => () => { want.current = false; rec.current?.abort(); }, []);
+  useEffect(() => () => { want.current = false; kill(); }, []);
 
   const run = (text: string, key: number) => {
     if (handled.current.has(key)) return true;
@@ -35,7 +35,16 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
     return true;
   };
 
+  const kill = () => {
+    clearTimeout(timer.current);
+    const old = rec.current;
+    rec.current = null;
+    if (old) { old.onresult = null; old.onend = null; old.onerror = null; try { old.abort(); } catch { /* redan stoppad */ } }
+  };
+
+  // Ny igenkännare varje gång: iOS/WebKit vägrar ofta starta om samma instans, och resultatindex börjar om från 0.
   const begin = (Ctor: new () => Rec) => {
+    kill();
     const r = new Ctor();
     r.lang = "sv-SE";
     r.interimResults = true;
@@ -43,6 +52,7 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
     r.maxAlternatives = 1;
     handled.current = new Set();
     r.onresult = (e) => {
+      if (rec.current !== r) return;
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const res = e.results[i]!;
         const text = res[0].transcript.trim();
@@ -52,12 +62,15 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
           if (!run(text, i)) toast(`"${text}" – säg t.ex. "10 på 20" eller "klar"`);
           timer.current = setTimeout(() => setLive(""), 1500);
         } else if (/\b(klar|nästa|kilo|kg|reps?|på)\b/i.test(text)) {
-          // Reagera direkt på interim-text när den ser komplett ut, men vänta lite så siffran hinner komma.
-          timer.current = setTimeout(() => run(text, i), 450);
+          timer.current = setTimeout(() => { if (rec.current === r) run(text, i); }, 450);
         }
       }
     };
-    r.onend = () => { if (want.current) { try { r.start(); } catch { setOn(false); } } else { setOn(false); setLive(""); } };
+    r.onend = () => {
+      if (rec.current !== r) return;
+      if (want.current) setTimeout(() => { if (want.current && rec.current === r) { try { begin(Ctor); } catch { want.current = false; setOn(false); } } }, 250);
+      else { rec.current = null; setOn(false); setLive(""); }
+    };
     r.onerror = () => {};
     rec.current = r;
     r.start();
@@ -67,11 +80,17 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
     const W = window as unknown as { SpeechRecognition?: new () => Rec; webkitSpeechRecognition?: new () => Rec };
     const Ctor = W.SpeechRecognition ?? W.webkitSpeechRecognition;
     if (!Ctor) return void toast.error("Röststyrning stöds inte på den här enheten än.");
-    if (on) { want.current = false; rec.current?.stop(); setOn(false); setLive(""); return; }
+    if (on) { want.current = false; kill(); setOn(false); setLive(""); return; }
     want.current = true;
     setOn(true);
-    try { begin(Ctor); } catch { setOn(false); }
+    try { begin(Ctor); } catch { want.current = false; setOn(false); }
   };
+
+  useEffect(() => {
+    const onHide = () => { if (document.hidden) { want.current = false; kill(); setOn(false); setLive(""); } };
+    document.addEventListener("visibilitychange", onHide);
+    return () => document.removeEventListener("visibilitychange", onHide);
+  }, []);
 
   return (
     <>
