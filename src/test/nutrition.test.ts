@@ -23,13 +23,14 @@ describe("Dietary restrictions", () => {
     expect(meals.map((s) => s.name)).not.toContain("Tofu-wok med nudlar");
     expect(meals.every((s) => s.diets.includes("veganskt"))).toBe(true);
   });
-  it("applies restrictions to initial meals and favorites", () => {
+  it("starts new users with no history", () => {
     resetAll();
-    completeOnboarding({ ...profile, restrictions: ["gluten", "mjolk", "notter"] });
+    completeOnboarding(profile);
     const saved = JSON.parse(localStorage.getItem("balans:v1") ?? "{}");
-    const allowed = suggestionsFor("allt", undefined, ["gluten", "mjolk", "notter"]).map((s) => s.name);
-    expect(saved.meals.length).toBeGreaterThan(0);
-    for (const meal of [...saved.meals, ...saved.favorites]) expect(allowed).toContain(meal.name);
+    expect(saved.meals).toEqual([]);
+    expect(saved.favorites).toEqual([]);
+    expect(saved.habits).toEqual({});
+    expect(saved.workouts.every((w: Workout) => w.status !== "klart" && w.date >= dateKey())).toBe(true);
     resetAll();
   });
 });
