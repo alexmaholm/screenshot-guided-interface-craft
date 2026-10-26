@@ -27,3 +27,15 @@ describe("övningsspecifik uppsättning", () => {
   it("latsdrag använder övre kabel", () => expect(s("Latsdrag").cable).toBe("high"));
   it("hammercurl markerar brachialis", () => expect(s("Hantelcurls med hammersgrepp").primary).toMatch(/Brachialis/));
 });
+
+import { variantFor } from "@/components/ExerciseDemo";
+import { describe as d2, it as i2, expect as e2 } from "vitest";
+d2("egna kroppsställningar", () => {
+  i2("varianter skiljer sig från grundrörelsen", () => {
+    e2(variantFor({ name: "Frontböj" })).toBe("frontsquat");
+    e2(variantFor({ name: "Rumänska marklyft" })).toBe("rdl");
+    e2(variantFor({ name: "Hammercurl" })).toBe("hammer");
+    e2(variantFor({ name: "Latsdrag" })).toBe("pulldown");
+    e2(variantFor({ name: "Knäböj" })).toBeNull();
+  });
+});
