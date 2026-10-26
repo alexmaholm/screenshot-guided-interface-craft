@@ -25,5 +25,5 @@ describe("övningsspecifik uppsättning", () => {
     for (const e of EXERCISES) expect(setupFor(e).primary.length).toBeGreaterThan(2);
   });
   it("latsdrag använder övre kabel", () => expect(s("Latsdrag").cable).toBe("high"));
-  it("hammercurl markerar brachialis", () => expect(s("Hammercurl").primary).toMatch(/Brachialis/));
+  it("hammercurl markerar brachialis", () => expect(s("Hantelcurls med hammersgrepp").primary).toMatch(/Brachialis/));
 });
