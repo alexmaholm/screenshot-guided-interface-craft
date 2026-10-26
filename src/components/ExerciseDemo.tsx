@@ -273,10 +273,57 @@ export const PRIMARY: Record<Pattern, string> = {
   legcurl: "Baksida lår", sled: "Framsida lår & rumpa", cardio: "Ben & kondition",
 };
 
+/** Övningsspecifika kroppsställningar för varianter som rör sig annorlunda än sin grundrörelse. */
+const seatedPull = { head: [50, 26], sh: [50, 37], hip: [48, 62], kn: [66, 62], ft: [68, 86] } as const;
+export const VARIANTS: [RegExp, string, Partial<Scene>][] = [
+  [/frontböj|front ?squat/, "frontsquat", {
+    labels: ["Stången på främre axlarna", "Sitt ner, armbågarna högt"],
+    a: S({ el: [60, 30], ha: [54, 27], el2: [58, 30], ha2: [52, 27] }),
+    b: full({ head: [54, 40], sh: [52, 51], hip: [36, 69], kn: [60, 72], ft: [50, 91], el: [62, 52], ha: [56, 49], el2: [60, 52], ha2: [54, 49] }),
+  }],
+  [/goblet/, "goblet", {
+    gearAt: "ha", labels: ["Vikten mot bröstet", "Sitt ner mellan knäna"],
+    a: S({ el: [55, 40], ha: [56, 33], el2: [53, 40], ha2: [54, 33] }),
+    b: full({ head: [55, 41], sh: [53, 52], hip: [36, 69], kn: [60, 72], ft: [50, 91], el: [58, 62], ha: [60, 54], el2: [56, 62], ha2: [58, 54] }),
+  }],
+  [/rumänsk|rdl|stela ben/, "rdl", {
+    labels: ["Stå rakt, stången vid låren", "Fäll höften bakåt, mjuka knän"],
+    a: S({ el: [51, 42], ha: [53, 58] }),
+    b: full({ head: [75, 43], sh: [67, 47], hip: [42, 53], kn: [47, 72], ft: [50, 91], el: [65, 61], ha: [63, 75] }),
+  }],
+  [/sumo/, "sumo", {
+    labels: ["Bred fotställning, knäna ut", "Res dig, rumpan fram"],
+    a: F({ head: [50, 32], sh: [50, 44], hip: [50, 64], kn: [66, 74], kn2: [34, 74], ft: [72, 91], ft2: [28, 91], el: [53, 58], ha: [52, 74], el2: [47, 58], ha2: [48, 74] }),
+    b: F({ kn: [60, 73], kn2: [40, 73], ft: [70, 91], ft2: [30, 91], el: [53, 42], ha: [52, 57], el2: [47, 42], ha2: [48, 57] }),
+  }],
+  [/hammer/, "hammer", { labels: ["Armen rak, tummen upp", "Böj upp, neutralt grepp"] }],
+  [/preacher|scott/, "preacher", {
+    bench: "seat", labels: ["Armen sträckt mot dynan", "Böj upp, överarmen på dynan"],
+    a: full({ head: [40, 22], sh: [41, 34], hip: [40, 60], kn: [58, 60], ft: [60, 86], el: [58, 46], ha: [72, 58] }),
+    b: full({ head: [40, 22], sh: [41, 34], hip: [40, 60], kn: [58, 60], ft: [60, 86], el: [58, 46], ha: [56, 30] }),
+  }],
+  [/latsdrag|pulldown/, "pulldown", {
+    bar: false, bench: "seat", labels: ["Sitt, armarna raka uppåt", "Dra stången till bröstet"],
+    a: full({ ...seatedPull, el: [54, 22], ha: [52, 8] }),
+    b: full({ ...seatedPull, head: [48, 26], el: [40, 42], ha: [52, 30] }),
+  }],
+  [/dips/, "dips", {
+    a: full({ head: [57, 19], sh: [53, 30], hip: [47, 55], kn: [44, 72], ft: [56, 80], el: [50, 43], ha: [50, 56] }),
+    b: full({ head: [60, 32], sh: [55, 43], hip: [47, 66], kn: [44, 82], ft: [56, 89], el: [40, 49], ha: [50, 56] }),
+  }],
+];
+
+export function variantFor(ex: Pick<ExercisePreset, "name">): string | null {
+  const n = ex.name.toLowerCase();
+  return VARIANTS.find(([re]) => re.test(n))?.[1] ?? null;
+}
+
 /** Steg-för-steg teknikguide: Startläge och Toppläge med skuggad 3D-känsla; arbetande muskler markeras. */
 export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, "name" | "muscle" | "track">; className?: string }) {
   const [phase, setPhase] = useState<0 | 1>(0);
-  const base = SCENES[patternFor(ex)];
+  const n = ex.name.toLowerCase();
+  const v = VARIANTS.find(([re]) => re.test(n))?.[2];
+  const base: Scene = { ...SCENES[patternFor(ex)], ...v };
   const su = setupFor(ex);
   const tilt = (p: Pose): Pose => {
     if (!su.incline || !base.bench || base.bench === "seat") return p;
