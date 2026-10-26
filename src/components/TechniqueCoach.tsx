@@ -22,7 +22,7 @@ export function TechniqueCoach({ ex: start }: { ex: ExercisePreset }) {
       {video ? (
         <video src={video} autoPlay loop muted playsInline className="mx-auto aspect-square w-full max-w-64 rounded-2xl bg-card object-cover" />
       ) : (
-        <ExerciseDemo ex={ex} className="mx-auto h-48 w-48" />
+        <ExerciseDemo ex={ex} className="mx-auto w-60" />
       )}
       <p className="text-sm">{ex.desc}</p>
       <ol className="space-y-2">
