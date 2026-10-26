@@ -216,7 +216,7 @@ const RULES: [RegExp, Pattern][] = [
   [/bänkpress|bröstpress|kabelpress|hantelpress|smith.*press|bench/, "bench"],
 ];
 
-export interface Setup { gear: Gear; cable?: "high" | "low" | "mid"; incline?: boolean; decline?: boolean; machine?: boolean; primary: string }
+export interface Setup { gear: Gear; cable?: "high" | "low" | "mid" | undefined; incline?: boolean; decline?: boolean; machine?: boolean; primary: string }
 
 const HIGH_CABLE: Pattern[] = ["vpull", "triceps", "fly"];
 const LOW_CABLE: Pattern[] = ["curl", "lateral", "front", "shrug", "kickback", "glute"];
