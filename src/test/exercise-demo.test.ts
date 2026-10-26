@@ -16,3 +16,14 @@ describe("rätt demonstration per övning", () => {
     ["Mountain climbers", "climber"], ["Smithmaskin knäböj", "squat"], ["Trappsteg", "cardio"],
   ])("%s → %s", (name, pat) => expect(p(name)).toBe(pat));
 });
+
+import { setupFor } from "@/components/ExerciseDemo";
+const s = (name: string) => setupFor(EXERCISES.find((e) => e.name === name)!);
+
+describe("övningsspecifik uppsättning", () => {
+  it("alla övningar har redskap och primärmuskel", () => {
+    for (const e of EXERCISES) expect(setupFor(e).primary.length).toBeGreaterThan(2);
+  });
+  it("latsdrag använder övre kabel", () => expect(s("Latsdrag").cable).toBe("high"));
+  it("hammercurl markerar brachialis", () => expect(s("Hantelcurls med hammersgrepp").primary).toMatch(/Brachialis/));
+});

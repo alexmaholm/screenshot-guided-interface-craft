@@ -10,7 +10,7 @@ export type Pattern =
   | "vpull" | "row" | "curl" | "triceps" | "kickback" | "dips" | "core" | "plank" | "rollout"
   | "legraise" | "hang" | "climber" | "bridge" | "hipthrust" | "glute" | "calf" | "legext" | "legcurl"
   | "sled" | "cardio";
-type Gear = "barbell" | "dumbbell" | "wheel" | "none";
+type Gear = "barbell" | "dumbbell" | "wheel" | "kettlebell" | "cable" | "band" | "none";
 type Seg = "torso" | "thigh" | "shin" | "upper" | "fore";
 
 const full = (p: Base): Pose => ({
@@ -216,6 +216,46 @@ const RULES: [RegExp, Pattern][] = [
   [/bänkpress|bröstpress|kabelpress|hantelpress|smith.*press|bench/, "bench"],
 ];
 
+export interface Setup { gear: Gear; cable?: "high" | "low" | "mid" | undefined; incline?: boolean; decline?: boolean; machine?: boolean; primary: string }
+
+const HIGH_CABLE: Pattern[] = ["vpull", "triceps", "fly"];
+const LOW_CABLE: Pattern[] = ["curl", "lateral", "front", "shrug", "kickback", "glute"];
+
+/** Övningsspecifik uppsättning: redskap, bänkvinkel, kabelhöjd och exakt muskeltext. */
+export function setupFor(ex: Pick<ExercisePreset, "name" | "muscle"> & { eq?: string[] }): Setup {
+  const n = ex.name.toLowerCase();
+  const pat = patternFor(ex);
+  const base = SCENES[pat].gear;
+  let gear: Gear = base;
+  const cable = /kabel|cable|crossover|kryssdrag|face pull|pushdown|latsdrag|pulldown|sittande rodd/.test(n);
+  if (cable) gear = "cable";
+  else if (/kettlebell|sving|swing|goblet/.test(n)) gear = "kettlebell";
+  else if (/gummiband|band/.test(n)) gear = "band";
+  else if (/hantel|dumbbell|hantlar/.test(n)) gear = "dumbbell";
+  else if (/skivstång|stång|barbell|trap bar|ez|militär|smith/.test(n)) gear = "barbell";
+  else if (/maskin|machine|pec deck|benpress|bensträck|bencurl|hack/.test(n)) gear = "none";
+  else if (/armhäv|planka|dips|chins|pull-?up|kroppsvikt|utan vikt/.test(n)) gear = "none";
+  const machine = /maskin|machine|pec deck|benpress|hack|smith|bensträck|bencurl/.test(n);
+  const incline = /lutande|incline/.test(n) && ["bench", "fly", "row", "curl", "lateral"].includes(pat);
+  const decline = /decline|nedåtlutande/.test(n);
+  const c: Setup["cable"] = cable ? (pat === "row" || /face pull|crossover|kryss/.test(n) ? "mid" : HIGH_CABLE.includes(pat) ? "high" : LOW_CABLE.includes(pat) ? "low" : "mid") : undefined;
+  let primary = PRIMARY[pat];
+  if (pat === "bench" || pat === "fly") primary = incline ? "Övre bröst (clavicular)" : decline ? "Nedre bröst" : primary;
+  if (/hammer/.test(n)) primary = "Brachialis & underarm";
+  if (/omvänd flyes|omvänd pec|reverse|face pull/.test(n)) primary = "Bakre delta & övre rygg";
+  if (/smal|close/.test(n) && pat === "bench") primary = "Triceps & inre bröst";
+  if (/rumänsk|rdl|stela ben|good morning/.test(n)) primary = "Baksida lår (hamstrings)";
+  if (/sumo/.test(n)) primary = "Insida lår & rumpa";
+  if (/front ?squat|frontböj|goblet/.test(n)) primary = "Framsida lår (quads)";
+  if (/hyperext|ryggres|superman/.test(n)) primary = "Ländrygg & rumpa";
+  if (/sidoplanka|sneda|rysk|russian|vedhugg|woodchop/.test(n)) primary = "Sneda magmuskler";
+  if (/sittande tå|seated calf/.test(n)) primary = "Djupa vadmuskeln (soleus)";
+  if (/över huvudet|overhead|fransk/.test(n) && pat === "triceps") primary = "Triceps (långa huvudet)";
+  if (/chins|underhand/.test(n)) primary = "Latissimus & biceps";
+  if (/bred|wide/.test(n) && pat === "vpull") primary = "Latissimus (bredd)";
+  return { gear, cable: c, incline, decline, machine, primary };
+}
+
 export function patternFor(ex: Pick<ExercisePreset, "name" | "muscle">): Pattern {
   const n = ex.name.toLowerCase();
   for (const [re, p] of RULES) if (re.test(n)) return p;
@@ -238,7 +278,15 @@ const ease = { calcMode: "spline", keyTimes: "0;0.5;1", keySplines: "0.45 0 0.55
 
 /** Loopande rörelsedemonstration med samma atletiska docka som muskelkartan; arbetande muskler markeras. */
 export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, "name" | "muscle" | "track">; className?: string }) {
-  const sc = SCENES[patternFor(ex)];
+  const base = SCENES[patternFor(ex)];
+  const su = setupFor(ex);
+  const tilt = (p: Pose): Pose => {
+    if (!su.incline || !base.bench || base.bench === "seat") return p;
+    // Lyft överkroppen till ca 35° ryggstöd
+    const lift = (q: P, k: number): P => [q[0] + 4 * k, q[1] - 16 * k];
+    return { ...p, head: lift(p.head, 1.2), sh: lift(p.sh, 1), el: lift(p.el, 0.9), el2: lift(p.el2, 0.9), ha: lift(p.ha, 0.8), ha2: lift(p.ha2, 0.8) };
+  };
+  const sc = { ...base, gear: su.gear, a: tilt(base.a), b: tilt(base.b) };
   const { a, b } = sc;
   const v = (p: J, i: 0 | 1) => `${a[p][i]};${b[p][i]};${a[p][i]}`;
   const an = (attr: string, values: string) => <animate attributeName={attr} values={values} dur={DUR} repeatCount="indefinite" {...ease} />;
@@ -292,6 +340,24 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
           <rect x={sc.bench === "seat" ? 50 : sc.bench === "low" ? 30 : 64} y={benchY + 5} width="3" height={93 - benchY - 5} />
         </g>
       )}
+      {su.cable && (
+        <g>
+          <rect x="88" y="4" width="4" height="89" rx="1.5" className="fill-foreground/35" />
+          <circle cx="88" cy={su.cable === "high" ? 8 : su.cable === "low" ? 86 : 45} r="2.4" className="fill-foreground/60" />
+          <line x1="88" y1={su.cable === "high" ? 8 : su.cable === "low" ? 86 : 45} x2={a.ha[0]} y2={a.ha[1]} strokeWidth="0.9" className="stroke-foreground/70">
+            {an("x2", v("ha", 0))}{an("y2", v("ha", 1))}
+          </line>
+        </g>
+      )}
+      {su.gear === "band" && (
+        <line x1={a.ft[0]} y1="91" x2={a.ha[0]} y2={a.ha[1]} strokeWidth="1.4" className="stroke-coral/70">{an("x2", v("ha", 0))}{an("y2", v("ha", 1))}</line>
+      )}
+      {su.machine && !base.bench && (
+        <g className="fill-foreground/30"><rect x="8" y="10" width="5" height="83" rx="2" /><rect x="8" y="66" width="22" height="5" rx="2" /></g>
+      )}
+      {su.incline && base.bench && base.bench !== "seat" && (
+        <line x1="54" y1="62" x2="30" y2="44" strokeWidth="5" strokeLinecap="round" className="stroke-foreground/35" />
+      )}
       {seg("hip", "kn2", 9, "thigh", true)}{seg("kn2", "ft2", 6.5, "shin", true)}
       {seg("sh", "el2", 6.5, "upper", true)}{seg("el2", "ha2", 5, "fore", true)}
       {seg("sh", "hip", 15, "torso")}
@@ -303,6 +369,8 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
       <circle r="6.5" cx={a.head[0]} cy={a.head[1]} className="fill-muted stroke-muted-foreground/45" strokeWidth="0.8">{an("cx", v("head", 0))}{an("cy", v("head", 1))}</circle>
       {sc.gear === "barbell" && at(gearAt, <g><circle r="8" className="fill-foreground/70" /><circle r="2.2" className="fill-card" /></g>)}
       {sc.gear === "dumbbell" && at(gearAt, <g className="fill-foreground/70"><rect x="-6" y="-2" width="12" height="4" rx="1" /><rect x="-7" y="-4.5" width="4" height="9" rx="1.5" /><rect x="3" y="-4.5" width="4" height="9" rx="1.5" /></g>)}
+      {sc.gear === "kettlebell" && at(gearAt, <g><circle cy="3" r="4.5" className="fill-foreground/70" /><path d="M-2.5 -0.5 V-4 H2.5 V-0.5" fill="none" strokeWidth="1.4" className="stroke-foreground/70" /></g>)}
+      {sc.gear === "cable" && at(gearAt, <rect x="-3.5" y="-1.2" width="7" height="2.4" rx="1.2" className="fill-foreground/80" />)}
       {sc.gear === "wheel" && at(gearAt, <g><circle r="5" className="fill-foreground/70" /><circle r="1.6" className="fill-card" /></g>)}
       <g className="fill-foreground" fontSize="6.5" fontWeight="600" textAnchor="middle">
         <text x="50" y="106" opacity="1">{fade(1)}1 · {sc.labels[0]}</text>
@@ -310,7 +378,7 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
       </g>
       <g>
         <circle cx="12" cy="115.5" r="1.8" className="fill-coral"><animate attributeName="opacity" values="0.3;1;0.3" dur={DUR} repeatCount="indefinite" {...ease} /></circle>
-        <text x="16" y="117.5" fontSize="5.2" className="fill-muted-foreground">Primär muskel: <tspan fontWeight="700" className="fill-foreground">{PRIMARY[patternFor(ex)]}</tspan></text>
+        <text x="16" y="117.5" fontSize="5.2" className="fill-muted-foreground">Primär muskel: <tspan fontWeight="700" className="fill-foreground">{su.primary}</tspan></text>
       </g>
     </svg>
   );
