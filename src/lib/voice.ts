@@ -22,8 +22,9 @@ const DONE = /\b(klar|klart|färdig|färdigt|done|nästa|bocka|check|okej|ok)\b/
 /** Tolkar svenska gymfraser: "10 reps på 20 kilo", "10 på 20", "tjugofem kilo", "12 st", "klar", "nästa". */
 export function parseVoice(text: string): VoiceCommand | null {
   let t = ` ${text.toLowerCase().replace(/(\d),(\d)/g, "$1.$2")} `;
+  t = t.replace(/ och en halv\b/g, " ochhalv");
   t = t.replace(/[a-zåäö]+/g, (w) => { const n = wordToNumber(w); return n === undefined ? w : String(n); });
-  t = t.replace(/(\d+) och en halv/g, (_, n) => `${Number(n) + 0.5}`).replace(/(\d+) (?:komma|punkt) (\d)/g, "$1.$2");
+  t = t.replace(/(\d+) ochhalv/g, (_, n) => `${Number(n) + 0.5}`).replace(/(\d+) (?:komma|punkt) (\d)/g, "$1.$2");
   let kg = t.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilo|kilogram|kilon)/)?.[1];
   let reps = t.match(/(\d+)\s*(?:reps?|repetitioner|repetition|gånger|st|stycken|lyft)\b/)?.[1];
   const pair = t.match(/(\d+)\s+(?:på|med|x|gånger)\s+(\d+(?:\.\d+)?)/);
