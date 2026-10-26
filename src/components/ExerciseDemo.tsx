@@ -274,7 +274,7 @@ export const PRIMARY: Record<Pattern, string> = {
 };
 
 /** Övningsspecifika kroppsställningar för varianter som rör sig annorlunda än sin grundrörelse. */
-const seatedPull = { head: [50, 26], sh: [50, 37], hip: [48, 62], kn: [66, 62], ft: [68, 86] } as const;
+const seatedPull: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [50, 26], sh: [50, 37], hip: [48, 62], kn: [66, 62], ft: [68, 86] };
 export const VARIANTS: [RegExp, string, Partial<Scene>][] = [
   [/frontböj|front ?squat/, "frontsquat", {
     labels: ["Stången på främre axlarna", "Sitt ner, armbågarna högt"],
