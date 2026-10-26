@@ -273,111 +273,103 @@ export const PRIMARY: Record<Pattern, string> = {
   legcurl: "Baksida lår", sled: "Framsida lår & rumpa", cardio: "Ben & kondition",
 };
 
-const DUR = "2.6s";
-const ease = { calcMode: "spline", keyTimes: "0;0.5;1", keySplines: "0.45 0 0.55 1;0.45 0 0.55 1" } as const;
-
-/** Loopande rörelsedemonstration med samma atletiska docka som muskelkartan; arbetande muskler markeras. */
+/** Steg-för-steg teknikguide: Startläge och Toppläge med skuggad 3D-känsla; arbetande muskler markeras. */
 export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, "name" | "muscle" | "track">; className?: string }) {
+  const [phase, setPhase] = useState<0 | 1>(0);
   const base = SCENES[patternFor(ex)];
   const su = setupFor(ex);
   const tilt = (p: Pose): Pose => {
     if (!su.incline || !base.bench || base.bench === "seat") return p;
-    // Lyft överkroppen till ca 35° ryggstöd
     const lift = (q: P, k: number): P => [q[0] + 4 * k, q[1] - 16 * k];
     return { ...p, head: lift(p.head, 1.2), sh: lift(p.sh, 1), el: lift(p.el, 0.9), el2: lift(p.el2, 0.9), ha: lift(p.ha, 0.8), ha2: lift(p.ha2, 0.8) };
   };
   const sc = { ...base, gear: su.gear, a: tilt(base.a), b: tilt(base.b) };
-  const { a, b } = sc;
-  const v = (p: J, i: 0 | 1) => `${a[p][i]};${b[p][i]};${a[p][i]}`;
-  const an = (attr: string, values: string) => <animate attributeName={attr} values={values} dur={DUR} repeatCount="indefinite" {...ease} />;
-  const seg = (p: J, q: J, w: number, s: Seg, far = false) => {
-    const hot = sc.work.includes(s);
-    const pts = { x1: a[p][0], y1: a[p][1], x2: a[q][0], y2: a[q][1] };
-    const anim = <>{an("x1", v(p, 0))}{an("y1", v(p, 1))}{an("x2", v(q, 0))}{an("y2", v(q, 1))}</>;
-    return (
-      <g opacity={far ? 0.55 : 1}>
-        <line {...pts} strokeWidth={w} strokeLinecap="round" className={hot ? "stroke-coral" : "stroke-muted"}>{anim}</line>
-        {hot && (
-          <line {...pts} strokeWidth={w + 4} strokeLinecap="round" className="stroke-coral" filter="url(#glow)">
-            {anim}
-            <animate attributeName="opacity" values="0.15;0.85;0.15" dur={DUR} repeatCount="indefinite" {...ease} />
-          </line>
-        )}
-        {hot && (
-          <line {...pts} strokeWidth={w * 0.35} strokeLinecap="round" className="stroke-card" opacity="0.35">{anim}</line>
-        )}
-      </g>
-    );
-  };
-  const at = (p: J, child: ReactNode) => (
-    <g>
-      <animateTransform attributeName="transform" type="translate" dur={DUR} repeatCount="indefinite" {...ease}
-        values={`${a[p][0]} ${a[p][1]};${b[p][0]} ${b[p][1]};${a[p][0]} ${a[p][1]}`} />
-      {child}
-    </g>
-  );
-  const fade = (from: number) => (
-    <animate attributeName="opacity" values={`${from};${1 - from};${from}`} keyTimes="0;0.5;1" dur={DUR} repeatCount="indefinite" calcMode="discrete" />
-  );
+  const a = phase === 0 ? sc.a : sc.b;
+  const other = phase === 0 ? sc.b : sc.a;
   const gearAt = sc.gearAt ?? "ha";
   const benchY = sc.bench === "low" ? 70 : sc.bench === "seat" ? 62 : 63;
 
+  // Skuggad lem: kontaktskugga, kropp, högdager – ger volym/3D-känsla
+  const seg = (p: J, q: J, w: number, s: Seg, far = false) => {
+    const hot = phase === 1 && sc.work.includes(s);
+    const pts = { x1: a[p][0], y1: a[p][1], x2: a[q][0], y2: a[q][1] };
+    return (
+      <g opacity={far ? 0.6 : 1}>
+        <line x1={pts.x1 + 1.3} y1={pts.y1 + 1.3} x2={pts.x2 + 1.3} y2={pts.y2 + 1.3} strokeWidth={w} strokeLinecap="round" className="stroke-foreground" opacity="0.14" />
+        <line {...pts} strokeWidth={w} strokeLinecap="round" className={hot ? "stroke-coral" : far ? "stroke-muted-foreground/50" : "stroke-muted"} />
+        {hot && <line {...pts} strokeWidth={w + 4} strokeLinecap="round" className="stroke-coral" filter="url(#glow)" opacity="0.6" />}
+        <line x1={pts.x1 - w * 0.18} y1={pts.y1 - w * 0.18} x2={pts.x2 - w * 0.18} y2={pts.y2 - w * 0.18} strokeWidth={w * 0.32} strokeLinecap="round" className="stroke-card" opacity={hot ? 0.45 : 0.55} />
+      </g>
+    );
+  };
+  const at = (p: J, child: ReactNode) => <g transform={`translate(${a[p][0]} ${a[p][1]})`}>{child}</g>;
+  const ha = a[gearAt], hb = other[gearAt];
+  const moved = Math.hypot(ha[0] - hb[0], ha[1] - hb[1]) > 4;
+
   return (
-    <svg viewBox="0 0 100 122" role="img" aria-label={`Rörelsedemonstration: ${ex.name}`} className={`rounded-2xl bg-card ${className}`}>
-      <defs>
-        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" /></filter>
-      </defs>
-      <line x1="6" y1="93" x2="94" y2="93" className="stroke-border" strokeWidth="2" strokeLinecap="round" />
-      {sc.mat && <rect x="8" y="91" width="84" height="3" rx="1.5" className="fill-accent" />}
-      {sc.bar && <g className="stroke-foreground/60" strokeWidth="2.5" strokeLinecap="round"><line x1="28" y1="7" x2="72" y2="7" /><line x1="30" y1="7" x2="30" y2="2" /><line x1="70" y1="7" x2="70" y2="2" /></g>}
-      {sc.dipbars && <g className="stroke-foreground/60" strokeWidth="2.5" strokeLinecap="round"><line x1="40" y1="57" x2="62" y2="57" /><line x1="60" y1="57" x2="60" y2="93" /></g>}
-      {sc.sled && <g className="fill-foreground/60"><rect x="82" y="40" width="4" height="40" rx="1.5" /><rect x="78" y="78" width="16" height="13" rx="2" /></g>}
-      {sc.bench && (
-        <g className="fill-foreground/35">
-          <rect x={sc.bench === "seat" ? 26 : 12} y={benchY} width={sc.bench === "seat" ? 30 : sc.bench === "low" ? 24 : 60} height="5" rx="2.5" />
-          <rect x={sc.bench === "seat" ? 30 : 18} y={benchY + 5} width="3" height={93 - benchY - 5} />
-          <rect x={sc.bench === "seat" ? 50 : sc.bench === "low" ? 30 : 64} y={benchY + 5} width="3" height={93 - benchY - 5} />
-        </g>
-      )}
-      {su.cable && (
-        <g>
-          <rect x="88" y="4" width="4" height="89" rx="1.5" className="fill-foreground/35" />
-          <circle cx="88" cy={su.cable === "high" ? 8 : su.cable === "low" ? 86 : 45} r="2.4" className="fill-foreground/60" />
-          <line x1="88" y1={su.cable === "high" ? 8 : su.cable === "low" ? 86 : 45} x2={a.ha[0]} y2={a.ha[1]} strokeWidth="0.9" className="stroke-foreground/70">
-            {an("x2", v("ha", 0))}{an("y2", v("ha", 1))}
-          </line>
-        </g>
-      )}
-      {su.gear === "band" && (
-        <line x1={a.ft[0]} y1="91" x2={a.ha[0]} y2={a.ha[1]} strokeWidth="1.4" className="stroke-coral/70">{an("x2", v("ha", 0))}{an("y2", v("ha", 1))}</line>
-      )}
-      {su.machine && !base.bench && (
-        <g className="fill-foreground/30"><rect x="8" y="10" width="5" height="83" rx="2" /><rect x="8" y="66" width="22" height="5" rx="2" /></g>
-      )}
-      {su.incline && base.bench && base.bench !== "seat" && (
-        <line x1="54" y1="62" x2="30" y2="44" strokeWidth="5" strokeLinecap="round" className="stroke-foreground/35" />
-      )}
-      {seg("hip", "kn2", 9, "thigh", true)}{seg("kn2", "ft2", 6.5, "shin", true)}
-      {seg("sh", "el2", 6.5, "upper", true)}{seg("el2", "ha2", 5, "fore", true)}
-      {seg("sh", "hip", 15, "torso")}
-      {seg("hip", "kn", 10, "thigh")}{seg("kn", "ft", 7, "shin")}
-      {seg("sh", "el", 7, "upper")}{seg("el", "ha", 5.5, "fore")}
-      <line x1={a.sh[0]} y1={a.sh[1]} x2={a.head[0]} y2={a.head[1]} strokeWidth="8" strokeLinecap="round" className="stroke-muted">{an("x1", v("sh", 0))}{an("y1", v("sh", 1))}{an("x2", v("head", 0))}{an("y2", v("head", 1))}</line>
-      {(["ft", "ft2"] as J[]).map((f) => <line key={f} x1={a[f][0]} y1={a[f][1]} x2={a[f][0] + 4} y2={a[f][1]} strokeWidth="4" strokeLinecap="round" className="stroke-muted">{an("x1", v(f, 0))}{an("x2", `${a[f][0] + 4};${b[f][0] + 4};${a[f][0] + 4}`)}{an("y1", v(f, 1))}{an("y2", v(f, 1))}</line>)}
-      <ellipse rx="5.6" ry="6.4" cx={a.head[0]} cy={a.head[1]} className="fill-muted">{an("cx", v("head", 0))}{an("cy", v("head", 1))}</ellipse>
-      {sc.gear === "barbell" && at(gearAt, <g><circle r="8" className="fill-foreground/70" /><circle r="2.2" className="fill-card" /></g>)}
-      {sc.gear === "dumbbell" && at(gearAt, <g className="fill-foreground/70"><rect x="-6" y="-2" width="12" height="4" rx="1" /><rect x="-7" y="-4.5" width="4" height="9" rx="1.5" /><rect x="3" y="-4.5" width="4" height="9" rx="1.5" /></g>)}
-      {sc.gear === "kettlebell" && at(gearAt, <g><circle cy="3" r="4.5" className="fill-foreground/70" /><path d="M-2.5 -0.5 V-4 H2.5 V-0.5" fill="none" strokeWidth="1.4" className="stroke-foreground/70" /></g>)}
-      {sc.gear === "cable" && at(gearAt, <rect x="-3.5" y="-1.2" width="7" height="2.4" rx="1.2" className="fill-foreground/80" />)}
-      {sc.gear === "wheel" && at(gearAt, <g><circle r="5" className="fill-foreground/70" /><circle r="1.6" className="fill-card" /></g>)}
-      <g className="fill-foreground" fontSize="6.5" fontWeight="600" textAnchor="middle">
-        <text x="50" y="106" opacity="1">{fade(1)}1 · {sc.labels[0]}</text>
-        <text x="50" y="106" opacity="0">{fade(0)}2 · {sc.labels[1]}</text>
-      </g>
-      <g>
-        <circle cx="12" cy="115.5" r="1.8" className="fill-coral"><animate attributeName="opacity" values="0.3;1;0.3" dur={DUR} repeatCount="indefinite" {...ease} /></circle>
-        <text x="16" y="117.5" fontSize="5.2" className="fill-muted-foreground">Primär muskel: <tspan fontWeight="700" className="fill-foreground">{su.primary}</tspan></text>
-      </g>
-    </svg>
+    <div className={`overflow-hidden rounded-2xl bg-card ${className}`}>
+      <svg viewBox="0 0 100 112" role="img" aria-label={`Teknikguide: ${ex.name}, ${phase === 0 ? "startläge" : "toppläge"}`} className="block w-full">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" /></filter>
+          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" className="fill-coral" />
+          </marker>
+        </defs>
+        <ellipse cx="50" cy="94" rx="36" ry="3.2" className="fill-foreground" opacity="0.08" />
+        <line x1="6" y1="93" x2="94" y2="93" className="stroke-border" strokeWidth="2" strokeLinecap="round" />
+        {sc.mat && <rect x="8" y="91" width="84" height="3" rx="1.5" className="fill-accent" />}
+        {sc.bar && <g className="stroke-foreground/60" strokeWidth="2.5" strokeLinecap="round"><line x1="28" y1="7" x2="72" y2="7" /><line x1="30" y1="7" x2="30" y2="2" /><line x1="70" y1="7" x2="70" y2="2" /></g>}
+        {sc.dipbars && <g className="stroke-foreground/60" strokeWidth="2.5" strokeLinecap="round"><line x1="40" y1="57" x2="62" y2="57" /><line x1="60" y1="57" x2="60" y2="93" /></g>}
+        {sc.sled && <g className="fill-foreground/60"><rect x="82" y="40" width="4" height="40" rx="1.5" /><rect x="78" y="78" width="16" height="13" rx="2" /></g>}
+        {sc.bench && (
+          <g className="fill-foreground/35">
+            <rect x={sc.bench === "seat" ? 26 : 12} y={benchY} width={sc.bench === "seat" ? 30 : sc.bench === "low" ? 24 : 60} height="5" rx="2.5" />
+            <rect x={sc.bench === "seat" ? 30 : 18} y={benchY + 5} width="3" height={93 - benchY - 5} />
+            <rect x={sc.bench === "seat" ? 50 : sc.bench === "low" ? 30 : 64} y={benchY + 5} width="3" height={93 - benchY - 5} />
+          </g>
+        )}
+        {su.cable && (
+          <g>
+            <rect x="88" y="4" width="4" height="89" rx="1.5" className="fill-foreground/35" />
+            <circle cx="88" cy={su.cable === "high" ? 8 : su.cable === "low" ? 86 : 45} r="2.4" className="fill-foreground/60" />
+            <line x1="88" y1={su.cable === "high" ? 8 : su.cable === "low" ? 86 : 45} x2={a.ha[0]} y2={a.ha[1]} strokeWidth="0.9" className="stroke-foreground/70" />
+          </g>
+        )}
+        {su.gear === "band" && <line x1={a.ft[0]} y1="91" x2={a.ha[0]} y2={a.ha[1]} strokeWidth="1.4" className="stroke-coral/70" />}
+        {su.machine && !base.bench && <g className="fill-foreground/30"><rect x="8" y="10" width="5" height="83" rx="2" /><rect x="8" y="66" width="22" height="5" rx="2" /></g>}
+        {su.incline && base.bench && base.bench !== "seat" && <line x1="54" y1="62" x2="30" y2="44" strokeWidth="5" strokeLinecap="round" className="stroke-foreground/35" />}
+        {seg("hip", "kn2", 9, "thigh", true)}{seg("kn2", "ft2", 6.5, "shin", true)}
+        {seg("sh", "el2", 6.5, "upper", true)}{seg("el2", "ha2", 5, "fore", true)}
+        {seg("sh", "hip", 15, "torso")}
+        {seg("hip", "kn", 10, "thigh")}{seg("kn", "ft", 7, "shin")}
+        {seg("sh", "el", 7, "upper")}{seg("el", "ha", 5.5, "fore")}
+        <line x1={a.sh[0]} y1={a.sh[1]} x2={a.head[0]} y2={a.head[1]} strokeWidth="8" strokeLinecap="round" className="stroke-muted" />
+        {(["ft", "ft2"] as J[]).map((f) => <line key={f} x1={a[f][0]} y1={a[f][1]} x2={a[f][0] + 4} y2={a[f][1]} strokeWidth="4" strokeLinecap="round" className="stroke-muted" />)}
+        <ellipse rx="5.6" ry="6.4" cx={a.head[0] + 0.9} cy={a.head[1] + 0.9} className="fill-foreground" opacity="0.14" />
+        <ellipse rx="5.6" ry="6.4" cx={a.head[0]} cy={a.head[1]} className="fill-muted" />
+        <ellipse rx="2" ry="2.6" cx={a.head[0] - 1.6} cy={a.head[1] - 2} className="fill-card" opacity="0.5" />
+        {sc.gear === "barbell" && at(gearAt, <g><circle r="8" className="fill-foreground/70" /><circle r="2.2" className="fill-card" /></g>)}
+        {sc.gear === "dumbbell" && at(gearAt, <g className="fill-foreground/70"><rect x="-6" y="-2" width="12" height="4" rx="1" /><rect x="-7" y="-4.5" width="4" height="9" rx="1.5" /><rect x="3" y="-4.5" width="4" height="9" rx="1.5" /></g>)}
+        {sc.gear === "kettlebell" && at(gearAt, <g><circle cy="3" r="4.5" className="fill-foreground/70" /><path d="M-2.5 -0.5 V-4 H2.5 V-0.5" fill="none" strokeWidth="1.4" className="stroke-foreground/70" /></g>)}
+        {sc.gear === "cable" && at(gearAt, <rect x="-3.5" y="-1.2" width="7" height="2.4" rx="1.2" className="fill-foreground/80" />)}
+        {sc.gear === "wheel" && at(gearAt, <g><circle r="5" className="fill-foreground/70" /><circle r="1.6" className="fill-card" /></g>)}
+        {phase === 0 && moved && (
+          <line x1={ha[0]} y1={ha[1]} x2={ha[0] + (hb[0] - ha[0]) * 0.7} y2={ha[1] + (hb[1] - ha[1]) * 0.7} strokeWidth="1.3" strokeDasharray="2 1.5" className="stroke-coral" markerEnd="url(#arrow)" />
+        )}
+        <text x="50" y="105" fontSize="6.5" fontWeight="600" textAnchor="middle" className="fill-foreground">{phase + 1} · {sc.labels[phase]}</text>
+      </svg>
+      <div className="grid grid-cols-2 gap-1.5 px-2 pb-2">
+        {(["Startläge", "Toppläge"] as const).map((l, i) => (
+          <button key={l} type="button" onClick={() => setPhase(i as 0 | 1)}
+            className={`rounded-xl py-2 text-xs font-semibold transition-colors ${phase === i ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+            {i + 1}. {l}
+          </button>
+        ))}
+      </div>
+      <p className="px-3 pb-3 text-[11px] text-muted-foreground">
+        Primär muskel: <span className="font-semibold text-foreground">{su.primary}</span>
+        {phase === 0 ? " · Pilen visar rörelseriktningen" : " · Muskeln lyser när den arbetar som mest"}
+      </p>
+    </div>
   );
 }
