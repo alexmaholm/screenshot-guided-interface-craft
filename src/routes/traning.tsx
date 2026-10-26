@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { changeSetCount, improvements, lastWeight, nextSetType, setLabels, setRows, withRows } from "@/lib/progress";
+import { VoiceLog } from "@/components/VoiceLog";
+import type { VoiceCommand } from "@/lib/voice";
 import type { SetType } from "@/lib/balans";
 import type { Exercise } from "@/lib/balans";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -305,6 +307,16 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
     if (n !== undefined && (!Number.isFinite(n) || n < 0)) return;
     patchEx(i, (e) => withRows(e, setRows(e).map((r, k) => (k === s ? { ...r, [field]: n } : r))));
   };
+  const voice = (c: VoiceCommand): string | null => {
+    const i = w.exercises.findIndex((e) => !e.done);
+    if (i < 0) return "Alla övningar är klara";
+    const rows = setRows(w.exercises[i]!);
+    const s = rows.findIndex((r) => !r.done);
+    if (s < 0) return null;
+    if (c.done) setRestTrigger((t) => ({ ...t, [i]: (t[i] ?? 0) + 1 }));
+    patchEx(i, (e) => withRows(e, setRows(e).map((r, k) => (k === s ? { ...r, ...(c.reps !== undefined ? { reps: c.reps } : {}), ...(c.kg !== undefined ? { kg: c.kg } : {}), done: c.done || r.done } : r))));
+    return `${w.exercises[i]!.name} · set ${s + 1}${c.reps !== undefined ? ` · ${c.reps} reps` : ""}${c.kg !== undefined ? ` · ${c.kg} kg` : ""}${c.done ? " ✓" : ""}`;
+  };
   const finish = () => {
     const ups = improvements(w, all);
     onPatch((x) => ({ ...x, status: "klart", feeling, note }));
@@ -314,6 +326,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
   };
   return (
     <div className="space-y-5">
+      {w.status !== "klart" && w.exercises.length > 0 && <VoiceLog onCommand={voice} />}
       <button onClick={onBack} className="flex min-h-11 items-center gap-2 font-medium text-primary"><ArrowLeft className="h-5 w-5" /> Alla pass</button>
       <header className="bg-hero rounded-3xl p-6 text-primary-foreground">
         <p className="text-sm opacity-80">{KIND_LABEL[w.kind]}</p>
