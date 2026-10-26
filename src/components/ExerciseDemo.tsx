@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { ExercisePreset } from "@/lib/exercises";
 
 type P = [number, number];
