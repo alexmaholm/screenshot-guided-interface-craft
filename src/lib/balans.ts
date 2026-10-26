@@ -367,44 +367,20 @@ export function recoverySuggestions(profile: Profile, workout: Workout | undefin
 
 /* ---------------- Onboarding: skapa plan + exempeldata ---------------- */
 
+/** New users start with no history: only upcoming planned workouts from today, no meals, habits or favorites. */
 export function completeOnboarding(p: Profile) {
   const today = dateKey();
   const level = p.level ?? "nybörjare";
   const days = p.days.length ? p.days : [0, 2, 4];
   const workouts: Workout[] = [];
-  const meals: Meal[] = [];
-  const habits: Record<string, DayHabits> = {};
   let n = 0;
-  for (let off = -6; off <= 7; off++) {
+  for (let off = 0; off <= 7; off++) {
     const date = addDays(today, off);
-    const wd = weekdayIndex(date);
-    if (days.includes(wd)) {
-      const w = generateWorkout({ kind: kindForGoal(p.goal, n++), level, equipment: p.equipment, minutes: p.sessionMin, date });
-      if (off < 0) {
-        w.status = "klart";
-        w.feeling = 3 + Math.floor(Math.random() * 3);
-        w.exercises = w.exercises.map((e) => ({ ...e, done: true }));
-      }
-      workouts.push(w);
-    }
-    if (off < 0) {
-      const sug = suggestionsFor(p.diet, undefined, p.restrictions);
-      for (const t of MEAL_TYPES) {
-        if (t === "mellanmål" && Math.random() < 0.4) continue;
-        const opts = sug.filter((s) => s.type === t);
-        const s = opts[Math.floor(Math.random() * opts.length)];
-        if (s) meals.push({ id: uid(), date, type: t, name: s.name, amount: s.amount, kcal: s.kcal, protein: s.protein });
-      }
-      habits[date] = { water: 4 + Math.floor(Math.random() * 5), sleepH: 6.5 + Math.round(Math.random() * 3) / 2, recovery: 3 + Math.floor(Math.random() * 3) };
+    if (days.includes(weekdayIndex(date))) {
+      workouts.push(generateWorkout({ kind: kindForGoal(p.goal, n++), level, equipment: p.equipment, minutes: p.sessionMin, date }));
     }
   }
-  const breakfast = suggestionsFor(p.diet, "frukost", p.restrictions)[0];
-  if (breakfast) meals.push({ id: uid(), date: today, type: "frukost", name: breakfast.name, amount: breakfast.amount, kcal: breakfast.kcal, protein: breakfast.protein });
-  habits[today] = { water: 2 };
-  const favorites: Favorite[] = suggestionsFor(p.diet, undefined, p.restrictions)
-    .slice(0, 3)
-    .map((s) => ({ id: uid(), name: s.name, amount: s.amount, type: s.type, kcal: s.kcal, protein: s.protein }));
-  update(() => ({ profile: p, meals, favorites, workouts, habits, body: [], customExercises: [], templates: [] }));
+  update(() => ({ profile: p, meals: [], favorites: [], workouts, habits: {}, body: [], customExercises: [], templates: [] }));
 }
 
 /* ---------------- Tips ---------------- */
