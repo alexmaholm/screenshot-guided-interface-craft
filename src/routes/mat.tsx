@@ -1,3 +1,4 @@
+import { RecipeBank } from "@/components/RecipeBank";
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { MacroSummary } from "@/components/MacroSummary";
 import { WaterTracker } from "@/components/WaterTracker";
@@ -116,6 +117,7 @@ function Mat() {
       </section>
       <WaterTracker date={date} />
       <DailyHabits date={date} />
+      <RecipeBank profile={p} showKcal={showKcal} onLog={addMeal} />
 
       {MEAL_TYPES.map((t) => {
         const list = meals.filter((m) => m.type === t);
