@@ -23,7 +23,7 @@ Om svar på tidigare frågor ges, använd dem och ställ inte samma frågor igen
 "title" är ett kort svenskt namn på rätten. Om bilden inte visar mat: tom items och en fråga om vad användaren åt.`;
 
 export const analyzePlate = createServerFn({ method: "POST" })
-  .inputValidator((input: { image: string; answers?: { question: string; answer: string }[]; diet?: string }) => {
+  .inputValidator((input: { image: string; answers?: { question: string; answer: string }[]; diet?: string | undefined }) => {
     if (typeof input?.image !== "string" || !input.image.startsWith("data:image/")) throw new Error("Ogiltig bild");
     if (input.image.length > 8_000_000) throw new Error("Bilden är för stor");
     return input;
