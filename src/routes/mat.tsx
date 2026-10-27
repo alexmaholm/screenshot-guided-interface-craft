@@ -4,6 +4,7 @@ import { WaterTracker } from "@/components/WaterTracker";
 import { FoodSearch } from "@/components/FoodSearch";
 import { DailyHabits } from "@/components/DailyHabits";
 import { PhotoLog } from "@/components/PhotoLog";
+import { BarcodeScan } from "@/components/BarcodeScan";
 import { parseNutrition } from "@/lib/habits";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -176,7 +177,7 @@ function AddMealDialog({
   onAdd: (m: Omit<Meal, "id" | "date">) => void; showKcal: boolean;
 }) {
   const s = useBalans();
-  const [tab, setTab] = useState<"foto" | "sök" | "egen" | "favoriter" | "tidigare" | "förslag">("foto");
+  const [tab, setTab] = useState<"foto" | "kod" | "sök" | "egen" | "favoriter" | "tidigare" | "förslag">("foto");
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [kcal, setKcal] = useState("");
@@ -227,12 +228,13 @@ function AddMealDialog({
             <button key={t} className="chip" aria-pressed={type === t} onClick={() => setType(t)}>{MEAL_LABEL[t]}</button>
           ))}
         </div>
-        <div className="grid grid-cols-6 gap-1 rounded-full bg-muted p-1 text-sm" role="tablist">
-          {(["foto", "sök", "egen", "favoriter", "tidigare", "förslag"] as const).map((t) => (
-            <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`min-h-10 rounded-full text-xs capitalize sm:text-sm ${tab === t ? "bg-card font-semibold shadow-sm" : ""}`}>{t}</button>
+        <div className="flex gap-1 overflow-x-auto rounded-full bg-muted p-1 text-sm" role="tablist">
+          {(["foto", "kod", "sök", "egen", "favoriter", "tidigare", "förslag"] as const).map((t) => (
+            <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`min-h-10 shrink-0 rounded-full px-3 text-xs capitalize ${tab === t ? "bg-card font-semibold shadow-sm" : ""}`}>{t === "kod" ? "Streckkod" : t}</button>
           ))}
         </div>
         {tab === "foto" && <PhotoLog diet={[s.profile?.diet, ...(s.profile?.restrictions ?? [])].filter(Boolean).join(", ")} showKcal={showKcal} onSave={(m) => onAdd({ type, ...m })} />}
+        {tab === "kod" && <BarcodeScan showKcal={showKcal} onSave={(m) => onAdd({ type, ...m })} />}
         {tab === "sök" && <FoodSearch showKcal={showKcal} onPick={(f) => onAdd({ type, ...f })} />}
         {tab === "egen" && (
           <form onSubmit={submit} className="space-y-3">
