@@ -46,3 +46,13 @@ export async function lookupBarcode(code: string): Promise<BarcodeProduct | null
   if (!res.ok) return null;
   return parseOffProduct(code, await res.json());
 }
+
+/** Household measures for packaged goods. Approximate grams per unit; "portion" uses the package serving. */
+export type Measure = "g" | "tsk" | "msk" | "dl" | "portion";
+export const MEASURE_G: Record<Exclude<Measure, "portion">, number> = { g: 1, tsk: 5, msk: 15, dl: 100 };
+export const MEASURE_STEP: Record<Measure, number> = { g: 10, tsk: 1, msk: 1, dl: 0.5, portion: 1 };
+
+export function measureGrams(unit: Measure, qty: number, servingG?: number) {
+  const per = unit === "portion" ? (servingG ?? 0) : MEASURE_G[unit];
+  return Math.round(Math.max(0, qty) * per);
+}

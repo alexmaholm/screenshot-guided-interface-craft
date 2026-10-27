@@ -19,3 +19,11 @@ describe("streckkod", () => {
     expect(portionFor(p, 150)).toEqual({ kcal: 90, protein: 15, carbs: 6, fat: 0.3 });
   });
 });
+
+import { measureGrams } from "@/lib/barcode";
+describe("measureGrams", () => {
+  it("1 tsk är 5 g", () => expect(measureGrams("tsk", 1)).toBe(5));
+  it("2 msk är 30 g", () => expect(measureGrams("msk", 2)).toBe(30));
+  it("1,5 dl är 150 g", () => expect(measureGrams("dl", 1.5)).toBe(150));
+  it("portion följer förpackningen", () => expect(measureGrams("portion", 2, 30)).toBe(60));
+});
