@@ -18,7 +18,7 @@ const schema = z.object({
 
 const SYSTEM = `Du är en svensk kostexpert som analyserar foton av måltider.
 Identifiera varje synlig råvara/komponent, uppskatta vikt i gram och beräkna kcal, protein, kolhydrater och fett för den mängden.
-Om något inte går att avgöra säkert från bilden (t.ex. typ av sås/dressing, tillagningsfett, panering, dryck, dolda ingredienser, osäker portion), lägg en kort fråga på svenska i "questions" med 2–4 korta svarsalternativ. Ställ max 4 frågor, och bara när det påverkar näringen märkbart.
+Om något inte går att avgöra säkert från bilden (t.ex. typ av sås/dressing, tillagningsfett, panering, dryck, dolda ingredienser, osäker portion), lägg en kort fråga på svenska i "questions" med 2–4 korta svarsalternativ. Ställ max 4 frågor (max 4 svarsalternativ), och bara när det påverkar näringen märkbart.
 Om svar på tidigare frågor ges, använd dem och ställ inte samma frågor igen.
 "title" är ett kort svenskt namn på rätten. Om bilden inte visar mat: tom items och en fråga om vad användaren åt.`;
 
@@ -50,7 +50,7 @@ export const analyzePlate = createServerFn({ method: "POST" })
         maxRetries: 0,
         messages: [{ role: "user", content: [
           { type: "text", text: `Analysera tallriken.${extra ? "\n" + extra : ""}` },
-          { type: "image", image: data.image },
+          { type: "file", data: data.image, mediaType: data.image.slice(5, data.image.indexOf(";")) },
         ] }],
         providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
       });
