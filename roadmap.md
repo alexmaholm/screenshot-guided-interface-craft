@@ -12,3 +12,4 @@
 - [ ] Smarta vardagsrekommendationer: måltider som fyller dagens kvarvarande luckor.
 - [ ] Stämma av namnbyte från Balans samt prissättning för gratis- och PRO-nivå.
 - [x] Starta pass: välj färdigt förslag eller blankt pass + smart filtrering efter "Ditt fokus" och egna önskemål (inte ordet "intention").
+- [x] Etapp 3.1 – AI-fotologg av tallriken med justerbar förhandsvisning och popup-frågor om det AI inte ser säkert.
