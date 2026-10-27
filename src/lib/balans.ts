@@ -348,6 +348,11 @@ const CONTAINS: Record<string, Restriction[]> = {
   "Proteinyoghurt": ["mjolk", "laktos"],
 };
 
+/** Shared eligibility rule for any dish (suggestions, recipes). */
+export function dishEligible(diets: Diet[], contains: Restriction[] | undefined, diet: Diet | undefined, restrictions: Restriction[] = []) {
+  return contains !== undefined && diets.includes(diet ?? "allt") && restrictions.every((r) => !contains.includes(r));
+}
+
 export function suggestionsFor(diet: Diet | undefined, type?: MealType, restrictions: Restriction[] = []) {
   const d = diet ?? "allt";
   return SUGGESTIONS.filter((s) => {
