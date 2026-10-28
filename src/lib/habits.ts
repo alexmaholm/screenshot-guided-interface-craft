@@ -27,3 +27,32 @@ export function parseNutrition(values: { kcal: string; protein: string; carbs: s
   }
   return result;
 }
+type StreakInput = {
+  meals: Pick<Meal, "date">[];
+  workouts: { date: string; status: string; kind: string }[];
+  habits: Record<string, DayHabits>;
+};
+
+/** "Vila är också framsteg": vald vilodag eller planerat vilopass räknas som aktiv dag. */
+export function dayStatus(s: StreakInput, date: string): "aktiv" | "vila" | "tom" {
+  const h = s.habits[date];
+  const active = s.meals.some((m) => m.date === date)
+    || s.workouts.some((w) => w.date === date && w.status === "klart" && w.kind !== "vila")
+    || !!(h && (h.water > 0 || (h.produce ?? 0) > 0 || (h.sleepH ?? 0) > 0));
+  if (active) return "aktiv";
+  if (h?.restDay || s.workouts.some((w) => w.date === date && w.kind === "vila")) return "vila";
+  return "tom";
+}
+
+/** Dagar i rad bakåt från idag. Idag får vara tom utan att bryta sviten. */
+export function streakInfo(s: StreakInput, today: string, addDays: (d: string, n: number) => string) {
+  let streak = 0, restDays = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = addDays(today, -i);
+    const st = dayStatus(s, d);
+    if (st === "tom") { if (i === 0) continue; break; }
+    streak++;
+    if (st === "vila") restDays++;
+  }
+  return { streak, restDays, today: dayStatus(s, today) };
+}

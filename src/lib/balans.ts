@@ -113,6 +113,7 @@ export interface DayHabits {
   produce?: number | undefined;
   sleepH?: number | undefined;
   recovery?: number | undefined; // 1–5
+  restDay?: boolean | undefined; // medvetet vald vilodag – bryter inte streak
 }
 
 export interface CustomExercise {
