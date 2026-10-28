@@ -7,6 +7,7 @@ import { StrengthProgress } from "@/components/StrengthProgress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addDays, dateKey, prettyDate, resetAll, update, useBalans, weekdayIndex, WEEKDAYS } from "@/lib/balans";
+import { streakInfo } from "@/lib/habits";
 
 export const Route = createFileRoute("/framsteg")({
   head: () => ({
@@ -42,13 +43,7 @@ function Progress() {
   const [weight, setWeight] = useState("");
   const [showBody, setShowBody] = useState(s.body.length > 0);
 
-  let streak = 0;
-  for (let i = 0; i < 60; i++) {
-    const d = addDays(today, -i);
-    const active = s.meals.some((m) => m.date === d) || s.workouts.some((w) => w.date === d && w.status === "klart");
-    if (active) streak++;
-    else if (i > 0) break;
-  }
+  const { streak, restDays } = streakInfo(s, today, addDays);
 
   return (
     <div className="space-y-5">
@@ -60,7 +55,7 @@ function Progress() {
       <section className="bg-hero rounded-3xl p-6 text-primary-foreground">
         <p className="text-sm opacity-80">Aktiva dagar i rad</p>
         <p className="font-display text-5xl font-bold">{streak}</p>
-        <p className="mt-1 text-sm">{streak >= 3 ? "Du bygger en fin rutin." : "Varje dag är en ny chans – inga krav."}</p>
+        <p className="mt-1 text-sm">{streak >= 3 ? "Du bygger en fin rutin." : "Varje dag är en ny chans – inga krav."}{restDays ? ` ${restDays} vilodag${restDays > 1 ? "ar" : ""} ingår – vila är också framsteg.` : ""}</p>
       </section>
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">

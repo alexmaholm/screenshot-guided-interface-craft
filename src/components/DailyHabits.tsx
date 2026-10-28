@@ -1,14 +1,15 @@
-import { Apple, Check, Minus, Moon, Plus, Sparkles, Utensils, Droplets } from "lucide-react";
+import { Apple, Check, Flame, Leaf, Minus, Moon, Plus, Sparkles, Utensils, Droplets } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { update, useBalans, type DayHabits } from "@/lib/balans";
-import { habitSummary, PRODUCE_GOAL, SLEEP_GOAL } from "@/lib/habits";
+import { addDays, update, useBalans, type DayHabits } from "@/lib/balans";
+import { habitSummary, PRODUCE_GOAL, SLEEP_GOAL, streakInfo } from "@/lib/habits";
 
 export function DailyHabits({ date }: { date: string }) {
   const state = useBalans();
   if (!state?.profile) return null;
   const habits = state.habits[date] ?? { water: 0 };
   const { score, parts, mealCount } = habitSummary(habits, state.meals.filter((meal) => meal.date === date), state.profile);
+  const { streak, restDays } = streakInfo(state, date, addDays);
   const setHabit = (patch: Partial<DayHabits>) => update((s) => ({
     ...s, habits: { ...s.habits, [date]: { ...(s.habits[date] ?? { water: 0 }), ...patch } },
   }));
@@ -32,6 +33,16 @@ export function DailyHabits({ date }: { date: string }) {
         </div>
       </div>
       <p className="text-sm text-muted-foreground">{score === 100 ? "Alla dagens riktmärken nådda. Fint jobbat!" : score >= 50 ? "Du har gett dagen en fin grund. Varje liten vana räknas." : "En ny dag, i din takt. Det du gör räknas – inte det som saknas."}</p>
+      <div className="flex items-center gap-3 rounded-lg border bg-card p-4">
+        <Flame className="h-6 w-6 shrink-0 text-coral" aria-hidden />
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold">{streak} {streak === 1 ? "dag" : "dagar"} i rad</p>
+          <p className="text-xs text-muted-foreground">{habits.restDay ? "Vila är också framsteg 🌿 Sviten lever." : restDays ? `Inklusive ${restDays} vilodag${restDays > 1 ? "ar" : ""} – vila räknas.` : "Logga mat, vanor eller träning – eller välj vila."}</p>
+        </div>
+        <Button size="sm" variant={habits.restDay ? "default" : "secondary"} className="shrink-0 rounded-full" aria-pressed={!!habits.restDay} onClick={() => setHabit({ restDay: !habits.restDay })}>
+          <Leaf className="h-4 w-4" /> {habits.restDay ? "Vilodag" : "Vila idag"}
+        </Button>
+      </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {rows.map(({ label, icon: Icon, value, progress }) => (
           <div key={label} className="rounded-lg border bg-card p-4">
