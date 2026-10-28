@@ -8,16 +8,19 @@ import { PhotoLog } from "@/components/PhotoLog";
 import { BarcodeScan } from "@/components/BarcodeScan";
 import { parseNutrition } from "@/lib/habits";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Star, Trash2, Plus, ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
+import { Star, Trash2, Plus, ChevronLeft, ChevronRight, ChevronDown, Eye, EyeOff, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { estimateText } from "@/lib/textlog.functions";
 import {
-  addDays, dateKey, macroTargets, sumMacros, MEAL_LABEL, MEAL_TYPES, prettyDate, suggestionsFor, uid, update, useBalans,
-  type Meal, type MealType,
+  addDays, dateKey, macroTargets, sumMacros, sumMicros, MEAL_LABEL, MEAL_TYPES, prettyDate, suggestionsFor, uid, update, useBalans,
+  type Meal, type MealType, type Micros,
 } from "@/lib/balans";
 
 type Search = { ny?: boolean | undefined; typ?: MealType | undefined };
@@ -114,6 +117,20 @@ function Mat() {
           </button>
         </div>
         <MacroSummary eaten={eaten} target={target} showKcal={showKcal} />
+        <details className="group rounded-2xl bg-muted px-4 py-2">
+          <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-sm font-medium">
+            Fler näringsämnen <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+          </summary>
+          {(() => { const mi = sumMicros(meals); return (
+            <dl className="grid grid-cols-2 gap-2 pb-2 pt-1 text-sm">
+              <div><dt className="text-muted-foreground">Fibrer</dt><dd className="font-semibold">{mi.fiber} g</dd></div>
+              <div><dt className="text-muted-foreground">Socker</dt><dd className="font-semibold">{mi.sugar} g</dd></div>
+              <div><dt className="text-muted-foreground">Mättat fett</dt><dd className="font-semibold">{mi.satFat} g</dd></div>
+              <div><dt className="text-muted-foreground">Salt</dt><dd className="font-semibold">{mi.salt} g</dd></div>
+              <p className="col-span-2 text-xs text-muted-foreground">Uppskattningar från AI-loggade måltider.</p>
+            </dl>
+          ); })()}
+        </details>
       </section>
       <WaterTracker date={date} />
       <DailyHabits date={date} />
@@ -187,20 +204,38 @@ function AddMealDialog({
   const [carbs, setCarbs] = useState("");
   const [fat, setFat] = useState("");
   const [err, setErr] = useState("");
+  const [aiText, setAiText] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
+  const [micros, setMicros] = useState<Micros | null>(null);
+  const estimate = useServerFn(estimateText);
 
-  useEffect(() => { if (open) { setName(""); setAmount(""); setKcal(""); setProtein(""); setCarbs(""); setFat(""); setErr(""); } }, [open]);
+  useEffect(() => { if (open) { setName(""); setAmount(""); setKcal(""); setProtein(""); setCarbs(""); setFat(""); setErr(""); setAiText(""); setMicros(null); } }, [open]);
 
   if (!s) return null;
 
   const recent = Array.from(new Map([...s.meals].reverse().map((m) => [m.name, m])).values()).slice(0, 8);
   const sugg = suggestionsFor(s.profile?.diet, type, s.profile?.restrictions);
 
+  const runAi = async () => {
+    setAiBusy(true);
+    try {
+      const r = await estimate({ data: { text: aiText } });
+      if (!r.ok) { toast.error(r.error); return; }
+      const v = r.result;
+      setName(v.name); setAmount(v.amount);
+      setKcal(String(Math.round(v.kcal))); setProtein(String(v.protein)); setCarbs(String(v.carbs)); setFat(String(v.fat));
+      setMicros({ fiber: v.fiber, sugar: v.sugar, satFat: v.satFat, salt: v.salt });
+      setErr("");
+    } catch { toast.error("Kunde inte beräkna. Försök igen eller fyll i manuellt."); }
+    finally { setAiBusy(false); }
+  };
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return setErr("Skriv vad du åt.");
     const nutrition = parseNutrition({ kcal, protein, carbs, fat });
     if (!nutrition) return setErr("Ange näringsvärden som är 0 eller större.");
-    onAdd({ type, name: name.trim(), amount: amount.trim() || "1 portion", ...nutrition });
+    onAdd({ type, name: name.trim(), amount: amount.trim() || "1 portion", ...nutrition, ...(micros ?? {}) });
   };
   const Pick = ({ items }: { items: { name: string; amount: string; kcal?: number | undefined; protein?: number | undefined; carbs?: number | undefined; fat?: number | undefined }[] }) =>
     items.length === 0 ? (
@@ -240,6 +275,14 @@ function AddMealDialog({
         {tab === "sök" && <FoodSearch showKcal={showKcal} onPick={(f) => onAdd({ type, ...f })} />}
         {tab === "egen" && (
           <form onSubmit={submit} className="space-y-3">
+            <div className="space-y-2 rounded-2xl bg-secondary/60 p-3">
+              <label htmlFor="ait" className="text-sm font-medium">Beskriv måltiden</label>
+              <Textarea id="ait" rows={2} className="rounded-xl" value={aiText} onChange={(e) => setAiText(e.target.value)} placeholder="T.ex. 2 kokta ägg och en knäckemacka med ost" />
+              <Button type="button" variant="outline" className="h-11 w-full rounded-full" disabled={aiBusy || aiText.trim().length < 2} onClick={runAi}>
+                {aiBusy ? <Loader2 className="animate-spin" /> : <Sparkles />} Beräkna med AI
+              </Button>
+              {micros && <p className="text-xs text-muted-foreground">Fibrer {micros.fiber} g · Socker {micros.sugar} g · Mättat fett {micros.satFat} g · Salt {micros.salt} g</p>}
+            </div>
             <div>
               <label htmlFor="mn" className="text-sm font-medium">Maträtt</label>
               <Input id="mn" className="mt-1 h-12 rounded-xl" value={name} onChange={(e) => { setName(e.target.value); setErr(""); }} placeholder="T.ex. Pasta med pesto" aria-invalid={!!err} />
