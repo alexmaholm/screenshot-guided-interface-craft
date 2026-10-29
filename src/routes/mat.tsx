@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { estimateText } from "@/lib/textlog.functions";
 import {
-  addDays, dateKey, macroTargets, sumMacros, sumMicros, MEAL_LABEL, MEAL_TYPES, prettyDate, suggestionsFor, uid, update, useBalans,
+  addDays, dateKey, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, sumMicros, MEAL_LABEL, MEAL_TYPES, prettyDate, suggestionsFor, uid, update, useBalans,
   type Meal, type MealType, type Micros,
 } from "@/lib/balans";
 
@@ -116,7 +116,24 @@ function Mat() {
             {showKcal ? "Dölj kalorier" : "Visa kalorier"}
           </button>
         </div>
+        <div>
+          <p className="text-sm font-medium">Ditt fokus</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {NUTRITION_FOCUS.map((f) => (
+              <button key={f.value} className="chip" aria-pressed={nutritionFocusOf(p) === f.value}
+                onClick={() => update((st) => st.profile ? ({ ...st, profile: { ...st.profile, nutritionFocus: f.value } }) : st)}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">{NUTRITION_FOCUS.find((f) => f.value === nutritionFocusOf(p))?.hint} · Vägledande uppskattning, inte medicinsk rådgivning.</p>
+        </div>
         <MacroSummary eaten={eaten} target={target} showKcal={showKcal} />
+        {eaten.protein > 0 && (
+          <p className="text-sm text-primary">
+            {eaten.protein >= target.protein ? "Proteinmålet nått – grymt för återhämtningen! 💪" : `${Math.round((eaten.protein / Math.max(1, target.protein)) * 100)} % av proteinet nått – fint på väg!`}
+          </p>
+        )}
         <details className="group rounded-2xl bg-muted px-4 py-2">
           <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-sm font-medium">
             Fler näringsämnen <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
