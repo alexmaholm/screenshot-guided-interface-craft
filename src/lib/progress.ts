@@ -88,3 +88,21 @@ export function trackedExercises(all: Workout[]): string[] {
   for (const w of all) if (w.status === "klart") for (const e of w.exercises) if (e.weightKg) count.set(e.name, (count.get(e.name) ?? 0) + 1);
   return [...count].sort((a, b) => b[1] - a[1]).map(([n]) => n);
 }
+
+/** Lifted volume (kg × reps) for one workout; warm-up sets are excluded so the number reflects working effort. */
+export function workoutVolume(w: Workout): number {
+  return w.exercises.reduce((sum, e) => sum + setRows(e)
+    .filter((r) => r.type !== "warmup" && r.done !== false || (!e.log && e.done))
+    .filter((r) => r.type !== "warmup")
+    .reduce((a, r) => a + (r.kg ?? 0) * (r.reps ?? 0), 0), 0);
+}
+
+export interface WeekReport { workouts: number; volumeKg: number; minutes: number; topLift?: { name: string; kg: number } | undefined }
+
+/** Week summary over finished workouts whose date is in `days`. */
+export function weekReport(all: Workout[], days: string[]): WeekReport {
+  const done = all.filter((w) => w.status === "klart" && days.includes(w.date));
+  let top: WeekReport["topLift"];
+  for (const w of done) for (const e of w.exercises) if (e.weightKg && (!top || e.weightKg > top.kg)) top = { name: e.name, kg: e.weightKg };
+  return { workouts: done.length, volumeKg: Math.round(done.reduce((a, w) => a + workoutVolume(w), 0)), minutes: done.reduce((a, w) => a + w.durationMin, 0), topLift: top };
+}
