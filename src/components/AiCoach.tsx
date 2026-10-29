@@ -8,7 +8,7 @@ import { askCoach } from "@/lib/coach.functions";
 import { dateKey, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, useBalans, type State } from "@/lib/balans";
 
 const QUICK = [
-  "Vad kan jag äta till kvällsmat för att nå mitt mål?",
+  "Vad passar bra att äta nu för att nå mitt mål?",
   "Jag känner mig lite seg idag – hur borde jag träna?",
   "Hur ser min balans ut hittills idag?",
 ];
@@ -40,6 +40,7 @@ export function AiCoach() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
+  const [suggest, setSuggest] = useState<string[]>(QUICK);
   const [chat, setChat] = useState<{ q: string; a: string; error?: boolean }[]>([]);
   if (!s?.profile) return null;
 
@@ -49,6 +50,7 @@ export function AiCoach() {
     setQ("");
     try {
       const r = await ask({ data: { question, context: coachContext(s) } });
+      if (r.ok && r.followUps.length) setSuggest(r.followUps);
       setChat((c) => [...c, r.ok ? { q: question, a: r.answer } : { q: question, a: r.error, error: true }]);
     } catch {
       setChat((c) => [...c, { q: question, a: "Coachen kunde inte svara just nu. Försök igen.", error: true }]);
@@ -83,7 +85,7 @@ export function AiCoach() {
             ))}
             {busy && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Coachen tänker…</p>}
             <div className="flex flex-wrap gap-2">
-              {QUICK.map((x) => (
+              {suggest.map((x) => (
                 <button key={x} className="chip text-left" disabled={busy} onClick={() => send(x)}>{x}</button>
               ))}
             </div>
