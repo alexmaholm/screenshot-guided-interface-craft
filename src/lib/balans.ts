@@ -135,10 +135,13 @@ export interface State {
   body: { date: string; weight: number }[];
   customExercises: CustomExercise[];
   templates: import("@/lib/templates").WorkoutTemplate[];
+  mealPlan: PlannedMeal[];
 }
 
+export interface PlannedMeal { id: string; date: string; type: MealType; recipeId: string }
+
 const KEY = "balans:v1";
-const empty: State = { profile: null, meals: [], favorites: [], workouts: [], habits: {}, body: [], customExercises: [], templates: [] };
+const empty: State = { profile: null, meals: [], favorites: [], workouts: [], habits: {}, body: [], customExercises: [], templates: [], mealPlan: [] };
 
 let state: State | null = null;
 const listeners = new Set<() => void>();
