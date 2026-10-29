@@ -37,6 +37,7 @@ export interface Profile {
   waterGoal: number;
   trainingFocus?: import("@/lib/exercises").TrainingFocus | undefined;
   trainingWishes?: string | undefined;
+  nutritionFocus?: NutritionFocus | undefined;
 }
 
 export interface Meal {
@@ -486,12 +487,30 @@ export function portion(food: Food, qty: number, unit: Unit) {
 }
 
 export interface MacroTargets { kcal: number; protein: number; carbs: number; fat: number }
-/** Simple daily targets from latest weight (default 70 kg) and goal. */
+export type NutritionFocus = "muskler" | "forma" | "energi" | "balans";
+export const NUTRITION_FOCUS: { value: NutritionFocus; label: string; hint: string }[] = [
+  { value: "muskler", label: "Bygga muskler", hint: "Mer protein och lite extra energi" },
+  { value: "forma", label: "Forma kroppen i lugn takt", hint: "Litet, snällt underskott med mycket protein" },
+  { value: "energi", label: "Mer vardagsenergi", hint: "Jämn energi med fokus på kolhydrater" },
+  { value: "balans", label: "Goda vanor", hint: "Balanserad grund att må bra på" },
+];
+/** Focus chosen in Mat, or derived from the onboarding goal. */
+export function nutritionFocusOf(p: Profile): NutritionFocus {
+  return p.nutritionFocus ?? (p.goal === "styrka" ? "muskler" : p.goal === "energi" ? "energi" : "balans");
+}
+const FOCUS_RULES: Record<NutritionFocus, { kcalAdj: number; proteinPerKg: number; fatShare: number }> = {
+  muskler: { kcalAdj: 250, proteinPerKg: 1.8, fatShare: 0.25 },
+  forma: { kcalAdj: -300, proteinPerKg: 1.8, fatShare: 0.3 },
+  energi: { kcalAdj: 0, proteinPerKg: 1.4, fatShare: 0.25 },
+  balans: { kcalAdj: 0, proteinPerKg: 1.4, fatShare: 0.3 },
+};
+/** Daily targets from latest weight (default 70 kg), training days and nutrition focus. */
 export function macroTargets(profile: Profile, weightKg?: number): MacroTargets {
   const w = weightKg && weightKg > 30 ? weightKg : 70;
-  const kcal = Math.round((w * 31 + (profile.days.length >= 4 ? 150 : 0)) / 10) * 10;
-  const protein = Math.round(w * (profile.goal === "styrka" ? 1.8 : 1.4));
-  const fat = Math.round((kcal * 0.3) / 9);
+  const rule = FOCUS_RULES[nutritionFocusOf(profile)];
+  const kcal = Math.round((w * 31 + (profile.days.length >= 4 ? 150 : 0) + rule.kcalAdj) / 10) * 10;
+  const protein = Math.round(w * rule.proteinPerKg);
+  const fat = Math.round((kcal * rule.fatShare) / 9);
   const carbs = Math.max(0, Math.round((kcal - protein * 4 - fat * 9) / 4));
   return { kcal, protein, carbs, fat };
 }
