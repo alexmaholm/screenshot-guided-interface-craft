@@ -80,7 +80,17 @@ export function AiCoach() {
             {chat.map((m, i) => (
               <div key={i} className="space-y-2">
                 <p className="ml-8 rounded-2xl bg-secondary px-3 py-2 text-sm">{m.q}</p>
-                <p className={`mr-8 whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm ${m.error ? "bg-muted text-muted-foreground" : "bg-muted"}`}>{m.a}</p>
+                <div className={`mr-8 space-y-2 rounded-2xl bg-muted px-3 py-2 text-sm leading-relaxed ${m.error ? "text-muted-foreground" : ""}`}>
+                  {m.a.split("\n").map((l) => l.trim()).filter(Boolean).map((line, j) => {
+                    const bullet = /^([-*•]|\d+[.)])\s+/.test(line);
+                    const text = line.replace(/^([-*•]|\d+[.)])\s+/, "").replace(/^#+\s*/, "");
+                    const parts = text.split(/\*\*(.+?)\*\*/g).map((p, k) =>
+                      k % 2 ? <strong key={k} className="font-semibold">{p}</strong> : p.replace(/\*/g, ""));
+                    return bullet
+                      ? <p key={j} className="flex gap-2"><span className="text-primary" aria-hidden>•</span><span>{parts}</span></p>
+                      : <p key={j}>{parts}</p>;
+                  })}
+                </div>
               </div>
             ))}
             {busy && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Coachen tänker…</p>}
