@@ -92,7 +92,6 @@ export function trackedExercises(all: Workout[]): string[] {
 /** Lifted volume (kg × reps) for one workout; warm-up sets are excluded so the number reflects working effort. */
 export function workoutVolume(w: Workout): number {
   return w.exercises.reduce((sum, e) => sum + setRows(e)
-    .filter((r) => r.type !== "warmup" && r.done !== false || (!e.log && e.done))
     .filter((r) => r.type !== "warmup")
     .reduce((a, r) => a + (r.kg ?? 0) * (r.reps ?? 0), 0), 0);
 }
