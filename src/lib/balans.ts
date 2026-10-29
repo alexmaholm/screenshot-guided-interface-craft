@@ -401,7 +401,7 @@ export function completeOnboarding(p: Profile) {
       workouts.push(generateWorkout({ kind: kindForGoal(p.goal, n++), level, equipment: p.equipment, minutes: p.sessionMin, date }));
     }
   }
-  update(() => ({ profile: p, meals: [], favorites: [], workouts, habits: {}, body: [], customExercises: [], templates: [] }));
+  update(() => ({ profile: p, meals: [], favorites: [], workouts, habits: {}, body: [], customExercises: [], templates: [], mealPlan: [] }));
 }
 
 /* ---------------- Tips ---------------- */

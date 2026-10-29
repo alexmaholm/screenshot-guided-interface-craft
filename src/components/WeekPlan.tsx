@@ -37,7 +37,7 @@ export function WeekPlan({ profile }: { profile: Profile }) {
   };
   const copy = async () => {
     const text = planIngredientsText(plan, dates);
-    if (!text) return toast("Planera några måltider först");
+    if (!text) { toast("Planera några måltider först"); return; }
     try { await navigator.clipboard.writeText(`Veckans ingredienser\n${text}`); toast.success("Veckans ingredienser är kopierade"); }
     catch { toast.error("Kunde inte kopiera"); }
   };
