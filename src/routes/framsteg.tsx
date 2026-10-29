@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
+import { SundayReport } from "@/components/SundayReport";
 import { StrengthProgress } from "@/components/StrengthProgress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +58,8 @@ function Progress() {
         <p className="font-display text-5xl font-bold">{streak}</p>
         <p className="mt-1 text-sm">{streak >= 3 ? "Du bygger en fin rutin." : "Varje dag är en ny chans – inga krav."}{restDays ? ` ${restDays} vilodag${restDays > 1 ? "ar" : ""} ingår – vila är också framsteg.` : ""}</p>
       </section>
+
+      <SundayReport workouts={s.workouts} days={days} restDays={restDays} streak={streak} waterAvg={waterAvg} mealDays={mealDays} />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Box label="Genomförda pass" value={`${workoutsDone.length}/${planned.length || 0}`} />
