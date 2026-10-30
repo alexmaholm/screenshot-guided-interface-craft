@@ -1,5 +1,4 @@
 import { addDays, weekdayIndex, type DayHabits, type PlannedMeal, type Workout } from "@/lib/balans";
-import { RECIPES, scaleIngredients } from "@/lib/recipes";
 
 /** Monday–Sunday date keys for the week containing `key`. */
 export function weekDates(key: string): string[] {
@@ -22,22 +21,7 @@ export const DAY_HINT: Record<DayKind, string> = {
   fri: "Ät efter hunger och dina vanliga mål.",
 };
 
-/** All planned ingredients for the given dates, merged per name+unit. */
-export function planIngredientsText(plan: PlannedMeal[], dates: string[]): string {
-  const totals = new Map<string, { qty: number; unit: string; name: string }>();
-  for (const pm of plan) {
-    if (!dates.includes(pm.date)) continue;
-    const r = RECIPES.find((x) => x.id === pm.recipeId);
-    if (!r) continue;
-    for (const i of r.ingredients) {
-      const k = `${i.name}|${i.unit}`;
-      const cur = totals.get(k) ?? { qty: 0, unit: i.unit, name: i.name };
-      cur.qty += i.qty;
-      totals.set(k, cur);
-    }
-  }
-  const fmt = (n: number) => String(Math.round(n * 10) / 10).replace(".", ",");
-  return [...totals.values()].map((i) => `- ${fmt(i.qty)} ${i.unit} ${i.name}`).join("\n");
+/** Planned meals for the given dates as shareable text, one line per meal in date order. */
+export function planText(plan: PlannedMeal[], dates: string[], dayLabels: string[]): string {
+  return dates.flatMap((d, i) => plan.filter((pm) => pm.date === d && pm.name).map((pm) => `- ${dayLabels[i]}: ${pm.name}`)).join("\n");
 }
-
-export { scaleIngredients };
