@@ -96,6 +96,13 @@ function Profile() {
         ))}
       </section>
 
+      <WeightLog />
+
+      <Link to="/installningar" className="card-soft flex min-h-14 items-center justify-between p-5 font-semibold">
+        <span className="flex items-center gap-3"><Settings className="h-5 w-5" aria-hidden /> Inställningar</span>
+        <span aria-hidden>›</span>
+      </Link>
+
       <section className="card-soft flex items-center justify-between p-5">
         <div><div className="text-sm text-muted-foreground">Medlemskap</div><div className="font-semibold">Gratis</div></div>
         <span className="rounded-full bg-muted px-3 py-1 text-xs">PRO kommer snart</span>
