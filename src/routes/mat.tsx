@@ -1,4 +1,3 @@
-import { RecipeBank } from "@/components/RecipeBank";
 import { WeekPlan } from "@/components/WeekPlan";
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { MacroSummary } from "@/components/MacroSummary";
@@ -152,7 +151,6 @@ function Mat() {
       </section>
       <WaterTracker date={date} />
       <DailyHabits date={date} />
-      <RecipeBank profile={p} showKcal={showKcal} onLog={addMeal} />
       <WeekPlan profile={p} />
 
       {MEAL_TYPES.map((t) => {
