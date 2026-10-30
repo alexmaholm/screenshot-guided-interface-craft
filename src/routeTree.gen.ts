@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FramstegRouteImport } from './routes/framsteg'
 import { Route as MatRouteImport } from './routes/mat'
+import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as TraningRouteImport } from './routes/traning'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const MatRoute = MatRouteImport.update({
   path: '/mat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TraningRoute = TraningRouteImport.update({
   id: '/traning',
   path: '/traning',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/framsteg': typeof FramstegRoute
   '/mat': typeof MatRoute
+  '/profil': typeof ProfilRoute
   '/traning': typeof TraningRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/framsteg': typeof FramstegRoute
   '/mat': typeof MatRoute
+  '/profil': typeof ProfilRoute
   '/traning': typeof TraningRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/framsteg': typeof FramstegRoute
   '/mat': typeof MatRoute
+  '/profil': typeof ProfilRoute
   '/traning': typeof TraningRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/framsteg' | '/mat' | '/traning'
+  fullPaths: '/' | '/framsteg' | '/mat' | '/profil' | '/traning'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/framsteg' | '/mat' | '/traning'
-  id: '__root__' | '/' | '/framsteg' | '/mat' | '/traning'
+  to: '/' | '/framsteg' | '/mat' | '/profil' | '/traning'
+  id: '__root__' | '/' | '/framsteg' | '/mat' | '/profil' | '/traning'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FramstegRoute: typeof FramstegRoute
   MatRoute: typeof MatRoute
+  ProfilRoute: typeof ProfilRoute
   TraningRoute: typeof TraningRoute
 }
 
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/traning': {
       id: '/traning'
       path: '/traning'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FramstegRoute: FramstegRoute,
   MatRoute: MatRoute,
+  ProfilRoute: ProfilRoute,
   TraningRoute: TraningRoute,
 }
 export const routeTree = rootRouteImport
