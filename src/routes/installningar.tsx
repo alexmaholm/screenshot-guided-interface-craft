@@ -7,6 +7,7 @@ import { DietaryPreferences } from "@/components/DietaryPreferences";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { isNativeHealthAvailable, healthSourceName } from "@/lib/health";
 import { dateKey, NUTRITION_FOCUS, nutritionFocusOf, resetAll, update, useBalans, WEEKDAYS, type Profile } from "@/lib/balans";
 
 export const Route = createFileRoute("/installningar")({
@@ -91,6 +92,21 @@ function Settings() {
         <label className="flex items-center justify-between gap-3 text-sm">Vattenmål (glas/dag)
           <Input type="number" min={1} max={20} className="h-11 w-24 rounded-xl" value={p.waterGoal} onChange={(e) => set({ waterGoal: Math.min(20, Math.max(1, Number(e.target.value) || 1)) })} />
         </label>
+      </Section>
+
+      <Section title="Hälso-synk">
+        <p className="text-sm text-muted-foreground">Synka med {healthSourceName()} så hamnar förbränning, steg och vikt automatiskt i Balans.</p>
+        {([["calories", "Aktiva kalorier"], ["steps", "Steg"], ["weight", "Kroppsvikt"]] as const).map(([k, label]) => {
+          const hs = p.healthSync ?? { calories: false, steps: false, weight: false };
+          return (
+            <label key={k} className="flex min-h-11 items-center justify-between gap-3 text-sm">{label}
+              <Switch checked={hs[k]} onCheckedChange={(v) => {
+                if (v && !isNativeHealthAvailable()) toast(`Synken med ${healthSourceName()} aktiveras i mobilappen – ditt val är sparat.`);
+                set({ healthSync: { ...hs, [k]: v } });
+              }} />
+            </label>
+          );
+        })}
       </Section>
 
       <Section title="Konto">

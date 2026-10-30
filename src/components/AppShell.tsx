@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Home, Utensils, Dumbbell, LineChart, Leaf, User } from "lucide-react";
 import type { ReactNode } from "react";
 import { AiCoach } from "@/components/AiCoach";
+import { AppTour } from "@/components/AppTour";
 
 const TABS = [
   { to: "/", label: "Hem", icon: Home },
@@ -36,6 +37,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 md:px-8 md:pb-12">{children}</main>
       <AiCoach />
+      <AppTour />
       <nav
         aria-label="Huvudmeny"
         className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur md:hidden"
