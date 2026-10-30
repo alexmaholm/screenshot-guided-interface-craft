@@ -321,63 +321,9 @@ function kindForGoal(goal: Goal, i: number): WorkoutKind {
   return c[i % c.length] ?? "rörlighet";
 }
 
-/* ---------------- Måltidsförslag ---------------- */
-
-export interface Suggestion {
-  name: string;
-  amount: string;
-  type: MealType;
-  kcal: number;
-  protein: number;
-  diets: Diet[];
-}
-const ALL: Diet[] = ["allt", "vegetariskt", "veganskt", "pescetariskt", "glutenfritt"];
-export const SUGGESTIONS: Suggestion[] = [
-  { name: "Havregrynsgröt med bär och nötter", amount: "1 skål", type: "frukost", kcal: 380, protein: 12, diets: ["allt", "vegetariskt", "veganskt", "pescetariskt"] },
-  { name: "Kvarg med banan och müsli", amount: "1 skål", type: "frukost", kcal: 340, protein: 24, diets: ["allt", "vegetariskt", "pescetariskt"] },
-  { name: "Äggröra på surdegsbröd", amount: "2 ägg, 1 skiva", type: "frukost", kcal: 360, protein: 18, diets: ["allt", "vegetariskt", "pescetariskt"] },
-  { name: "Chiapudding med mango", amount: "1 glas", type: "frukost", kcal: 300, protein: 9, diets: ALL },
-  { name: "Linsgryta med ris", amount: "1 tallrik", type: "lunch", kcal: 520, protein: 22, diets: ALL },
-  { name: "Kycklingsallad med quinoa", amount: "1 stor skål", type: "lunch", kcal: 480, protein: 35, diets: ["allt", "glutenfritt"] },
-  { name: "Halloumiwrap med grönsaker", amount: "1 wrap", type: "lunch", kcal: 560, protein: 24, diets: ["allt", "vegetariskt", "pescetariskt"] },
-  { name: "Ugnsbakad lax med potatis", amount: "1 tallrik", type: "middag", kcal: 610, protein: 38, diets: ["allt", "pescetariskt", "glutenfritt"] },
-  { name: "Tofu-wok med nudlar", amount: "1 tallrik", type: "middag", kcal: 550, protein: 26, diets: ["allt", "vegetariskt", "veganskt", "pescetariskt"] },
-  { name: "Kikärtscurry med ris", amount: "1 tallrik", type: "middag", kcal: 540, protein: 18, diets: ALL },
-  { name: "Köttfärssås med pasta", amount: "1 tallrik", type: "middag", kcal: 650, protein: 34, diets: ["allt"] },
-  { name: "Äpple och jordnötssmör", amount: "1 äpple, 1 msk", type: "mellanmål", kcal: 190, protein: 4, diets: ALL },
-  { name: "Hummus med morötter", amount: "1 liten skål", type: "mellanmål", kcal: 180, protein: 6, diets: ALL },
-  { name: "Proteinyoghurt", amount: "1 burk", type: "mellanmål", kcal: 150, protein: 17, diets: ["allt", "vegetariskt", "pescetariskt", "glutenfritt"] },
-];
-// Ingredients assumed by the curated suggestions. Missing metadata is never eligible.
-const CONTAINS: Record<string, Restriction[]> = {
-  "Havregrynsgröt med bär och nötter": ["gluten", "notter"],
-  "Kvarg med banan och müsli": ["gluten", "laktos", "mjolk", "notter"],
-  "Äggröra på surdegsbröd": ["gluten", "agg", "mjolk", "laktos"],
-  "Chiapudding med mango": [], // Prepared with coconut drink.
-  "Linsgryta med ris": [],
-  "Kycklingsallad med quinoa": [],
-  "Halloumiwrap med grönsaker": ["gluten", "mjolk", "laktos"],
-  "Ugnsbakad lax med potatis": [], // Prepared with oil, not butter.
-  "Tofu-wok med nudlar": ["gluten", "soja"],
-  "Kikärtscurry med ris": [], // Prepared with coconut milk.
-  "Köttfärssås med pasta": ["gluten"],
-  "Äpple och jordnötssmör": ["notter"],
-  "Hummus med morötter": [],
-  "Proteinyoghurt": ["mjolk", "laktos"],
-};
-
 /** Shared eligibility rule for any dish (suggestions, recipes). */
 export function dishEligible(diets: Diet[], contains: Restriction[] | undefined, diet: Diet | undefined, restrictions: Restriction[] = []) {
   return contains !== undefined && diets.includes(diet ?? "allt") && restrictions.every((r) => !contains.includes(r));
-}
-
-export function suggestionsFor(diet: Diet | undefined, type?: MealType, restrictions: Restriction[] = []) {
-  const d = diet ?? "allt";
-  return SUGGESTIONS.filter((s) => {
-    const contains = CONTAINS[s.name];
-    return contains !== undefined && s.diets.includes(d) && (!type || s.type === type)
-      && restrictions.every((r) => !contains.includes(r));
-  });
 }
 
 /* ---------------- Återhämtningsguide: vad kroppen behöver efter passet ---------------- */
