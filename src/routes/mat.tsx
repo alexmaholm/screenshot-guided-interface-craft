@@ -138,9 +138,6 @@ function Mat() {
           ); })()}
         </details>
       </section>
-      <WaterTracker date={date} />
-      <DailyHabits date={date} />
-      <WeekPlan profile={p} />
 
       {MEAL_TYPES.map((t) => {
         const list = meals.filter((m) => m.type === t);
@@ -184,6 +181,11 @@ function Mat() {
           </section>
         );
       })}
+
+      <WaterTracker date={date} />
+      <DailyHabits date={date} />
+      <WeekPlan profile={p} />
+
 
       <AddMealDialog open={open} onOpenChange={setOpen} type={type} setType={setType} onAdd={(m) => { addMeal(m); setOpen(false); }} showKcal={showKcal} />
     </div>
