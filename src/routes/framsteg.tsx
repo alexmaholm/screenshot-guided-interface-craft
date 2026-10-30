@@ -109,54 +109,6 @@ function Progress() {
         )}
       </section>
 
-      <section className="card-soft p-5">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold">Vikt (frivilligt)</h2>
-            <p className="text-sm text-muted-foreground">Helt valfritt. Visas bara om du vill.</p>
-          </div>
-          <Button variant="outline" className="h-11 rounded-full" onClick={() => setShowBody(!showBody)}>{showBody ? "Dölj" : "Visa"}</Button>
-        </div>
-        {showBody && (
-          <div className="mt-4 space-y-3">
-            <form className="flex gap-2" onSubmit={(e) => {
-              e.preventDefault();
-              const v = Number(weight.replace(",", "."));
-              if (!Number.isFinite(v) || v < 20 || v > 400) { toast.error("Ange en vikt i kilo, t.ex. 72,5"); return; }
-              update((st) => ({ ...st, body: [...st.body.filter((b) => b.date !== today), { date: today, weight: v }] }));
-              setWeight("");
-              toast.success("Sparat");
-            }}>
-              <Input className="h-12 rounded-xl" inputMode="decimal" placeholder="Kilo" value={weight} onChange={(e) => setWeight(e.target.value)} aria-label="Vikt i kilo" />
-              <Button type="submit" className="h-12 rounded-full">Spara</Button>
-            </form>
-            {s.body.length === 0 ? <p className="text-sm text-muted-foreground">Inga mätningar ännu.</p> : (
-              <ul className="text-sm">
-                {[...s.body].reverse().slice(0, 5).map((b) => (
-                  <li key={b.date} className="flex justify-between py-1"><span className="capitalize">{prettyDate(b.date)}</span><span>{b.weight} kg</span></li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-      </section>
-
-      <section className="card-soft space-y-3 p-5">
-        <h2 className="text-lg font-semibold">Inställningar</h2>
-        <label className="flex min-h-12 items-center justify-between gap-3">
-          <span>Dölj kalorier</span>
-          <input type="checkbox" className="h-6 w-6 accent-[var(--primary)]" checked={p.hideCalories} onChange={(e) => update((st) => ({ ...st, profile: { ...st.profile!, hideCalories: e.target.checked } }))} />
-        </label>
-        <label className="flex min-h-12 items-center justify-between gap-3">
-          <span>Vattenmål (glas)</span>
-          <Input type="number" min={1} max={20} className="h-12 w-24 rounded-xl" value={p.waterGoal} onChange={(e) => update((st) => ({ ...st, profile: { ...st.profile!, waterGoal: Math.min(20, Math.max(1, Number(e.target.value) || 1)) } }))} />
-        </label>
-        <div className="border-t pt-4"><h3 className="mb-4 font-semibold">Mina kostval</h3><DietaryPreferences profile={p} onChange={(patch) => update((st) => st.profile ? { ...st, profile: { ...st.profile, ...patch } } : st)} /></div>
-        <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => { if (confirm("Börja om? All din data raderas.")) resetAll(); return undefined; }}>
-          Börja om från början
-        </Button>
-        <p className="text-xs text-muted-foreground">Balans ger generell inspiration och ersätter inte vård eller individuell kostrådgivning.</p>
-      </section>
     </div>
   );
 }

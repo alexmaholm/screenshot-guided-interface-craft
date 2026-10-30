@@ -96,10 +96,57 @@ function Profile() {
         ))}
       </section>
 
+      <WeightLog />
+
+      <Link to="/installningar" className="card-soft flex min-h-14 items-center justify-between p-5 font-semibold">
+        <span className="flex items-center gap-3"><Settings className="h-5 w-5" aria-hidden /> Inställningar</span>
+        <span aria-hidden>›</span>
+      </Link>
+
       <section className="card-soft flex items-center justify-between p-5">
         <div><div className="text-sm text-muted-foreground">Medlemskap</div><div className="font-semibold">Gratis</div></div>
         <span className="rounded-full bg-muted px-3 py-1 text-xs">PRO kommer snart</span>
       </section>
     </div>
+  );
+}
+
+function WeightLog() {
+  const s = useBalans()!;
+  const [weight, setWeight] = useState("");
+  const [show, setShow] = useState(false);
+  const today = dateKey();
+  return (
+    <section className="card-soft p-5">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Vikt (frivilligt)</h2>
+          <p className="text-sm text-muted-foreground">Helt valfritt. Visas bara om du vill.</p>
+        </div>
+        <Button variant="outline" className="h-11 rounded-full" onClick={() => setShow(!show)}>{show ? "Dölj" : "Visa"}</Button>
+      </div>
+      {show && (
+        <div className="mt-4 space-y-3">
+          <form className="flex gap-2" onSubmit={(e) => {
+            e.preventDefault();
+            const v = Number(weight.replace(",", "."));
+            if (!Number.isFinite(v) || v < 20 || v > 400) { toast.error("Ange en vikt i kilo, t.ex. 72,5"); return; }
+            update((st) => ({ ...st, body: [...st.body.filter((b) => b.date !== today), { date: today, weight: v }] }));
+            setWeight("");
+            toast.success("Sparat");
+          }}>
+            <Input className="h-12 rounded-xl" inputMode="decimal" placeholder="Kilo" value={weight} onChange={(e) => setWeight(e.target.value)} aria-label="Vikt i kilo" />
+            <Button type="submit" className="h-12 rounded-full">Spara</Button>
+          </form>
+          {s.body.length === 0 ? <p className="text-sm text-muted-foreground">Inga mätningar ännu.</p> : (
+            <ul className="text-sm">
+              {[...s.body].reverse().slice(0, 5).map((b) => (
+                <li key={b.date} className="flex justify-between py-1"><span>{b.date}</span><span>{b.weight} kg</span></li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </section>
   );
 }
