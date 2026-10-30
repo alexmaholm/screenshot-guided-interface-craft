@@ -38,6 +38,8 @@ export interface Profile {
   trainingFocus?: import("@/lib/exercises").TrainingFocus | undefined;
   trainingWishes?: string | undefined;
   nutritionFocus?: NutritionFocus | undefined;
+  /** Emoji avatar or data-URL photo */
+  avatar?: string | undefined;
 }
 
 export interface Meal {
