@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FramstegRouteImport } from './routes/framsteg'
+import { Route as InstallningarRouteImport } from './routes/installningar'
 import { Route as MatRouteImport } from './routes/mat'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as TraningRouteImport } from './routes/traning'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const FramstegRoute = FramstegRouteImport.update({
   id: '/framsteg',
   path: '/framsteg',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstallningarRoute = InstallningarRouteImport.update({
+  id: '/installningar',
+  path: '/installningar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatRoute = MatRouteImport.update({
@@ -44,6 +50,7 @@ const TraningRoute = TraningRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/framsteg': typeof FramstegRoute
+  '/installningar': typeof InstallningarRoute
   '/mat': typeof MatRoute
   '/profil': typeof ProfilRoute
   '/traning': typeof TraningRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/framsteg': typeof FramstegRoute
+  '/installningar': typeof InstallningarRoute
   '/mat': typeof MatRoute
   '/profil': typeof ProfilRoute
   '/traning': typeof TraningRoute
@@ -59,21 +67,31 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/framsteg': typeof FramstegRoute
+  '/installningar': typeof InstallningarRoute
   '/mat': typeof MatRoute
   '/profil': typeof ProfilRoute
   '/traning': typeof TraningRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/framsteg' | '/mat' | '/profil' | '/traning'
+  fullPaths:
+    '/' | '/framsteg' | '/installningar' | '/mat' | '/profil' | '/traning'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/framsteg' | '/mat' | '/profil' | '/traning'
-  id: '__root__' | '/' | '/framsteg' | '/mat' | '/profil' | '/traning'
+  to: '/' | '/framsteg' | '/installningar' | '/mat' | '/profil' | '/traning'
+  id:
+    | '__root__'
+    | '/'
+    | '/framsteg'
+    | '/installningar'
+    | '/mat'
+    | '/profil'
+    | '/traning'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FramstegRoute: typeof FramstegRoute
+  InstallningarRoute: typeof InstallningarRoute
   MatRoute: typeof MatRoute
   ProfilRoute: typeof ProfilRoute
   TraningRoute: typeof TraningRoute
@@ -93,6 +111,13 @@ declare module '@tanstack/react-router' {
       path: '/framsteg'
       fullPath: '/framsteg'
       preLoaderRoute: typeof FramstegRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/installningar': {
+      id: '/installningar'
+      path: '/installningar'
+      fullPath: '/installningar'
+      preLoaderRoute: typeof InstallningarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mat': {
@@ -122,6 +147,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FramstegRoute: FramstegRoute,
+  InstallningarRoute: InstallningarRoute,
   MatRoute: MatRoute,
   ProfilRoute: ProfilRoute,
   TraningRoute: TraningRoute,
