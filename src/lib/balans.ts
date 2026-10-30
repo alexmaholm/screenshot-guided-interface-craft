@@ -138,7 +138,7 @@ export interface State {
   mealPlan: PlannedMeal[];
 }
 
-export interface PlannedMeal { id: string; date: string; type: MealType; name: string; kcal?: number; protein?: number }
+export interface PlannedMeal { id: string; date: string; type: MealType; name: string; kcal?: number | undefined; protein?: number | undefined }
 
 const KEY = "balans:v1";
 const empty: State = { profile: null, meals: [], favorites: [], workouts: [], habits: {}, body: [], customExercises: [], templates: [], mealPlan: [] };
