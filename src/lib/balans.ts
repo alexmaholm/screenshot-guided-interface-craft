@@ -378,12 +378,74 @@ export function suggestionsFor(diet: Diet | undefined, type?: MealType, restrict
   });
 }
 
-export function recoverySuggestions(profile: Profile, workout: Workout | undefined): Suggestion[] {
+/* ---------------- Återhämtningsguide: vad kroppen behöver efter passet ---------------- */
+
+export type NutrientKey = "protein" | "kolhydrater" | "elektrolyter" | "vatska" | "magnesium" | "antioxidanter" | "omega3";
+interface Source { name: string; contains: Restriction[]; animal?: "kott" | "fisk" | "mejeri" | "agg" }
+const mk = (name: string, contains: Restriction[] = [], animal?: Source["animal"]): Source => (animal ? { name, contains, animal } : { name, contains });
+const NUTRIENT_SOURCES: Record<NutrientKey, { title: string; sources: Source[] }> = {
+  protein: { title: "Protein", sources: [mk("Kvarg", ["mjolk", "laktos"], "mejeri"), mk("Ägg", ["agg"], "agg"), mk("Kyckling", [], "kott"), mk("Lax", [], "fisk"), mk("Tonfisk", [], "fisk"), mk("Tofu", ["soja"]), mk("Linser"), mk("Kikärtor"), mk("Keso", ["mjolk", "laktos"], "mejeri"), mk("Edamamebönor", ["soja"]), mk("Tempeh", ["soja"]), mk("Räkor", [], "fisk"), mk("Laktosfri kvarg", ["mjolk"], "mejeri")] },
+  kolhydrater: { title: "Kolhydrater", sources: [mk("Banan"), mk("Havregryn", ["gluten"]), mk("Ris"), mk("Potatis"), mk("Sötpotatis"), mk("Fullkornspasta", ["gluten"]), mk("Bär"), mk("Quinoa"), mk("Russin"), mk("Rågbröd", ["gluten"]), mk("Glutenfria havregryn")] },
+  elektrolyter: { title: "Vätska & elektrolyter", sources: [mk("Kokosvatten"), mk("Vatten med en nypa salt"), mk("Mineralvatten"), mk("Banan (kalium)"), mk("Buljong"), mk("Apelsin"), mk("Avokado (kalium)"), mk("Sportdryck vid långa pass")] },
+  vatska: { title: "Vätska", sources: [mk("Vatten"), mk("Mineralvatten"), mk("Vattenmelon"), mk("Gurka"), mk("Örtte"), mk("Citronvatten")] },
+  magnesium: { title: "Magnesium för vila & sömn", sources: [mk("Pumpafrön"), mk("Mandlar", ["notter"]), mk("Havregryn", ["gluten"]), mk("Spenat"), mk("Mörk choklad"), mk("Bönor"), mk("Cashewnötter", ["notter"]), mk("Solrosfrön")] },
+  antioxidanter: { title: "Antioxidanter", sources: [mk("Blåbär"), mk("Körsbär"), mk("Spenat"), mk("Paprika"), mk("Broccoli"), mk("Granatäpple"), mk("Grönkål"), mk("Tomat")] },
+  omega3: { title: "Omega-3", sources: [mk("Lax", [], "fisk"), mk("Makrill", [], "fisk"), mk("Chiafrön"), mk("Linfrön"), mk("Valnötter", ["notter"]), mk("Rapsolja"), mk("Sill", [], "fisk")] },
+};
+
+function sourceEligible(src: Source, diet: Diet | undefined, restrictions: Restriction[]) {
+  const d = diet ?? "allt";
+  if (d === "veganskt" && src.animal) return false;
+  if (d === "vegetariskt" && (src.animal === "kott" || src.animal === "fisk")) return false;
+  if (d === "pescetariskt" && src.animal === "kott") return false;
+  if (d === "glutenfritt" && src.contains.includes("gluten")) return false;
+  return restrictions.every((r) => !src.contains.includes(r));
+}
+
+export interface GuideItem { key: NutrientKey; title: string; why: string; sources: string[] }
+export interface GuideInput {
+  profile: Profile; workout: Workout | undefined;
+  eaten: MacroTargets; target: MacroTargets;
+  hour: number; waterGlasses: number;
+  /** Changes the rotation of sources ("Nya förslag"). */
+  shuffle?: number;
+}
+
+/** Personal post-workout guide: what to prioritise now and good sources, based on workout, today's intake and time of day. */
+export function recoveryGuide({ profile, workout, eaten, target, hour, waterGlasses, shuffle = 0 }: GuideInput): GuideItem[] {
   if (!workout || workout.status !== "klart" || workout.kind === "vila") return [];
-  return suggestionsFor(profile.diet, undefined, profile.restrictions)
-    .filter((meal) => meal.type === "lunch" || meal.type === "middag")
-    .sort((a, b) => workout.kind === "styrka" ? b.protein - a.protein : a.kcal - b.kcal)
-    .slice(0, 3);
+  const proteinLeft = Math.max(0, target.protein - eaten.protein);
+  const carbsLeft = Math.max(0, target.carbs - eaten.carbs);
+  const long = workout.durationMin >= 45;
+  const evening = hour >= 19;
+  const items: { key: NutrientKey; prio: number; why: string }[] = [];
+  const add = (key: NutrientKey, prio: number, why: string) => items.push({ key, prio, why });
+
+  if (workout.kind === "styrka") {
+    if (proteinLeft > 0) add("protein", 10, `Bygger upp musklerna efter passet. Du har ca ${proteinLeft} g kvar till dagens mål.`);
+    else add("antioxidanter", 6, "Proteinmålet är redan nått – färgglada grönsaker och bär stöttar återhämtningen.");
+    add("kolhydrater", carbsLeft > 50 ? 8 : 5, carbsLeft > 50 ? "Fyller på energin i musklerna – du har ätit lite kolhydrater hittills idag." : "Lite kolhydrater tillsammans med proteinet hjälper musklerna att återhämta sig.");
+  } else if (workout.kind === "kondition") {
+    add("kolhydrater", carbsLeft > 50 ? 10 : 8, `Fyller på energidepåerna efter ${workout.durationMin} min kondition.`);
+    add("elektrolyter", long ? 9 : 7, long ? "Längre pass = mer svett. Ersätt salt och kalium tillsammans med vätskan." : "Ersätt vätskan och saltet du svettats ut.");
+    if (proteinLeft > 20) add("protein", 5, "En portion protein hjälper även efter konditionsträning.");
+  } else {
+    add("vatska", 7, "Återfukta kroppen efter rörlighetspasset.");
+    add("antioxidanter", 6, "Bär och grönt ger mikronäring som stöttar kroppen.");
+  }
+  if (evening) add("magnesium", 7, "Kvällspass – välj något lättsmält. Magnesium kan bidra till avslappning inför natten.");
+  if (waterGlasses < Math.max(3, Math.round(profile.waterGoal / 2)) && !items.some((i) => i.key === "elektrolyter" || i.key === "vatska"))
+    add("vatska", 8, `Du har druckit ${waterGlasses} glas idag – drick lite extra nu.`);
+  if (workout.kind === "styrka" && !evening && proteinLeft === 0) add("omega3", 4, "Fett av god kvalitet kompletterar en bra träningsdag.");
+
+  const seed = [...(workout.id + workout.date)].reduce((a, c) => a + c.charCodeAt(0), 0) + shuffle * 3;
+  return items.sort((a, b) => b.prio - a.prio).slice(0, 3).map((it, idx) => {
+    const n = NUTRIENT_SOURCES[it.key];
+    const ok = n.sources.filter((src) => sourceEligible(src, profile.diet, profile.restrictions ?? [])).map((src) => src.name);
+    const start = ok.length ? (seed + idx * 5) % ok.length : 0;
+    const picked = [...ok.slice(start), ...ok.slice(0, start)].slice(0, 4);
+    return { key: it.key, title: n.title, why: it.why, sources: picked };
+  });
 }
 
 /* ---------------- Onboarding: skapa plan + exempeldata ---------------- */
