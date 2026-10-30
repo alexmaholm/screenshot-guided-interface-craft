@@ -60,7 +60,7 @@ export interface Micros { fiber: number; sugar: number; satFat: number; salt: nu
 /** Sums optional micronutrients; meals without values count as 0. */
 export function sumMicros(meals: Pick<Meal, "fiber" | "sugar" | "satFat" | "salt">[]): Micros {
   const s = (k: keyof Micros) => Math.round(meals.reduce((a, m) => a + (m[k] ?? 0), 0) * 10) / 10;
-  return { fiber: mk("fiber"), sugar: mk("sugar"), satFat: mk("satFat"), salt: mk("salt") };
+  return { fiber: s("fiber"), sugar: s("sugar"), satFat: s("satFat"), salt: s("salt") };
 }
 
 export interface Favorite {
