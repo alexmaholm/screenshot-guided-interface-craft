@@ -40,6 +40,8 @@ export interface Profile {
   nutritionFocus?: NutritionFocus | undefined;
   /** Emoji avatar or data-URL photo */
   avatar?: string | undefined;
+  tourSeen?: boolean | undefined;
+  healthSync?: { calories: boolean; steps: boolean; weight: boolean } | undefined;
 }
 
 export interface Meal {
@@ -539,3 +541,16 @@ export function sumMacros(meals: Meal[]): MacroTargets {
 }
 
 export const GLASS_ML = 250;
+
+export type MacroKey = "protein" | "carbs" | "fat";
+/** Friendly, non-judgmental progress line per macro. Returns null before anything is logged. */
+export function macroFeedback(key: MacroKey, eaten: number, target: number): string | null {
+  if (eaten <= 0 || target <= 0) return null;
+  const pct = Math.round((eaten / target) * 100);
+  const msg = {
+    protein: ["Proteinmålet nått – grymt för återhämtningen! 💪", "av proteinet nått – fint på väg!"],
+    carbs: ["Kolhydratmålet nått – bra energipåfyllning för dagen! ⚡", "av kolhydraterna – energi på väg in."],
+    fat: ["Fettmålet nått – fint med bra fetter idag! 🥑", "av fettet – gott om utrymme kvar för bra fetter."],
+  }[key];
+  return pct >= 100 ? msg[0]! : `${pct} % ${msg[1]}`;
+}

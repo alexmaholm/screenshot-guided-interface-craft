@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { estimateText } from "@/lib/textlog.functions";
 import {
-  addDays, dateKey, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, sumMicros, MEAL_LABEL, MEAL_TYPES, prettyDate, uid, update, useBalans,
+  addDays, dateKey, macroFeedback, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, sumMicros, MEAL_LABEL, MEAL_TYPES, prettyDate, uid, update, useBalans,
   type Meal, type MealType, type Micros,
 } from "@/lib/balans";
 
@@ -118,11 +118,7 @@ function Mat() {
         </div>
         <p className="text-xs text-muted-foreground">{NUTRITION_FOCUS.find((f) => f.value === nutritionFocusOf(p))?.label} · Vägledande uppskattning, inte medicinsk rådgivning.</p>
         <MacroSummary eaten={eaten} target={target} showKcal={showKcal} />
-        {eaten.protein > 0 && (
-          <p className="text-sm text-primary">
-            {eaten.protein >= target.protein ? "Proteinmålet nått – grymt för återhämtningen! 💪" : `${Math.round((eaten.protein / Math.max(1, target.protein)) * 100)} % av proteinet nått – fint på väg!`}
-          </p>
-        )}
+        {(["protein", "carbs", "fat"] as const).map((k) => { const t = macroFeedback(k, eaten[k], target[k]); return t ? <p key={k} className="text-sm text-primary">{t}</p> : null; })}
         <details className="group rounded-2xl bg-muted px-4 py-2">
           <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-sm font-medium">
             Fler näringsämnen <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
