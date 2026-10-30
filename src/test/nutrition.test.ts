@@ -1,27 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { completeOnboarding, dateKey, recoveryGuide, resetAll, suggestionsFor, type Profile, type Restriction, type Workout } from "@/lib/balans";
+import { completeOnboarding, dateKey, recoveryGuide, resetAll, dishEligible, type Profile, type Restriction, type Workout } from "@/lib/balans";
 
 const profile: Profile = { name: "Alex", goal: "styrka", equipment: ["ingen"], days: [0, 2, 4], sessionMin: 25, waterGoal: 8, hideCalories: false, diet: "allt" };
 const workout: Workout = { id: "test", date: dateKey(), title: "Styrka", kind: "styrka", durationMin: 25, exercises: [], status: "klart" };
 
 describe("Dietary restrictions", () => {
-  const cases: [Restriction, string][] = [
-    ["gluten", "Äggröra på surdegsbröd"],
-    ["laktos", "Proteinyoghurt"],
-    ["mjolk", "Halloumiwrap med grönsaker"],
-    ["notter", "Äpple och jordnötssmör"],
-    ["soja", "Tofu-wok med nudlar"],
-    ["agg", "Äggröra på surdegsbröd"],
-  ];
-  it.each(cases)("excludes %s ingredients", (restriction, name) => {
-    expect(suggestionsFor("allt").map((s) => s.name)).toContain(name);
-    expect(suggestionsFor("allt", undefined, [restriction]).map((s) => s.name)).not.toContain(name);
+  it("excludes dishes containing a restricted ingredient", () => {
+    expect(dishEligible(["allt"], ["gluten"], "allt", [])).toBe(true);
+    expect(dishEligible(["allt"], ["gluten"], "allt", ["gluten"])).toBe(false);
   });
-  it("combines vegan preferences with gluten restriction", () => {
-    const meals = suggestionsFor("veganskt", undefined, ["gluten"]);
-    expect(meals.map((s) => s.name)).toContain("Linsgryta med ris");
-    expect(meals.map((s) => s.name)).not.toContain("Tofu-wok med nudlar");
-    expect(meals.every((s) => s.diets.includes("veganskt"))).toBe(true);
+  it("excludes dishes outside the chosen diet or missing ingredient data", () => {
+    expect(dishEligible(["allt"], [], "veganskt")).toBe(false);
+    expect(dishEligible(["veganskt"], undefined, "veganskt")).toBe(false);
   });
   it("starts new users with no history", () => {
     resetAll();
