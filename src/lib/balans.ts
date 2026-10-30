@@ -60,7 +60,7 @@ export interface Micros { fiber: number; sugar: number; satFat: number; salt: nu
 /** Sums optional micronutrients; meals without values count as 0. */
 export function sumMicros(meals: Pick<Meal, "fiber" | "sugar" | "satFat" | "salt">[]): Micros {
   const s = (k: keyof Micros) => Math.round(meals.reduce((a, m) => a + (m[k] ?? 0), 0) * 10) / 10;
-  return { fiber: s("fiber"), sugar: s("sugar"), satFat: s("satFat"), salt: s("salt") };
+  return { fiber: mk("fiber"), sugar: mk("sugar"), satFat: mk("satFat"), salt: mk("salt") };
 }
 
 export interface Favorite {
@@ -382,15 +382,15 @@ export function suggestionsFor(diet: Diet | undefined, type?: MealType, restrict
 
 export type NutrientKey = "protein" | "kolhydrater" | "elektrolyter" | "vatska" | "magnesium" | "antioxidanter" | "omega3";
 interface Source { name: string; contains: Restriction[]; animal?: "kott" | "fisk" | "mejeri" | "agg" }
-const s = (name: string, contains: Restriction[] = [], animal?: Source["animal"]): Source => (animal ? { name, contains, animal } : { name, contains });
+const mk = (name: string, contains: Restriction[] = [], animal?: Source["animal"]): Source => (animal ? { name, contains, animal } : { name, contains });
 const NUTRIENT_SOURCES: Record<NutrientKey, { title: string; sources: Source[] }> = {
-  protein: { title: "Protein", sources: [s("Kvarg", ["mjolk", "laktos"], "mejeri"), s("Ägg", ["agg"], "agg"), s("Kyckling", [], "kott"), s("Lax", [], "fisk"), s("Tonfisk", [], "fisk"), s("Tofu", ["soja"]), s("Linser"), s("Kikärtor"), s("Keso", ["mjolk", "laktos"], "mejeri"), s("Edamamebönor", ["soja"]), s("Tempeh", ["soja"]), s("Räkor", [], "fisk"), s("Laktosfri kvarg", ["mjolk"], "mejeri")] },
-  kolhydrater: { title: "Kolhydrater", sources: [s("Banan"), s("Havregryn", ["gluten"]), s("Ris"), s("Potatis"), s("Sötpotatis"), s("Fullkornspasta", ["gluten"]), s("Bär"), s("Quinoa"), s("Russin"), s("Rågbröd", ["gluten"]), s("Glutenfria havregryn")] },
-  elektrolyter: { title: "Vätska & elektrolyter", sources: [s("Kokosvatten"), s("Vatten med en nypa salt"), s("Mineralvatten"), s("Banan (kalium)"), s("Buljong"), s("Apelsin"), s("Avokado (kalium)"), s("Sportdryck vid långa pass")] },
-  vatska: { title: "Vätska", sources: [s("Vatten"), s("Mineralvatten"), s("Vattenmelon"), s("Gurka"), s("Örtte"), s("Citronvatten")] },
-  magnesium: { title: "Magnesium för vila & sömn", sources: [s("Pumpafrön"), s("Mandlar", ["notter"]), s("Havregryn", ["gluten"]), s("Spenat"), s("Mörk choklad"), s("Bönor"), s("Cashewnötter", ["notter"]), s("Solrosfrön")] },
-  antioxidanter: { title: "Antioxidanter", sources: [s("Blåbär"), s("Körsbär"), s("Spenat"), s("Paprika"), s("Broccoli"), s("Granatäpple"), s("Grönkål"), s("Tomat")] },
-  omega3: { title: "Omega-3", sources: [s("Lax", [], "fisk"), s("Makrill", [], "fisk"), s("Chiafrön"), s("Linfrön"), s("Valnötter", ["notter"]), s("Rapsolja"), s("Sill", [], "fisk")] },
+  protein: { title: "Protein", sources: [mk("Kvarg", ["mjolk", "laktos"], "mejeri"), mk("Ägg", ["agg"], "agg"), mk("Kyckling", [], "kott"), mk("Lax", [], "fisk"), mk("Tonfisk", [], "fisk"), mk("Tofu", ["soja"]), mk("Linser"), mk("Kikärtor"), mk("Keso", ["mjolk", "laktos"], "mejeri"), mk("Edamamebönor", ["soja"]), mk("Tempeh", ["soja"]), mk("Räkor", [], "fisk"), mk("Laktosfri kvarg", ["mjolk"], "mejeri")] },
+  kolhydrater: { title: "Kolhydrater", sources: [mk("Banan"), mk("Havregryn", ["gluten"]), mk("Ris"), mk("Potatis"), mk("Sötpotatis"), mk("Fullkornspasta", ["gluten"]), mk("Bär"), mk("Quinoa"), mk("Russin"), mk("Rågbröd", ["gluten"]), mk("Glutenfria havregryn")] },
+  elektrolyter: { title: "Vätska & elektrolyter", sources: [mk("Kokosvatten"), mk("Vatten med en nypa salt"), mk("Mineralvatten"), mk("Banan (kalium)"), mk("Buljong"), mk("Apelsin"), mk("Avokado (kalium)"), mk("Sportdryck vid långa pass")] },
+  vatska: { title: "Vätska", sources: [mk("Vatten"), mk("Mineralvatten"), mk("Vattenmelon"), mk("Gurka"), mk("Örtte"), mk("Citronvatten")] },
+  magnesium: { title: "Magnesium för vila & sömn", sources: [mk("Pumpafrön"), mk("Mandlar", ["notter"]), mk("Havregryn", ["gluten"]), mk("Spenat"), mk("Mörk choklad"), mk("Bönor"), mk("Cashewnötter", ["notter"]), mk("Solrosfrön")] },
+  antioxidanter: { title: "Antioxidanter", sources: [mk("Blåbär"), mk("Körsbär"), mk("Spenat"), mk("Paprika"), mk("Broccoli"), mk("Granatäpple"), mk("Grönkål"), mk("Tomat")] },
+  omega3: { title: "Omega-3", sources: [mk("Lax", [], "fisk"), mk("Makrill", [], "fisk"), mk("Chiafrön"), mk("Linfrön"), mk("Valnötter", ["notter"]), mk("Rapsolja"), mk("Sill", [], "fisk")] },
 };
 
 function sourceEligible(src: Source, diet: Diet | undefined, restrictions: Restriction[]) {
