@@ -116,18 +116,7 @@ function Mat() {
             {showKcal ? "Dölj kalorier" : "Visa kalorier"}
           </button>
         </div>
-        <div>
-          <p className="text-sm font-medium">Ditt fokus</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {NUTRITION_FOCUS.map((f) => (
-              <button key={f.value} className="chip" aria-pressed={nutritionFocusOf(p) === f.value}
-                onClick={() => update((st) => st.profile ? ({ ...st, profile: { ...st.profile, nutritionFocus: f.value } }) : st)}>
-                {f.label}
-              </button>
-            ))}
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">{NUTRITION_FOCUS.find((f) => f.value === nutritionFocusOf(p))?.hint} · Vägledande uppskattning, inte medicinsk rådgivning.</p>
-        </div>
+        <p className="text-xs text-muted-foreground">{NUTRITION_FOCUS.find((f) => f.value === nutritionFocusOf(p))?.label} · Vägledande uppskattning, inte medicinsk rådgivning.</p>
         <MacroSummary eaten={eaten} target={target} showKcal={showKcal} />
         {eaten.protein > 0 && (
           <p className="text-sm text-primary">
