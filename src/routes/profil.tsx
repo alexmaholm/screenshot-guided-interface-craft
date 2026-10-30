@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { update, useBalans } from "@/lib/balans";
+import { addDays, dateKey, update, useBalans } from "@/lib/balans";
 import { streakInfo } from "@/lib/habits";
 
 export const Route = createFileRoute("/profil")({
@@ -52,7 +52,7 @@ function Profile() {
   const p = s.profile!;
   const [name, setName] = useState(p.name);
   const fileRef = useRef<HTMLInputElement>(null);
-  const streak = streakInfo(s);
+  const streak = streakInfo(s, dateKey(), addDays);
   const done = s.workouts.filter((w) => w.status === "klart").length;
   const avatar = p.avatar ?? "🌿";
   const isPhoto = avatar.startsWith("data:");
@@ -91,7 +91,7 @@ function Profile() {
       </section>
 
       <section className="grid grid-cols-3 gap-3">
-        {[{ v: streak.current, l: "dagar i rad" }, { v: done, l: "pass klara" }, { v: s.meals.length, l: "måltider" }].map((x) => (
+        {[{ v: streak.streak, l: "dagar i rad" }, { v: done, l: "pass klara" }, { v: s.meals.length, l: "måltider" }].map((x) => (
           <div key={x.l} className="card-soft p-4 text-center"><div className="text-2xl font-bold">{x.v}</div><div className="text-xs text-muted-foreground">{x.l}</div></div>
         ))}
       </section>
