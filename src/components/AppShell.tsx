@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Utensils, Dumbbell, LineChart, Leaf } from "lucide-react";
+import { Home, Utensils, Dumbbell, LineChart, Leaf, User } from "lucide-react";
 import type { ReactNode } from "react";
 import { AiCoach } from "@/components/AiCoach";
 
@@ -8,6 +8,7 @@ const TABS = [
   { to: "/mat", label: "Mat", icon: Utensils },
   { to: "/traning", label: "Träning", icon: Dumbbell },
   { to: "/framsteg", label: "Framsteg", icon: LineChart },
+  { to: "/profil", label: "Profil", icon: User },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -39,7 +40,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         aria-label="Huvudmeny"
         className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur md:hidden"
       >
-        <ul className="mx-auto grid max-w-md grid-cols-4">
+        <ul className="mx-auto grid max-w-md grid-cols-5">
           {TABS.map(({ to, label, icon: Icon }) => (
             <li key={to}>
               <Link
