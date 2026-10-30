@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { estimateText } from "@/lib/textlog.functions";
 import {
-  addDays, dateKey, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, sumMicros, MEAL_LABEL, MEAL_TYPES, prettyDate, suggestionsFor, uid, update, useBalans,
+  addDays, dateKey, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, sumMicros, MEAL_LABEL, MEAL_TYPES, prettyDate, uid, update, useBalans,
   type Meal, type MealType, type Micros,
 } from "@/lib/balans";
 
@@ -33,9 +33,9 @@ export const Route = createFileRoute("/mat")({
   head: () => ({
     meta: [
       { title: "Mat – Balans" },
-      { name: "description", content: "Logga måltider, spara favoriter och hitta förslag som passar din kost." },
+      { name: "description", content: "Logga måltider med foto, streckkod eller egen text och spara favoriter." },
       { property: "og:title", content: "Mat – Balans" },
-      { property: "og:description", content: "Enkel måltidslogg med favoriter och förslag." },
+      { property: "og:description", content: "Enkel måltidslogg med foto, streckkod och favoriter." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -213,7 +213,7 @@ function AddMealDialog({
   onAdd: (m: Omit<Meal, "id" | "date">) => void; showKcal: boolean;
 }) {
   const s = useBalans();
-  const [tab, setTab] = useState<"foto" | "kod" | "sök" | "egen" | "favoriter" | "tidigare" | "förslag">("foto");
+  const [tab, setTab] = useState<"foto" | "kod" | "sök" | "egen" | "favoriter" | "tidigare">("foto");
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [kcal, setKcal] = useState("");
@@ -231,7 +231,6 @@ function AddMealDialog({
   if (!s) return null;
 
   const recent = Array.from(new Map([...s.meals].reverse().map((m) => [m.name, m])).values()).slice(0, 8);
-  const sugg = suggestionsFor(s.profile?.diet, type, s.profile?.restrictions);
 
   const runAi = async () => {
     setAiBusy(true);
@@ -283,7 +282,7 @@ function AddMealDialog({
           ))}
         </div>
         <div className="flex gap-1 overflow-x-auto rounded-full bg-muted p-1 text-sm" role="tablist">
-          {(["foto", "kod", "sök", "egen", "favoriter", "tidigare", "förslag"] as const).map((t) => (
+          {(["foto", "kod", "sök", "egen", "favoriter", "tidigare"] as const).map((t) => (
             <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`min-h-10 shrink-0 rounded-full px-3 text-xs capitalize ${tab === t ? "bg-card font-semibold shadow-sm" : ""}`}>{t === "kod" ? "Streckkod" : t}</button>
           ))}
         </div>
@@ -335,7 +334,6 @@ function AddMealDialog({
         )}
         {tab === "favoriter" && <Pick items={s.favorites} />}
         {tab === "tidigare" && <Pick items={recent} />}
-        {tab === "förslag" && <><Pick items={sugg} /><p className="text-xs text-muted-foreground">Kontrollera ingredienser och allergenmärkning. Chiapudding avser kokosdryck; lax tillagas med olja.</p></>}
       </DialogContent>
     </Dialog>
   );
