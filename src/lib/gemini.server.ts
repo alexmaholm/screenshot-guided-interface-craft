@@ -1,6 +1,6 @@
 // Shared Google Gemini model for all AI features (photo log, text log, coach).
 // Uses Gemini's OpenAI-compatible endpoint with the project's GEMINI_API_KEY.
-export const GEMINI_MODEL = "gemini-2.5-flash";
+export const GEMINI_MODEL = "gemini-3.8-flash";
 
 export async function geminiModel() {
   const key = process.env["GEMINI_API_KEY"];
