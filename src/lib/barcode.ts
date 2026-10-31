@@ -3,6 +3,8 @@ export interface BarcodeProduct {
   code: string;
   name: string;
   kcal: number; protein: number; carbs: number; fat: number;
+  /** Per 100 g, when the product lists them. */
+  fiber?: number | undefined; sugar?: number | undefined; satFat?: number | undefined; salt?: number | undefined;
   /** Suggested serving in grams, if the product lists one. */
   servingG?: number | undefined;
 }
@@ -25,6 +27,11 @@ export function parseOffProduct(code: string, json: unknown): BarcodeProduct | n
   const kcal = num(n["energy-kcal_100g"]) ?? (kj !== undefined ? kj / 4.184 : undefined);
   const protein = num(n["proteins_100g"]), carbs = num(n["carbohydrates_100g"]), fat = num(n["fat_100g"]);
   if (kcal === undefined && protein === undefined && carbs === undefined && fat === undefined) return null;
+  const sodium = num(n["sodium_100g"]);
+  const micros = {
+    fiber: num(n["fiber_100g"]), sugar: num(n["sugars_100g"]), satFat: num(n["saturated-fat_100g"]),
+    salt: num(n["salt_100g"]) ?? (sodium !== undefined ? Math.round(sodium * 2.5 * 100) / 100 : undefined),
+  };
   const name = String(p["product_name_sv"] || p["product_name"] || "").trim();
   const brand = String(p["brands"] ?? "").split(",")[0]?.trim();
   return {
@@ -32,13 +39,20 @@ export function parseOffProduct(code: string, json: unknown): BarcodeProduct | n
     name: [brand, name].filter(Boolean).join(" ") || `Produkt ${code}`,
     kcal: Math.round(kcal ?? 0), protein: protein ?? 0, carbs: carbs ?? 0, fat: fat ?? 0,
     servingG: num(p["serving_quantity"]),
+    ...Object.fromEntries(Object.entries(micros).filter(([, v]) => v !== undefined)),
   };
 }
 
 export function portionFor(p: BarcodeProduct, grams: number) {
   const k = Math.max(0, grams) / 100;
   const r1 = (n: number) => Math.round(n * k * 10) / 10;
-  return { kcal: Math.round(p.kcal * k), protein: r1(p.protein), carbs: r1(p.carbs), fat: r1(p.fat) };
+  const out: { kcal: number; protein: number; carbs: number; fat: number; fiber?: number; sugar?: number; satFat?: number; salt?: number } =
+    { kcal: Math.round(p.kcal * k), protein: r1(p.protein), carbs: r1(p.carbs), fat: r1(p.fat) };
+  for (const key of ["fiber", "sugar", "satFat", "salt"] as const) {
+    const v = p[key];
+    if (v !== undefined) out[key] = key === "salt" ? Math.round(v * k * 100) / 100 : r1(v);
+  }
+  return out;
 }
 
 export async function lookupBarcode(code: string): Promise<BarcodeProduct | null> {

@@ -27,3 +27,14 @@ describe("measureGrams", () => {
   it("1,5 dl är 150 g", () => expect(measureGrams("dl", 1.5)).toBe(150));
   it("portion följer förpackningen", () => expect(measureGrams("portion", 2, 30)).toBe(60));
 });
+
+describe("streckkod mikronäring", () => {
+  it("läser fiber, socker, mättat fett och salt per 100 g och skalar per portion", () => {
+    const p = parseOffProduct("73108650", { product: { product_name: "Müsli", nutriments: { "energy-kcal_100g": 400, fiber_100g: 8, sugars_100g: 20, "saturated-fat_100g": 2, salt_100g: 0.5 } } })!;
+    expect(portionFor(p, 50)).toMatchObject({ fiber: 4, sugar: 10, satFat: 1, salt: 0.25 });
+  });
+  it("räknar salt från natrium när salt saknas", () => {
+    const p = parseOffProduct("73108650", { product: { product_name: "x", nutriments: { "energy-kcal_100g": 100, sodium_100g: 0.4 } } });
+    expect(p?.salt).toBe(1);
+  });
+});

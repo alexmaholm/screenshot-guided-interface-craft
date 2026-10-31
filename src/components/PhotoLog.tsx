@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { analyzePlate } from "@/lib/photo.functions";
-import { plateTotals, scaleItem, type PlateItem, type PlateQuestion } from "@/lib/photolog";
+import { plateMicros, plateTotals, scaleItem, type PlateItem, type PlateQuestion } from "@/lib/photolog";
 
-type Saved = { name: string; amount: string; kcal: number; protein: number; carbs: number; fat: number };
+type Saved = { name: string; amount: string; kcal: number; protein: number; carbs: number; fat: number; fiber?: number; sugar?: number; satFat?: number; salt?: number };
 
 async function shrink(file: File): Promise<string> {
   const url = URL.createObjectURL(file);
@@ -114,7 +114,7 @@ export function PhotoLog({ diet, showKcal, onSave }: { diet?: string | undefined
           {total && (
             <p className="text-sm text-muted-foreground">Totalt {total.grams} g · {total.protein} g P · {total.carbs} g K · {total.fat} g F{showKcal ? ` · ${total.kcal} kcal` : ""}</p>
           )}
-          <Button className="h-12 w-full rounded-full" disabled={items.length === 0} onClick={() => total && onSave({ name: title.trim() || "Måltid", amount: `${total.grams} g (foto)`, kcal: total.kcal, protein: total.protein, carbs: total.carbs, fat: total.fat })}>Spara måltid</Button>
+          <Button className="h-12 w-full rounded-full" disabled={items.length === 0} onClick={() => total && onSave({ name: title.trim() || "Måltid", amount: `${total.grams} g (foto)`, kcal: total.kcal, protein: total.protein, carbs: total.carbs, fat: total.fat, ...plateMicros(items) })}>Spara måltid</Button>
           <p className="text-xs text-muted-foreground">Uppskattning från bild – justera vid behov.</p>
         </>
       )}

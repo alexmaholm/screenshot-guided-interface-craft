@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { isValidBarcode, lookupBarcode, measureGrams, MEASURE_STEP, portionFor, type BarcodeProduct, type Measure } from "@/lib/barcode";
 
-type Saved = { name: string; amount: string; kcal: number; protein: number; carbs: number; fat: number };
+type Saved = { name: string; amount: string; kcal: number; protein: number; carbs: number; fat: number; fiber?: number; sugar?: number; satFat?: number; salt?: number };
 
 export function BarcodeScan({ showKcal, onSave }: { showKcal: boolean; onSave: (m: Saved) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
