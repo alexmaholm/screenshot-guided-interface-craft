@@ -25,23 +25,17 @@ export const estimateText = createServerFn({ method: "POST" })
     return { text };
   })
   .handler(async ({ data }): Promise<{ ok: true; result: TextEstimate } | { ok: false; error: string }> => {
-    const key = process.env["LOVABLE_API_KEY"];
-    if (!key) return { ok: false, error: "AI-beräkningen är inte konfigurerad." };
-    const { createOpenAI } = await import("@ai-sdk/openai");
+    const { geminiModel } = await import("./gemini.server");
+    const model = await geminiModel();
+    if (!model) return { ok: false, error: "AI-beräkningen är inte konfigurerad." };
     const { streamText, Output } = await import("ai");
-    const openai = createOpenAI({
-      baseURL: "https://ai.gateway.lovable.dev/v1",
-      apiKey: key,
-      headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
-    });
     try {
       const result = streamText({
-        model: openai.responses("openai/gpt-6-astra"),
+        model,
         system: SYSTEM,
         output: Output.object({ schema }),
         maxRetries: 0,
         prompt: data.text,
-        providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
       });
       return { ok: true, result: await result.output };
     } catch (e) {
