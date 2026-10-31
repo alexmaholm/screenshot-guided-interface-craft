@@ -415,12 +415,16 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
         {su.incline && base.bench && base.bench !== "seat" && <line x1="54" y1="62" x2="30" y2="44" strokeWidth="5" strokeLinecap="round" className="stroke-foreground/35" />}
         {seg("hip", "kn2", 9, "thigh", true)}{seg("kn2", "ft2", 6.5, "shin", true)}
         {seg("sh", "el2", 6.5, "upper", true)}{seg("el2", "ha2", 5, "fore", true)}
+        {(["ft2"] as J[]).map((f) => <path key={f} d={`M${a[f][0] - 2.4} ${a[f][1] + 1.4} Q${a[f][0] - 2.6} ${a[f][1] - 2.4} ${a[f][0] + 0.5} ${a[f][1] - 2} L${a[f][0] + 5.2} ${a[f][1] - 0.2} Q${a[f][0] + 6.4} ${a[f][1] + 1.4} ${a[f][0] + 5} ${a[f][1] + 1.6} Z`} className="fill-foreground/60" opacity={0.5} />)}
+        <path d={limbPath(a.sh, a.head, 5.5, 4.6, 5, 0.5)} className="fill-foreground/85" />
         {seg("sh", "hip", 15, "torso")}
         {seg("hip", "kn", 10, "thigh")}{seg("kn", "ft", 7, "shin")}
+        <path d={`M${a.ft[0] - 2.4} ${a.ft[1] + 1.4} Q${a.ft[0] - 2.6} ${a.ft[1] - 2.4} ${a.ft[0] + 0.5} ${a.ft[1] - 2} L${a.ft[0] + 5.2} ${a.ft[1] - 0.2} Q${a.ft[0] + 6.4} ${a.ft[1] + 1.4} ${a.ft[0] + 5} ${a.ft[1] + 1.6} Z`} className="fill-foreground/85" />
         {seg("sh", "el", 7, "upper")}{seg("el", "ha", 5.5, "fore")}
-        <line x1={a.sh[0]} y1={a.sh[1]} x2={a.head[0]} y2={a.head[1]} strokeWidth="6" strokeLinecap="round" className="stroke-foreground/80" />
-        {(["ft", "ft2"] as J[]).map((f) => <line key={f} x1={a[f][0]} y1={a[f][1]} x2={a[f][0] + 4} y2={a[f][1]} strokeWidth="4" strokeLinecap="round" className="stroke-foreground/80" opacity={f === "ft2" ? 0.45 : 1} />)}
-        <ellipse rx="5.4" ry="6.2" cx={a.head[0]} cy={a.head[1]} className="fill-foreground/80" />
+        <circle cx={a.sh[0]} cy={a.sh[1] + 1.2} r="4.4" className={sc.work.includes("upper") ? "fill-foreground/85" : "fill-foreground/85"} />
+        {sc.work.includes("upper") && <circle cx={a.sh[0]} cy={a.sh[1] + 1.2} r="4.4" className="fill-coral" opacity={0.25 + 0.75 * t} />}
+        <circle cx={a.ha[0]} cy={a.ha[1]} r="2.3" className="fill-foreground/85" />
+        <ellipse rx="5" ry="6" cx={a.head[0]} cy={a.head[1]} className="fill-foreground/85" />
         {sc.gear === "barbell" && at(gearAt, <g><circle r="8" className="fill-foreground" /><circle r="2.2" className="fill-card" /></g>)}
         {sc.gear === "dumbbell" && at(gearAt, <g className="fill-foreground"><rect x="-6" y="-2" width="12" height="4" rx="1" /><rect x="-7" y="-4.5" width="4" height="9" rx="1.5" /><rect x="3" y="-4.5" width="4" height="9" rx="1.5" /></g>)}
         {sc.gear === "kettlebell" && at(gearAt, <g><circle cy="3" r="4.5" className="fill-foreground" /><path d="M-2.5 -0.5 V-4 H2.5 V-0.5" fill="none" strokeWidth="1.4" className="stroke-foreground" /></g>)}
