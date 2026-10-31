@@ -9,6 +9,10 @@ const itemSchema = z.object({
   protein: z.number(),
   carbs: z.number(),
   fat: z.number(),
+  fiber: z.number(),
+  sugar: z.number(),
+  satFat: z.number(),
+  salt: z.number(),
 });
 const schema = z.object({
   title: z.string(),
@@ -17,7 +21,7 @@ const schema = z.object({
 });
 
 const SYSTEM = `Du är en svensk kostexpert som analyserar foton av måltider.
-Identifiera varje synlig råvara/komponent, uppskatta vikt i gram och beräkna kcal, protein, kolhydrater och fett för den mängden.
+Identifiera varje synlig råvara/komponent, uppskatta vikt i gram och beräkna kcal, protein, kolhydrater, fett, fibrer (fiber), socker (sugar), mättat fett (satFat) och salt (salt) i gram för den mängden.
 Om något inte går att avgöra säkert från bilden (t.ex. typ av sås/dressing, tillagningsfett, panering, dryck, dolda ingredienser, osäker portion), lägg en kort fråga på svenska i "questions" med 2–4 korta svarsalternativ. Ställ max 4 frågor (max 4 svarsalternativ), och bara när det påverkar näringen märkbart.
 Om svar på tidigare frågor ges, använd dem och ställ inte samma frågor igen.
 "title" är ett kort svenskt namn på rätten. Om bilden inte visar mat: tom items och en fråga om vad användaren åt.`;

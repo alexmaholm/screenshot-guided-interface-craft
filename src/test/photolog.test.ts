@@ -14,3 +14,11 @@ describe("photolog", () => {
     expect(plateTotals([rice, rice]).kcal).toBe(520);
   });
 });
+
+import { plateMicros as _pm, scaleItem as _si } from "@/lib/photolog";
+describe("foto mikronäring", () => {
+  it("halverad vikt halverar fibrer och salt, och tallriken summeras", () => {
+    const a = _si({ name: "a", grams: 200, kcal: 200, protein: 10, carbs: 30, fat: 5, fiber: 6, sugar: 4, satFat: 2, salt: 1 }, 100);
+    expect(_pm([a, { name: "b", grams: 50, kcal: 50, protein: 1, carbs: 1, fat: 1, fiber: 1, sugar: 1, satFat: 1, salt: 0.2 }])).toEqual({ fiber: 4, sugar: 3, satFat: 2, salt: 0.7 });
+  });
+});
