@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { ExercisePreset } from "@/lib/exercises";
 
 type P = [number, number];
@@ -432,7 +432,7 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
       </div>
       <p className="px-3 pb-3 text-[11px] text-muted-foreground">
         Primär muskel: <span className="font-semibold text-foreground">{su.primary}</span>
-        {phase === 0 ? " · Pilen visar rörelseriktningen" : " · Muskeln lyser när den arbetar som mest"}
+        {" · Muskeln lyser när den arbetar"}
       </p>
     </div>
   );
