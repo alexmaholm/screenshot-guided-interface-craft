@@ -405,26 +405,28 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
         {seg("sh", "hip", 15, "torso")}
         {seg("hip", "kn", 10, "thigh")}{seg("kn", "ft", 7, "shin")}
         {seg("sh", "el", 7, "upper")}{seg("el", "ha", 5.5, "fore")}
-        <line x1={a.sh[0]} y1={a.sh[1]} x2={a.head[0]} y2={a.head[1]} strokeWidth="8" strokeLinecap="round" className="stroke-muted" />
-        {(["ft", "ft2"] as J[]).map((f) => <line key={f} x1={a[f][0]} y1={a[f][1]} x2={a[f][0] + 4} y2={a[f][1]} strokeWidth="4" strokeLinecap="round" className="stroke-muted" />)}
-        <ellipse rx="5.6" ry="6.4" cx={a.head[0] + 0.9} cy={a.head[1] + 0.9} className="fill-foreground" opacity="0.14" />
-        <ellipse rx="5.6" ry="6.4" cx={a.head[0]} cy={a.head[1]} className="fill-muted" />
-        <ellipse rx="2" ry="2.6" cx={a.head[0] - 1.6} cy={a.head[1] - 2} className="fill-card" opacity="0.5" />
-        {sc.gear === "barbell" && at(gearAt, <g><circle r="8" className="fill-foreground/70" /><circle r="2.2" className="fill-card" /></g>)}
-        {sc.gear === "dumbbell" && at(gearAt, <g className="fill-foreground/70"><rect x="-6" y="-2" width="12" height="4" rx="1" /><rect x="-7" y="-4.5" width="4" height="9" rx="1.5" /><rect x="3" y="-4.5" width="4" height="9" rx="1.5" /></g>)}
-        {sc.gear === "kettlebell" && at(gearAt, <g><circle cy="3" r="4.5" className="fill-foreground/70" /><path d="M-2.5 -0.5 V-4 H2.5 V-0.5" fill="none" strokeWidth="1.4" className="stroke-foreground/70" /></g>)}
-        {sc.gear === "cable" && at(gearAt, <rect x="-3.5" y="-1.2" width="7" height="2.4" rx="1.2" className="fill-foreground/80" />)}
-        {sc.gear === "wheel" && at(gearAt, <g><circle r="5" className="fill-foreground/70" /><circle r="1.6" className="fill-card" /></g>)}
-        {phase === 0 && moved && (
-          <line x1={ha[0]} y1={ha[1]} x2={ha[0] + (hb[0] - ha[0]) * 0.7} y2={ha[1] + (hb[1] - ha[1]) * 0.7} strokeWidth="1.3" strokeDasharray="2 1.5" className="stroke-coral" markerEnd="url(#arrow)" />
-        )}
-        <text x="50" y="105" fontSize="6.5" fontWeight="600" textAnchor="middle" className="fill-foreground">{phase + 1} · {sc.labels[phase]}</text>
+        <line x1={a.sh[0]} y1={a.sh[1]} x2={a.head[0]} y2={a.head[1]} strokeWidth="6" strokeLinecap="round" className="stroke-foreground/80" />
+        {(["ft", "ft2"] as J[]).map((f) => <line key={f} x1={a[f][0]} y1={a[f][1]} x2={a[f][0] + 4} y2={a[f][1]} strokeWidth="4" strokeLinecap="round" className="stroke-foreground/80" opacity={f === "ft2" ? 0.45 : 1} />)}
+        <ellipse rx="5.4" ry="6.2" cx={a.head[0]} cy={a.head[1]} className="fill-foreground/80" />
+        {sc.gear === "barbell" && at(gearAt, <g><circle r="8" className="fill-foreground" /><circle r="2.2" className="fill-card" /></g>)}
+        {sc.gear === "dumbbell" && at(gearAt, <g className="fill-foreground"><rect x="-6" y="-2" width="12" height="4" rx="1" /><rect x="-7" y="-4.5" width="4" height="9" rx="1.5" /><rect x="3" y="-4.5" width="4" height="9" rx="1.5" /></g>)}
+        {sc.gear === "kettlebell" && at(gearAt, <g><circle cy="3" r="4.5" className="fill-foreground" /><path d="M-2.5 -0.5 V-4 H2.5 V-0.5" fill="none" strokeWidth="1.4" className="stroke-foreground" /></g>)}
+        {sc.gear === "cable" && at(gearAt, <rect x="-3.5" y="-1.2" width="7" height="2.4" rx="1.2" className="fill-foreground" />)}
+        {sc.gear === "wheel" && at(gearAt, <g><circle r="5" className="fill-foreground" /><circle r="1.6" className="fill-card" /></g>)}
+        {moved && (() => { const s0 = sc.a[gearAt], s1 = sc.b[gearAt]; return (
+          <line x1={s0[0]} y1={s0[1]} x2={s0[0] + (s1[0] - s0[0]) * 0.85} y2={s0[1] + (s1[1] - s0[1]) * 0.85} strokeWidth="1" strokeDasharray="1.5 1.5" className="stroke-coral" opacity="0.7" markerEnd="url(#arrow)" />
+        ); })()}
+        <text x="50" y="105" fontSize="6.5" fontWeight="600" textAnchor="middle" className="fill-foreground">{sc.labels[phase]}</text>
       </svg>
-      <div className="grid grid-cols-2 gap-1.5 px-2 pb-2">
-        {(["Startläge", "Toppläge"] as const).map((l, i) => (
+      <div className="grid grid-cols-3 gap-1.5 px-2 pb-2">
+        <button type="button" onClick={() => setPlaying((p) => !p)} aria-pressed={playing}
+          className={`rounded-xl py-2 text-xs font-semibold transition-colors ${playing ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+          {playing ? "❚❚ Paus" : "▶ Spela"}
+        </button>
+        {(["Start", "Topp"] as const).map((l, i) => (
           <button key={l} type="button" onClick={() => setPhase(i as 0 | 1)}
-            className={`rounded-xl py-2 text-xs font-semibold transition-colors ${phase === i ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-            {i + 1}. {l}
+            className={`rounded-xl py-2 text-xs font-semibold transition-colors ${!playing && phase === i ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+            {l}
           </button>
         ))}
       </div>
