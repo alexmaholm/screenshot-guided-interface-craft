@@ -352,15 +352,28 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
   const gearAt = sc.gearAt ?? "ha";
   const benchY = sc.bench === "low" ? 70 : sc.bench === "seat" ? 62 : 63;
 
-  // Atletisk silhuett: solid kropp, arbetande muskel tonas in i accentfärg med ansträngningen
-  const seg = (p: J, q: J, w: number, s: Seg, far = false) => {
+  // Skulpterad silhuett: avsmalnande lemmar med muskelbuk, arbetande muskel tonas in i accentfärg
+  const limbPath = (p: P, q: P, w1: number, w2: number, bulge: number, at = 0.4) => {
+    const dx = q[0] - p[0], dy = q[1] - p[1], L = Math.hypot(dx, dy) || 1;
+    const nx = -dy / L, ny = dx / L;
+    const c: P = [p[0] + dx * at, p[1] + dy * at];
+    const o = (b: P, w: number, s: 1 | -1) => `${(b[0] + nx * w * s / 2).toFixed(2)} ${(b[1] + ny * w * s / 2).toFixed(2)}`;
+    // kontrollpunkt förskjuts så kurvan når "bulge"-bredden
+    const k = (w: number) => 2 * w - (w1 + w2) / 2;
+    return `M${o(p, w1, 1)} Q${o(c, k(bulge), 1)} ${o(q, w2, 1)} A${w2 / 2} ${w2 / 2} 0 0 1 ${o(q, w2, -1)} Q${o(c, k(bulge), -1)} ${o(p, w1, -1)} A${w1 / 2} ${w1 / 2} 0 0 1 ${o(p, w1, 1)}Z`;
+  };
+  const SHAPE: Record<Seg, [number, number, number, number?]> = {
+    thigh: [10, 6.5, 11.5], shin: [6.2, 3.6, 7.2, 0.3], upper: [6.4, 4.4, 7], fore: [5, 3.2, 5.6, 0.3], torso: [15, 11, 15.5, 0.25],
+  };
+  const seg = (p: J, q: J, _w: number, s: Seg, far = false) => {
     const hot = sc.work.includes(s);
-    const pts = { x1: a[p][0], y1: a[p][1], x2: a[q][0], y2: a[q][1] };
+    const [w1, w2, b, at] = SHAPE[s];
+    const d = limbPath(a[p], a[q], w1, w2, b, at);
     return (
-      <g opacity={far ? 0.45 : 1}>
-        <line {...pts} strokeWidth={w} strokeLinecap="round" className="stroke-foreground/80" />
-        {hot && <line {...pts} strokeWidth={w} strokeLinecap="round" className="stroke-coral" opacity={0.25 + 0.75 * t} />}
-        {hot && !far && <line {...pts} strokeWidth={w + 4} strokeLinecap="round" className="stroke-coral" filter="url(#glow)" opacity={0.5 * t} />}
+      <g opacity={far ? 0.5 : 1}>
+        <path d={d} className={far ? "fill-foreground/60" : "fill-foreground/85"} />
+        {hot && <path d={d} className="fill-coral" opacity={0.25 + 0.75 * t} />}
+        {hot && !far && <path d={d} className="fill-coral" filter="url(#glow)" opacity={0.5 * t} />}
       </g>
     );
   };
