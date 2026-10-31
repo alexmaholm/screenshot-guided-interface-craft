@@ -29,22 +29,17 @@ export const analyzePlate = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data }): Promise<{ ok: true; result: PlateAnalysis } | { ok: false; error: string }> => {
-    const key = process.env["LOVABLE_API_KEY"];
-    if (!key) return { ok: false, error: "AI-analysen är inte konfigurerad." };
-    const { createOpenAI } = await import("@ai-sdk/openai");
+    const { geminiModel } = await import("./gemini.server");
+    const model = await geminiModel();
+    if (!model) return { ok: false, error: "AI-analysen är inte konfigurerad." };
     const { streamText, Output } = await import("ai");
-    const openai = createOpenAI({
-      baseURL: "https://ai.gateway.lovable.dev/v1",
-      apiKey: key,
-      headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
-    });
     const extra = [
       data.diet ? `Användarens kost: ${data.diet}.` : "",
       data.answers?.length ? "Svar från användaren:\n" + data.answers.map((a) => `- ${a.question} → ${a.answer}`).join("\n") : "",
     ].filter(Boolean).join("\n");
     try {
       const result = streamText({
-        model: openai.responses("openai/gpt-6-astra"),
+        model,
         system: SYSTEM,
         output: Output.object({ schema }),
         maxRetries: 0,
@@ -52,7 +47,6 @@ export const analyzePlate = createServerFn({ method: "POST" })
           { type: "text", text: `Analysera tallriken.${extra ? "\n" + extra : ""}` },
           { type: "file", data: data.image, mediaType: data.image.slice(5, data.image.indexOf(";")) },
         ] }],
-        providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
       });
       const out = await result.output;
       return { ok: true, result: out };
