@@ -49,7 +49,7 @@ export const analyzePlate = createServerFn({ method: "POST" })
         maxRetries: 0,
         messages: [{ role: "user", content: [
           { type: "text", text: `Analysera tallriken.${extra ? "\n" + extra : ""}` },
-          { type: "image", image: data.image },
+          { type: "file", data: data.image, mediaType: data.image.slice(5, data.image.indexOf(";")) },
         ] }],
       });
       const out = await result.output;
