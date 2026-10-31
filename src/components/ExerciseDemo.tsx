@@ -320,7 +320,23 @@ export function variantFor(ex: Pick<ExercisePreset, "name">): string | null {
 
 /** Steg-för-steg teknikguide: Startläge och Toppläge med skuggad 3D-känsla; arbetande muskler markeras. */
 export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, "name" | "muscle" | "track">; className?: string }) {
-  const [phase, setPhase] = useState<0 | 1>(0);
+  const [playing, setPlaying] = useState(true);
+  const [t, setT] = useState(0);
+  useEffect(() => {
+    if (!playing) return;
+    let raf = 0; const start = performance.now();
+    const loop = (now: number) => {
+      // 3,2 s per rep: ner/upp med kort paus i ändlägena
+      const c = ((now - start) / 3200) % 1;
+      const k = c < 0.1 ? 0 : c < 0.45 ? (c - 0.1) / 0.35 : c < 0.55 ? 1 : c < 0.9 ? 1 - (c - 0.55) / 0.35 : 0;
+      setT(0.5 - Math.cos(k * Math.PI) / 2);
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [playing]);
+  const phase: 0 | 1 = t > 0.5 ? 1 : 0;
+  const setPhase = (p: 0 | 1) => { setPlaying(false); setT(p); };
   const n = ex.name.toLowerCase();
   const v = VARIANTS.find(([re]) => re.test(n))?.[2];
   const base: Scene = { ...SCENES[patternFor(ex)], ...v };
@@ -331,21 +347,20 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
     return { ...p, head: lift(p.head, 1.2), sh: lift(p.sh, 1), el: lift(p.el, 0.9), el2: lift(p.el2, 0.9), ha: lift(p.ha, 0.8), ha2: lift(p.ha2, 0.8) };
   };
   const sc = { ...base, gear: su.gear, a: tilt(base.a), b: tilt(base.b) };
-  const a = phase === 0 ? sc.a : sc.b;
-  const other = phase === 0 ? sc.b : sc.a;
+  const a = Object.fromEntries((Object.keys(sc.a) as J[]).map((j) => [j, [sc.a[j][0] + (sc.b[j][0] - sc.a[j][0]) * t, sc.a[j][1] + (sc.b[j][1] - sc.a[j][1]) * t]])) as Pose;
+  const other = sc.b;
   const gearAt = sc.gearAt ?? "ha";
   const benchY = sc.bench === "low" ? 70 : sc.bench === "seat" ? 62 : 63;
 
-  // Skuggad lem: kontaktskugga, kropp, högdager – ger volym/3D-känsla
+  // Atletisk silhuett: solid kropp, arbetande muskel tonas in i accentfärg med ansträngningen
   const seg = (p: J, q: J, w: number, s: Seg, far = false) => {
-    const hot = phase === 1 && sc.work.includes(s);
+    const hot = sc.work.includes(s);
     const pts = { x1: a[p][0], y1: a[p][1], x2: a[q][0], y2: a[q][1] };
     return (
-      <g opacity={far ? 0.6 : 1}>
-        <line x1={pts.x1 + 1.3} y1={pts.y1 + 1.3} x2={pts.x2 + 1.3} y2={pts.y2 + 1.3} strokeWidth={w} strokeLinecap="round" className="stroke-foreground" opacity="0.14" />
-        <line {...pts} strokeWidth={w} strokeLinecap="round" className={hot ? "stroke-coral" : far ? "stroke-muted-foreground/50" : "stroke-muted"} />
-        {hot && <line {...pts} strokeWidth={w + 4} strokeLinecap="round" className="stroke-coral" filter="url(#glow)" opacity="0.6" />}
-        <line x1={pts.x1 - w * 0.18} y1={pts.y1 - w * 0.18} x2={pts.x2 - w * 0.18} y2={pts.y2 - w * 0.18} strokeWidth={w * 0.32} strokeLinecap="round" className="stroke-card" opacity={hot ? 0.45 : 0.55} />
+      <g opacity={far ? 0.45 : 1}>
+        <line {...pts} strokeWidth={w} strokeLinecap="round" className="stroke-foreground/80" />
+        {hot && <line {...pts} strokeWidth={w} strokeLinecap="round" className="stroke-coral" opacity={0.25 + 0.75 * t} />}
+        {hot && !far && <line {...pts} strokeWidth={w + 4} strokeLinecap="round" className="stroke-coral" filter="url(#glow)" opacity={0.5 * t} />}
       </g>
     );
   };
