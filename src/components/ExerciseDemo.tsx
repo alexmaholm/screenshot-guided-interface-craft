@@ -352,15 +352,30 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
   const gearAt = sc.gearAt ?? "ha";
   const benchY = sc.bench === "low" ? 70 : sc.bench === "seat" ? 62 : 63;
 
-  // Atletisk silhuett: solid kropp, arbetande muskel tonas in i accentfärg med ansträngningen
-  const seg = (p: J, q: J, w: number, s: Seg, far = false) => {
+  // Skulpterad silhuett: avsmalnande lemmar med muskelbuk, arbetande muskel tonas in i accentfärg
+  const limbPath = (p: P, q: P, w1: number, w2: number, bulge: number, at = 0.4) => {
+    const dx = q[0] - p[0], dy = q[1] - p[1], L = Math.hypot(dx, dy) || 1;
+    const nx = -dy / L, ny = dx / L;
+    const c: P = [p[0] + dx * at, p[1] + dy * at];
+    const o = (b: P, w: number, s: 1 | -1) => `${(b[0] + nx * w * s / 2).toFixed(2)} ${(b[1] + ny * w * s / 2).toFixed(2)}`;
+    // kontrollpunkt förskjuts så kurvan når "bulge"-bredden
+    const k = (w: number) => 2 * w - (w1 + w2) / 2;
+    return `M${o(p, w1, 1)} Q${o(c, k(bulge), 1)} ${o(q, w2, 1)} L${o(q, w2, -1)} Q${o(c, k(bulge), -1)} ${o(p, w1, -1)}Z`;
+  };
+  const SHAPE: Record<Seg, [number, number, number, number?]> = {
+    thigh: [10, 6.5, 11.5], shin: [6.2, 3.6, 7.2, 0.3], upper: [6.4, 4.4, 7], fore: [5, 3.2, 5.6, 0.3], torso: [15, 11, 15.5, 0.25],
+  };
+  const seg = (p: J, q: J, _w: number, s: Seg, far = false) => {
     const hot = sc.work.includes(s);
-    const pts = { x1: a[p][0], y1: a[p][1], x2: a[q][0], y2: a[q][1] };
+    const [w1, w2, b, at] = SHAPE[s];
+    const d = limbPath(a[p], a[q], w1, w2, b, at);
     return (
-      <g opacity={far ? 0.45 : 1}>
-        <line {...pts} strokeWidth={w} strokeLinecap="round" className="stroke-foreground/80" />
-        {hot && <line {...pts} strokeWidth={w} strokeLinecap="round" className="stroke-coral" opacity={0.25 + 0.75 * t} />}
-        {hot && !far && <line {...pts} strokeWidth={w + 4} strokeLinecap="round" className="stroke-coral" filter="url(#glow)" opacity={0.5 * t} />}
+      <g opacity={far ? 0.5 : 1}>
+        <path d={d} className={far ? "fill-muted-foreground" : "fill-foreground"} />
+        <circle cx={a[q][0]} cy={a[q][1]} r={w2 / 2} className={far ? "fill-muted-foreground" : "fill-foreground"} />
+        <circle cx={a[p][0]} cy={a[p][1]} r={w1 / 2} className={far ? "fill-muted-foreground" : "fill-foreground"} />
+        {hot && <path d={d} className="fill-coral" opacity={0.25 + 0.75 * t} />}
+        {hot && !far && <path d={d} className="fill-coral" filter="url(#glow)" opacity={0.5 * t} />}
       </g>
     );
   };
@@ -402,12 +417,16 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
         {su.incline && base.bench && base.bench !== "seat" && <line x1="54" y1="62" x2="30" y2="44" strokeWidth="5" strokeLinecap="round" className="stroke-foreground/35" />}
         {seg("hip", "kn2", 9, "thigh", true)}{seg("kn2", "ft2", 6.5, "shin", true)}
         {seg("sh", "el2", 6.5, "upper", true)}{seg("el2", "ha2", 5, "fore", true)}
+        {(["ft2"] as J[]).map((f) => <path key={f} d={`M${a[f][0] - 2.4} ${a[f][1] + 1.4} Q${a[f][0] - 2.6} ${a[f][1] - 2.4} ${a[f][0] + 0.5} ${a[f][1] - 2} L${a[f][0] + 5.2} ${a[f][1] - 0.2} Q${a[f][0] + 6.4} ${a[f][1] + 1.4} ${a[f][0] + 5} ${a[f][1] + 1.6} Z`} className="fill-muted-foreground" />)}
+        <path d={limbPath(a.sh, a.head, 5.5, 4.6, 5, 0.5)} className="fill-foreground" />
         {seg("sh", "hip", 15, "torso")}
         {seg("hip", "kn", 10, "thigh")}{seg("kn", "ft", 7, "shin")}
+        <path d={`M${a.ft[0] - 2.4} ${a.ft[1] + 1.4} Q${a.ft[0] - 2.6} ${a.ft[1] - 2.4} ${a.ft[0] + 0.5} ${a.ft[1] - 2} L${a.ft[0] + 5.2} ${a.ft[1] - 0.2} Q${a.ft[0] + 6.4} ${a.ft[1] + 1.4} ${a.ft[0] + 5} ${a.ft[1] + 1.6} Z`} className="fill-foreground" />
         {seg("sh", "el", 7, "upper")}{seg("el", "ha", 5.5, "fore")}
-        <line x1={a.sh[0]} y1={a.sh[1]} x2={a.head[0]} y2={a.head[1]} strokeWidth="6" strokeLinecap="round" className="stroke-foreground/80" />
-        {(["ft", "ft2"] as J[]).map((f) => <line key={f} x1={a[f][0]} y1={a[f][1]} x2={a[f][0] + 4} y2={a[f][1]} strokeWidth="4" strokeLinecap="round" className="stroke-foreground/80" opacity={f === "ft2" ? 0.45 : 1} />)}
-        <ellipse rx="5.4" ry="6.2" cx={a.head[0]} cy={a.head[1]} className="fill-foreground/80" />
+        <circle cx={a.sh[0]} cy={a.sh[1] + 1.2} r="4.4" className={sc.work.includes("upper") ? "fill-foreground" : "fill-foreground"} />
+        {sc.work.includes("upper") && <circle cx={a.sh[0]} cy={a.sh[1] + 1.2} r="4.4" className="fill-coral" opacity={0.25 + 0.75 * t} />}
+        <circle cx={a.ha[0]} cy={a.ha[1]} r="2.3" className="fill-foreground" />
+        <ellipse rx="5" ry="6" cx={a.head[0]} cy={a.head[1]} className="fill-foreground" />
         {sc.gear === "barbell" && at(gearAt, <g><circle r="8" className="fill-foreground" /><circle r="2.2" className="fill-card" /></g>)}
         {sc.gear === "dumbbell" && at(gearAt, <g className="fill-foreground"><rect x="-6" y="-2" width="12" height="4" rx="1" /><rect x="-7" y="-4.5" width="4" height="9" rx="1.5" /><rect x="3" y="-4.5" width="4" height="9" rx="1.5" /></g>)}
         {sc.gear === "kettlebell" && at(gearAt, <g><circle cy="3" r="4.5" className="fill-foreground" /><path d="M-2.5 -0.5 V-4 H2.5 V-0.5" fill="none" strokeWidth="1.4" className="stroke-foreground" /></g>)}
