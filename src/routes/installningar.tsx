@@ -116,7 +116,7 @@ function Settings() {
 
       <Section title="Villkor & integritet">
         <details className="text-sm"><summary className="cursor-pointer font-medium">Medicinsk friskrivning</summary><p className="mt-2 text-muted-foreground">Balans ger generell inspiration för livsstil och träning – inte medicinsk rådgivning, diagnos eller behandling. Rådfråga vården vid skador, sjukdom eller graviditet.</p></details>
-        <details className="text-sm"><summary className="cursor-pointer font-medium">Integritet</summary><p className="mt-2 text-muted-foreground">Din data lagras lokalt på enheten. Bilder som analyseras med AI sparas inte permanent.</p></details>
+        <details className="text-sm"><summary className="cursor-pointer font-medium">Integritet</summary><p className="mt-2 text-muted-foreground">Din data lagras på enheten och, om du loggar in, krypterat i molnet. Bilder som analyseras med AI sparas inte permanent.</p></details>
         <details className="text-sm"><summary className="cursor-pointer font-medium">Användarvillkor</summary><p className="mt-2 text-muted-foreground">AI-genererade förslag och näringsvärden är uppskattningar. Kontrollera alltid märkning och allergener.</p></details>
       </Section>
 
