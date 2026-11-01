@@ -108,6 +108,7 @@ function Settings() {
             </label>
           );
         })}
+        <HealthToday prefs={p.healthSync ?? { calories: false, steps: false, weight: false }} />
       </Section>
 
       <Section title="Konto">
