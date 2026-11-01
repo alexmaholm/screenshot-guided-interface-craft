@@ -16,3 +16,5 @@
 - Keep daily habit scoring in `src/lib/habits.ts` and its shared display in `DailyHabits` so logged meals and water use the same score across views; scores describe logging progress, not medical health.
 - Parse manual nutrition values through `parseNutrition` before saving so all four macros share decimal and nonnegative validation.
 - All AI features (photo log, text log, coach) call Google Gemini through `src/lib/gemini.server.ts` with `GEMINI_API_KEY`; the owner chose their own Google key for lower running cost.
+
+- Cloud sync mirrors the whole local state as one JSON row per user (`user_state`) via `src/lib/cloudsync.ts`; local storage stays the source of truth so the app works offline.

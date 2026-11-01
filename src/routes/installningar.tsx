@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { DietaryPreferences } from "@/components/DietaryPreferences";
+import { AccountCard } from "@/components/AccountCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -110,12 +111,12 @@ function Settings() {
       </Section>
 
       <Section title="Konto">
-        <p className="text-sm text-muted-foreground">Din data sparas just nu på den här enheten. Inloggning med Apple och Google kommer inför lansering.</p>
+        <AccountCard />
       </Section>
 
       <Section title="Villkor & integritet">
         <details className="text-sm"><summary className="cursor-pointer font-medium">Medicinsk friskrivning</summary><p className="mt-2 text-muted-foreground">Balans ger generell inspiration för livsstil och träning – inte medicinsk rådgivning, diagnos eller behandling. Rådfråga vården vid skador, sjukdom eller graviditet.</p></details>
-        <details className="text-sm"><summary className="cursor-pointer font-medium">Integritet</summary><p className="mt-2 text-muted-foreground">Din data lagras lokalt på enheten. Bilder som analyseras med AI sparas inte permanent.</p></details>
+        <details className="text-sm"><summary className="cursor-pointer font-medium">Integritet</summary><p className="mt-2 text-muted-foreground">Din data lagras på enheten och, om du loggar in, krypterat i molnet. Bilder som analyseras med AI sparas inte permanent.</p></details>
         <details className="text-sm"><summary className="cursor-pointer font-medium">Användarvillkor</summary><p className="mt-2 text-muted-foreground">AI-genererade förslag och näringsvärden är uppskattningar. Kontrollera alltid märkning och allergener.</p></details>
       </Section>
 
