@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { DietaryPreferences } from "@/components/DietaryPreferences";
+import { AccountCard } from "@/components/AccountCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -110,7 +111,7 @@ function Settings() {
       </Section>
 
       <Section title="Konto">
-        <p className="text-sm text-muted-foreground">Din data sparas just nu på den här enheten. Inloggning med Apple och Google kommer inför lansering.</p>
+        <AccountCard />
       </Section>
 
       <Section title="Villkor & integritet">

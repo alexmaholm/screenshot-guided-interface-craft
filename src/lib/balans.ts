@@ -177,6 +177,21 @@ export function resetAll() {
   listeners.forEach((l) => l());
 }
 
+/** Current state snapshot (used by cloud sync). */
+export function getState(): State {
+  return load();
+}
+
+/** Replace the whole state, e.g. with data restored from the cloud. */
+export function replaceState(next: Partial<State>) {
+  update(() => ({ ...empty, ...next }));
+}
+
+export function subscribeState(cb: () => void) {
+  listeners.add(cb);
+  return () => { listeners.delete(cb); };
+}
+
 /** Returns null during server render / before hydration. */
 export function useBalans(): State | null {
   return useSyncExternalStore(
