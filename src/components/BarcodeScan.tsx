@@ -34,13 +34,41 @@ export function BarcodeScan({ showKcal, onSave }: { showKcal: boolean; onSave: (
 
   const start = async () => {
     setError(""); setProduct(null); setScanning(true);
+    let done = false;
+    const hit = (code: string) => { if (done) return; done = true; navigator.vibrate?.(40); void find(code); };
     try {
-      const { BrowserMultiFormatReader } = await import("@zxing/browser");
-      const reader = new BrowserMultiFormatReader();
-      const controls = await reader.decodeFromVideoDevice(undefined, videoRef.current!, (result) => {
-        if (result) { navigator.vibrate?.(40); void find(result.getText()); }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } },
       });
-      stopRef.current = () => controls.stop();
+      const track = stream.getVideoTracks()[0];
+      try { await track?.applyConstraints({ advanced: [{ focusMode: "continuous" } as MediaTrackConstraintSet] }); } catch { /* not supported */ }
+      const video = videoRef.current!;
+      video.srcObject = stream;
+      await video.play();
+      let stopDecode = () => {};
+      const Native = (window as unknown as { BarcodeDetector?: new (o: { formats: string[] }) => { detect: (v: HTMLVideoElement) => Promise<{ rawValue: string }[]> } }).BarcodeDetector;
+      if (Native) {
+        const det = new Native({ formats: ["ean_13", "ean_8", "upc_a", "upc_e"] });
+        let alive = true;
+        const loop = async () => {
+          if (!alive || done) return;
+          try { const r = await det.detect(video); if (r[0]?.rawValue) return hit(r[0].rawValue); } catch { /* frame not ready */ }
+          setTimeout(loop, 120);
+        };
+        void loop();
+        stopDecode = () => { alive = false; };
+      } else {
+        const { BrowserMultiFormatReader } = await import("@zxing/browser");
+        const { BarcodeFormat, DecodeHintType } = await import("@zxing/library");
+        const hints = new Map();
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.EAN_13, BarcodeFormat.EAN_8, BarcodeFormat.UPC_A, BarcodeFormat.UPC_E]);
+        hints.set(DecodeHintType.TRY_HARDER, true);
+        const reader = new BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 100 });
+        const controls = await reader.decodeFromVideoElement(video, (result) => { if (result) hit(result.getText()); });
+        stopDecode = () => controls.stop();
+      }
+      stopRef.current = () => { stopDecode(); stream.getTracks().forEach((t) => t.stop()); video.srcObject = null; };
     } catch {
       setScanning(false);
       setError("Kameran kunde inte startas. Tillåt kamera eller skriv in koden.");
