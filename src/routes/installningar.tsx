@@ -8,7 +8,7 @@ import { AccountCard } from "@/components/AccountCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { isNativeHealthAvailable, healthSourceName } from "@/lib/health";
+import { isNativeHealthAvailable, healthSourceName, readHealthToday, mergeHealth, type HealthSyncPrefs } from "@/lib/health";
 import { dateKey, NUTRITION_FOCUS, nutritionFocusOf, resetAll, update, useBalans, WEEKDAYS, type Profile } from "@/lib/balans";
 
 export const Route = createFileRoute("/installningar")({
@@ -122,6 +122,30 @@ function Settings() {
       </Section>
 
       <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => { if (confirm("Börja om? All din data raderas.")) resetAll(); }}>Radera all data</Button>
+    </div>
+  );
+}
+
+function HealthToday({ prefs }: { prefs: HealthSyncPrefs }) {
+  const s = useBalans();
+  const [busy, setBusy] = useState(false);
+  const today = dateKey(new Date());
+  const d = s?.health?.[today];
+  if (!(prefs.calories || prefs.steps || prefs.weight)) return null;
+  const sync = async () => {
+    if (!isNativeHealthAvailable()) { toast(`Synken med ${healthSourceName()} fungerar i mobilappen.`); return; }
+    setBusy(true);
+    try {
+      const r = await readHealthToday(prefs, today);
+      if (r) update((st) => ({ ...st, ...mergeHealth(st, r) }));
+      toast("Synkat!");
+    } catch { toast("Kunde inte hämta data från hälsoappen."); }
+    finally { setBusy(false); }
+  };
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/50 p-3 text-sm">
+      <span className="text-muted-foreground">Idag: {d?.steps ?? "–"} steg · {d?.activeKcal ?? "–"} aktiva kcal</span>
+      <Button size="sm" variant="outline" className="rounded-full" disabled={busy} onClick={sync}>{busy ? "Synkar…" : "Synka nu"}</Button>
     </div>
   );
 }
