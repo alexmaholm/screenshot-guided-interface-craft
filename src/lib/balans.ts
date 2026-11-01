@@ -140,6 +140,8 @@ export interface State {
   customExercises: CustomExercise[];
   templates: import("@/lib/templates").WorkoutTemplate[];
   mealPlan: PlannedMeal[];
+  /** Synced from Apple Health / Health Connect, per date. */
+  health?: Record<string, { steps?: number; activeKcal?: number }> | undefined;
 }
 
 export interface PlannedMeal { id: string; date: string; type: MealType; name: string; kcal?: number | undefined; protein?: number | undefined }
