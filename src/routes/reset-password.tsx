@@ -25,11 +25,11 @@ function ResetPassword() {
   const navigate = useNavigate();
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    if (pw.length < 6) return toast.error("Lösenordet måste ha minst 6 tecken.");
+    if (pw.length < 6) { toast.error("Lösenordet måste ha minst 6 tecken."); return; }
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pw });
     setBusy(false);
-    if (error) return toast.error("Länken har gått ut. Begär en ny.");
+    if (error) { toast.error("Länken har gått ut. Begär en ny."); return; }
     toast.success("Ditt lösenord är uppdaterat");
     navigate({ to: "/", replace: true });
   }

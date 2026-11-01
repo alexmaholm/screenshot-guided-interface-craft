@@ -21,24 +21,24 @@ export function SignInOptions({ onDone }: { onDone?: () => void }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 6) return toast.error("Lösenordet måste ha minst 6 tecken.");
+    if (password.length < 6) { toast.error("Lösenordet måste ha minst 6 tecken."); return; }
     setBusy(true);
     if (mode === "signup") {
       const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
       setBusy(false);
-      if (error) return toast.error(error.message);
+      if (error) { toast.error(error.message); return; }
       setSent(true);
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setBusy(false);
-      if (error) return toast.error("Fel e-post eller lösenord.");
+      if (error) { toast.error("Fel e-post eller lösenord."); return; }
       toast.success("Du är inloggad");
       onDone?.();
     }
   }
 
   async function forgot() {
-    if (!email) return toast.error("Skriv din e-post först.");
+    if (!email) { toast.error("Skriv din e-post först."); return; }
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
     if (error) toast.error(error.message);
     else toast.success("Vi har skickat en länk för att välja nytt lösenord.");
