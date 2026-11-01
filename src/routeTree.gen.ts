@@ -14,6 +14,7 @@ import { Route as FramstegRouteImport } from './routes/framsteg'
 import { Route as InstallningarRouteImport } from './routes/installningar'
 import { Route as MatRouteImport } from './routes/mat'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TraningRouteImport } from './routes/traning'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +42,11 @@ const ProfilRoute = ProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TraningRoute = TraningRouteImport.update({
   id: '/traning',
   path: '/traning',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/installningar': typeof InstallningarRoute
   '/mat': typeof MatRoute
   '/profil': typeof ProfilRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/traning': typeof TraningRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/installningar': typeof InstallningarRoute
   '/mat': typeof MatRoute
   '/profil': typeof ProfilRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/traning': typeof TraningRoute
 }
 export interface FileRoutesById {
@@ -70,14 +78,28 @@ export interface FileRoutesById {
   '/installningar': typeof InstallningarRoute
   '/mat': typeof MatRoute
   '/profil': typeof ProfilRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/traning': typeof TraningRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/framsteg' | '/installningar' | '/mat' | '/profil' | '/traning'
+    | '/'
+    | '/framsteg'
+    | '/installningar'
+    | '/mat'
+    | '/profil'
+    | '/reset-password'
+    | '/traning'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/framsteg' | '/installningar' | '/mat' | '/profil' | '/traning'
+  to:
+    | '/'
+    | '/framsteg'
+    | '/installningar'
+    | '/mat'
+    | '/profil'
+    | '/reset-password'
+    | '/traning'
   id:
     | '__root__'
     | '/'
@@ -85,6 +107,7 @@ export interface FileRouteTypes {
     | '/installningar'
     | '/mat'
     | '/profil'
+    | '/reset-password'
     | '/traning'
   fileRoutesById: FileRoutesById
 }
@@ -94,6 +117,7 @@ export interface RootRouteChildren {
   InstallningarRoute: typeof InstallningarRoute
   MatRoute: typeof MatRoute
   ProfilRoute: typeof ProfilRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   TraningRoute: typeof TraningRoute
 }
 
@@ -134,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/traning': {
       id: '/traning'
       path: '/traning'
@@ -150,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   InstallningarRoute: InstallningarRoute,
   MatRoute: MatRoute,
   ProfilRoute: ProfilRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   TraningRoute: TraningRoute,
 }
 export const routeTree = rootRouteImport
