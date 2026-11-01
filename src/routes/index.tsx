@@ -4,7 +4,7 @@ import { DailyHabits } from "@/components/DailyHabits";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Droplets, Moon, Utensils, Dumbbell, Sparkles, Plus, Play } from "lucide-react";
 import { AppShell, PageLoading } from "@/components/AppShell";
-import { Onboarding } from "@/components/Onboarding";
+import { StartScreen } from "@/components/StartScreen";
 import { dateKey, dayTip, KIND_LABEL, MEAL_LABEL, MEAL_TYPES, prettyDate, update, useBalans } from "@/lib/balans";
 
 export const Route = createFileRoute("/")({
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const s = useBalans();
   if (!s) return <div className="p-6"><PageLoading /></div>;
-  if (!s.profile) return <Onboarding />;
+  if (!s.profile) return <StartScreen />;
   return (
     <AppShell>
       <Today />
