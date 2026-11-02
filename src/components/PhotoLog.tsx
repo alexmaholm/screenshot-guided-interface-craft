@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { checkPhoto, loadUsage, photosLeft, PHOTO_DAILY_LIMIT, recordPhoto, saveUsage } from "@/lib/fairuse";
 import { useServerFn } from "@tanstack/react-start";
 import { Camera, Loader2, Minus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,8 +48,21 @@ export function PhotoLog({ diet, showKcal, onSave }: { diet?: string | undefined
     finally { setBusy(false); }
   };
 
+  const [left, setLeft] = useState<number | null>(null);
+  useEffect(() => { setLeft(photosLeft(loadUsage(), Date.now())); }, []);
+
   const pick = async (f: File | undefined) => {
     if (!f) return;
+    const now = Date.now();
+    const check = checkPhoto(loadUsage(), now);
+    if (!check.ok) {
+      setError(check.reason === "limit"
+        ? `Du har använt dagens ${PHOTO_DAILY_LIMIT} AI-fotoanalyser. Kvoten nollställs vid midnatt – logga gärna med text, streckkod eller manuellt så länge.`
+        : `Vänta ${check.waitS} sekunder innan nästa foto.`);
+      return;
+    }
+    const u = recordPhoto(loadUsage(), now);
+    saveUsage(u); setLeft(photosLeft(u, now));
     const img = await shrink(f);
     setImage(img); setItems(null); setHistory([]);
     run(img, []);
