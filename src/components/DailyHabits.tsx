@@ -57,9 +57,8 @@ export function DailyHabits({ date }: { date: string }) {
               <Button size="icon" className="h-10 w-10 rounded-full" aria-label="Lägg till en portion frukt och grönt" onClick={() => setHabit({ produce: (habits.produce ?? 0) + 1 })}><Plus /></Button>
             </div>}
             {label === "Sömn" && <div className="mt-3 flex items-center gap-2">
-              <Input aria-label="Sömn i natt, timmar" type="number" inputMode="decimal" min={0} max={24} step={0.5} placeholder="Timmar" className="h-10" value={habits.sleepH ?? ""} onChange={(e) => {
-                const value = e.target.value === "" ? undefined : Number(e.target.value);
-                if (value === undefined || (Number.isFinite(value) && value >= 0 && value <= 24)) setHabit({ sleepH: value });
+              <DecimalInput aria-label="Sömn i natt, timmar" placeholder="Timmar" className="h-10" value={habits.sleepH} onValue={(value) => {
+                if (value === undefined || value <= 24) setHabit({ sleepH: value });
               }} />
               <span className="text-sm text-muted-foreground">h</span>
             </div>}
