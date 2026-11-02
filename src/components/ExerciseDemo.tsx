@@ -432,9 +432,20 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
         {sc.gear === "kettlebell" && at(gearAt, <g><circle cy="3" r="4.5" className="fill-foreground" /><path d="M-2.5 -0.5 V-4 H2.5 V-0.5" fill="none" strokeWidth="1.4" className="stroke-foreground" /></g>)}
         {sc.gear === "cable" && at(gearAt, <rect x="-3.5" y="-1.2" width="7" height="2.4" rx="1.2" className="fill-foreground" />)}
         {sc.gear === "wheel" && at(gearAt, <g><circle r="5" className="fill-foreground" /><circle r="1.6" className="fill-card" /></g>)}
-        {moved && (() => { const s0 = sc.a[gearAt], s1 = sc.b[gearAt]; return (
-          <line x1={s0[0]} y1={s0[1]} x2={s0[0] + (s1[0] - s0[0]) * 0.85} y2={s0[1] + (s1[1] - s0[1]) * 0.85} strokeWidth="1" strokeDasharray="1.5 1.5" className="stroke-coral" opacity="0.7" markerEnd="url(#arrow)" />
-        ); })()}
+        {moved && (() => {
+          // Pilen ritas vid sidan av rörelsebanan, på den sida som är längst från kroppen, så den aldrig skär genom figuren.
+          const s0 = sc.a[gearAt], s1 = sc.b[gearAt];
+          const dx = s1[0] - s0[0], dy = s1[1] - s0[1], len = Math.hypot(dx, dy) || 1;
+          let nx = -dy / len, ny = dx / len;
+          const mx = (s0[0] + s1[0]) / 2, my = (s0[1] + s1[1]) / 2;
+          const body = [sc.a.sh, sc.a.hip, sc.b.sh, sc.b.hip, sc.a.head, sc.b.head];
+          const cx = body.reduce((s, p) => s + p[0], 0) / body.length, cy = body.reduce((s, p) => s + p[1], 0) / body.length;
+          if (nx * (mx - cx) + ny * (my - cy) < 0) { nx = -nx; ny = -ny; }
+          const off = 10, cl = (v: number) => Math.min(96, Math.max(4, v));
+          const x1 = cl(s0[0] + dx * 0.15 + nx * off), y1 = cl(s0[1] + dy * 0.15 + ny * off);
+          const x2 = cl(s0[0] + dx * 0.85 + nx * off), y2 = cl(s0[1] + dy * 0.85 + ny * off);
+          return <line x1={x1} y1={y1} x2={x2} y2={y2} strokeWidth="1" strokeDasharray="1.5 1.5" className="stroke-coral" opacity="0.8" markerEnd="url(#arrow)" />;
+        })()}
         <text x="50" y="105" fontSize="6.5" fontWeight="600" textAnchor="middle" className="fill-foreground">{sc.labels[phase]}</text>
       </svg>
       <div className="grid grid-cols-3 gap-1.5 px-2 pb-2">
