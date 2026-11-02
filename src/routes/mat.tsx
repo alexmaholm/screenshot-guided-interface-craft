@@ -1,3 +1,4 @@
+import { FridgeIdeas } from "@/components/FridgeIdeas";
 import { WeekPlan } from "@/components/WeekPlan";
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { MacroSummary } from "@/components/MacroSummary";
@@ -180,6 +181,7 @@ function Mat() {
 
       <WaterTracker date={date} />
       <DailyHabits date={date} />
+      <FridgeIdeas profile={p} />
       <WeekPlan profile={p} />
 
 
