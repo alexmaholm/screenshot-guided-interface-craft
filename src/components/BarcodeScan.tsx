@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, Minus, Plus, ScanBarcode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/DecimalInput";
 import { isValidBarcode, lookupBarcode, measureGrams, MEASURE_STEP, portionFor, type BarcodeProduct, type Measure } from "@/lib/barcode";
 
 type Saved = { name: string; amount: string; kcal: number; protein: number; carbs: number; fat: number; fiber?: number; sugar?: number; satFat?: number; salt?: number };
@@ -94,7 +95,7 @@ export function BarcodeScan({ showKcal, onSave }: { showKcal: boolean; onSave: (
         <div className="flex items-center justify-between gap-2">
           <Button variant="secondary" size="icon" className="h-12 w-12 rounded-full" aria-label={`Minska ${step} ${unit}`} onClick={() => setQty((q) => Math.max(0, +(q - step).toFixed(1)))}><Minus /></Button>
           <label className="flex items-center gap-2">
-            <Input inputMode="decimal" className="h-12 w-24 rounded-xl text-center text-lg" value={String(qty).replace(".", ",")} onChange={(e) => { const n = Number(e.target.value.replace(",", ".").replace(/[^\d.]/g, "")); setQty(Number.isFinite(n) ? Math.max(0, n) : 0); }} aria-label="Mängd" />
+            <DecimalInput key={unit} className="h-12 w-24 rounded-xl text-center text-lg" value={qty} onValue={(n) => setQty(n ?? 0)} aria-label="Mängd" />
             <span>{unit}</span>
           </label>
           <Button variant="secondary" size="icon" className="h-12 w-12 rounded-full" aria-label={`Öka ${step} ${unit}`} onClick={() => setQty((q) => +(q + step).toFixed(1))}><Plus /></Button>
