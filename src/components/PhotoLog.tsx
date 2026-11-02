@@ -85,6 +85,7 @@ export function PhotoLog({ diet, showKcal, onSave }: { diet?: string | undefined
           <Camera className="h-8 w-8" />
           <span className="font-semibold">Fota din tallrik</span>
           <span className="text-xs text-muted-foreground">AI räknar ut näringen – du kan justera innan du sparar</span>
+          {left !== null && <span className="text-xs font-medium">{left} av {PHOTO_DAILY_LIMIT} analyser kvar idag</span>}
         </button>
       ) : (
         <div className="flex items-center gap-3">
