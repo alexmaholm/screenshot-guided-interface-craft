@@ -1,3 +1,4 @@
+import { DecimalInput } from "@/components/DecimalInput";
 import { Apple, Check, Flame, Leaf, Minus, Moon, Plus, Sparkles, Utensils, Droplets } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

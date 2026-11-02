@@ -1,3 +1,4 @@
+import { DecimalInput } from "@/components/DecimalInput";
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { ExercisePicker, useExerciseLibrary } from "@/components/ExercisePicker";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
