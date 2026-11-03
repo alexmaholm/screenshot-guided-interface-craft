@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { addDays, dateKey, update, useBalans } from "@/lib/balans";
 import { streakInfo } from "@/lib/habits";
 import { weightTrend } from "@/lib/progress";
+import { Paywall } from "@/components/Paywall";
+import { PLANS, status, trialDaysLeft } from "@/lib/tiers";
 
 function WeightTrendChart({ body }: { body: { date: string; weight: number }[] }) {
   const pts = weightTrend(body).slice(-60);
