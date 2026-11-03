@@ -179,3 +179,25 @@ function WeightLog() {
     </section>
   );
 }
+
+function Membership() {
+  const s = useBalans()!;
+  const [open, setOpen] = useState(false);
+  const sub = s.subscription;
+  const st = status(sub);
+  const plan = PLANS.find((p) => p.id === sub?.plan);
+  const label = st === "free" ? "Gratis" : st === "trial" ? `PRO – provperiod (${trialDaysLeft(sub)} dagar kvar)` : `PRO – aktiv (${plan?.label})`;
+  return (
+    <section className="card-soft space-y-3 p-5">
+      <div className="flex items-center justify-between">
+        <div><div className="text-sm text-muted-foreground">Medlemskap</div><div className="font-semibold">{label}</div></div>
+        {st === "free" && <Button className="rounded-full" onClick={() => setOpen(true)}>Prova PRO</Button>}
+      </div>
+      {st !== "free" && plan && <p className="text-sm text-muted-foreground">{sub?.cancelled ? "Avslutad – PRO gäller provperioden ut." : `Därefter ${plan.price} kr per ${plan.months === 1 ? "månad" : `${plan.months} mån`}.`}</p>}
+      {st !== "free" && !sub?.cancelled && (
+        <Button variant="ghost" className="h-10 w-full rounded-full" onClick={() => { update((x) => (x.subscription ? { ...x, subscription: { ...x.subscription, cancelled: true } } : x)); toast("Prenumerationen är avslutad"); }}>Avsluta prenumeration</Button>
+      )}
+      <Paywall open={open} onOpenChange={setOpen} />
+    </section>
+  );
+}
