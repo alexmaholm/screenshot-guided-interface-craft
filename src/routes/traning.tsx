@@ -393,8 +393,10 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
                   )}
                   <button aria-label={`Set ${s + 1} klart`} aria-pressed={r.done} onClick={() => toggleSet(i, s)} className={`ml-auto grid h-10 w-10 place-items-center rounded-full border-2 ${r.done ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}><Check className="h-4 w-4" /></button>
                   <button aria-label={`Ta bort set ${s + 1}`} disabled={rows.length <= 1} onClick={() => patchEx(i, (x) => withRows(x, setRows(x).filter((_, k) => k !== s)))} className="grid h-10 w-8 place-items-center text-muted-foreground disabled:opacity-30"><X className="h-4 w-4" /></button>
+                </div>
                 </li>
-              ))}
+                );
+              })}
             </ol>
             {e.restSec > 0 ? <div className="mt-3"><RestTimer seconds={e.restSec} trigger={restTrigger[i] ?? 0} /></div> : null}
           </li>

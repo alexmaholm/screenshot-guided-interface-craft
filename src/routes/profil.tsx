@@ -7,6 +7,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addDays, dateKey, update, useBalans } from "@/lib/balans";
 import { streakInfo } from "@/lib/habits";
+import { weightTrend } from "@/lib/progress";
+
+function WeightTrendChart({ body }: { body: { date: string; weight: number }[] }) {
+  const pts = weightTrend(body).slice(-60);
+  const last = pts[pts.length - 1]!;
+  const first = pts[0]!;
+  const diff = Math.round((last.trend - first.trend) * 10) / 10;
+  if (pts.length < 2) return <p className="text-sm text-muted-foreground">Trend: {String(last.trend).replace(".", ",")} kg. Väg dig några gånger till så visas kurvan.</p>;
+  const vals = pts.flatMap((p) => [p.weight, p.trend]);
+  const min = Math.min(...vals) - 0.5, max = Math.max(...vals) + 0.5;
+  const W = 300, H = 110;
+  const x = (i: number) => (i / (pts.length - 1)) * W;
+  const y = (v: number) => H - ((v - min) / (max - min)) * H;
+  const line = pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.trend).toFixed(1)}`).join(" ");
+  return (
+    <div className="space-y-1">
+      <p className="text-sm"><span className="font-semibold">Trend {String(last.trend).replace(".", ",")} kg</span> <span className="text-muted-foreground">· {diff === 0 ? "stabil" : `${diff > 0 ? "+" : "−"}${String(Math.abs(diff)).replace(".", ",")} kg`} sedan start</span></p>
+      <svg viewBox={`0 0 ${W} ${H}`} className="h-28 w-full" role="img" aria-label="Vikttrend">
+        {pts.map((p, i) => <circle key={p.date} cx={x(i)} cy={y(p.weight)} r={2.5} className="fill-muted-foreground/40" />)}
+        <path d={line} fill="none" strokeWidth={2.5} strokeLinecap="round" className="stroke-primary" />
+      </svg>
+      <p className="text-xs text-muted-foreground">Prickarna är dagens vågsiffra, linjen din verkliga trend – vätskesvängningar jämnas ut.</p>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/profil")({
   head: () => ({
@@ -143,11 +168,14 @@ function WeightLog() {
             <Button type="submit" className="h-12 rounded-full">Spara</Button>
           </form>
           {s.body.length === 0 ? <p className="text-sm text-muted-foreground">Inga mätningar ännu.</p> : (
-            <ul className="text-sm">
-              {[...s.body].reverse().slice(0, 5).map((b) => (
-                <li key={b.date} className="flex justify-between py-1"><span>{b.date}</span><span>{b.weight} kg</span></li>
-              ))}
-            </ul>
+            <>
+              <WeightTrendChart body={s.body} />
+              <ul className="text-sm">
+                {[...s.body].reverse().slice(0, 5).map((b) => (
+                  <li key={b.date} className="flex justify-between py-1"><span>{b.date}</span><span>{b.weight} kg</span></li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
       )}
