@@ -9,7 +9,7 @@ import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { changeSetCount, improvements, lastWeight, nextSetType, setLabels, setRows, withRows } from "@/lib/progress";
+import { changeSetCount, improvements, lastSets, lastWeight, nextSetType, prevSetText, setLabels, setRows, withRows } from "@/lib/progress";
 import { VoiceLog } from "@/components/VoiceLog";
 import type { VoiceCommand } from "@/lib/voice";
 import type { SetType } from "@/lib/balans";
@@ -340,6 +340,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
       <ul className="space-y-3">
         {w.exercises.map((e, i) => {
           const prev = lastWeight(e.name, w.id, all);
+          const prevRows = lastSets(e.name, w.id, all);
           const rows = setRows(e);
           const labels = setLabels(rows);
           const timed = !e.reps && !!e.timeSec;
@@ -369,8 +370,12 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
               </div>
             </div>
             <ol className="mt-3 space-y-2">
-              {rows.map((r, s) => (
-                <li key={s} className="flex items-center gap-2">
+              {rows.map((r, s) => {
+                const pt = prevSetText(prevRows?.[s]);
+                return (
+                <li key={s}>
+                {pt && <p className="mb-0.5 pl-10 text-xs text-muted-foreground">Förra: {pt}</p>}
+                <div className="flex items-center gap-2">
                   <button
                     aria-label={`Set ${s + 1}: ${SET_TYPE_NAME[r.type ?? "normal"]}. Tryck för att byta typ`}
                     onClick={() => patchEx(i, (x) => withRows(x, setRows(x).map((q, k) => (k === s ? { ...q, type: nextSetType(q.type) } : q))))}
@@ -388,8 +393,10 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
                   )}
                   <button aria-label={`Set ${s + 1} klart`} aria-pressed={r.done} onClick={() => toggleSet(i, s)} className={`ml-auto grid h-10 w-10 place-items-center rounded-full border-2 ${r.done ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}><Check className="h-4 w-4" /></button>
                   <button aria-label={`Ta bort set ${s + 1}`} disabled={rows.length <= 1} onClick={() => patchEx(i, (x) => withRows(x, setRows(x).filter((_, k) => k !== s)))} className="grid h-10 w-8 place-items-center text-muted-foreground disabled:opacity-30"><X className="h-4 w-4" /></button>
+                </div>
                 </li>
-              ))}
+                );
+              })}
             </ol>
             {e.restSec > 0 ? <div className="mt-3"><RestTimer seconds={e.restSec} trigger={restTrigger[i] ?? 0} /></div> : null}
           </li>

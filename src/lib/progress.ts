@@ -66,6 +66,39 @@ export function lastWeight(name: string, currentId: string, all: Workout[]): num
     .find((x) => x.name.toLowerCase() === key && x.weightKg)?.weightKg;
 }
 
+/** Set rows from the most recent earlier finished workout containing this exercise. */
+export function lastSets(name: string, currentId: string, all: Workout[]): SetEntry[] | undefined {
+  const key = name.toLowerCase();
+  const ex = all
+    .filter((w) => w.id !== currentId && w.status === "klart")
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+    .flatMap((w) => w.exercises)
+    .find((x) => x.name.toLowerCase() === key);
+  return ex ? setRows(ex) : undefined;
+}
+
+/** Short guide text for one previous set, e.g. "80 kg × 8" or "40 sek". */
+export function prevSetText(r: SetEntry | undefined): string | undefined {
+  if (!r) return undefined;
+  if (r.timeSec && !r.reps) return `${r.timeSec} sek`;
+  if (r.kg && r.reps) return `${String(r.kg).replace(".", ",")} kg × ${r.reps}`;
+  if (r.reps) return `${r.reps} reps`;
+  if (r.kg) return `${String(r.kg).replace(".", ",")} kg`;
+  return undefined;
+}
+
+export interface TrendPoint { date: string; weight: number; trend: number }
+
+/** Exponentially smoothed weight trend (Happy Scale style) so daily water swings don't dominate. */
+export function weightTrend(body: { date: string; weight: number }[], alpha = 0.25): TrendPoint[] {
+  const sorted = [...body].sort((a, b) => (a.date < b.date ? -1 : 1));
+  let t: number | undefined;
+  return sorted.map((b) => {
+    t = t === undefined ? b.weight : t + alpha * (b.weight - t);
+    return { date: b.date, weight: b.weight, trend: Math.round(t * 10) / 10 };
+  });
+}
+
 export interface StrengthPoint { date: string; kg: number }
 
 /** Heaviest weight per finished workout date for one exercise, oldest first. */
