@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { askCoach } from "@/lib/coach.functions";
 import { dateKey, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, useBalans, type State } from "@/lib/balans";
+import { Paywall } from "@/components/Paywall";
+import { isPro } from "@/lib/tiers";
 
 const QUICK = [
   "Vad passar bra att äta nu för att nå mitt mål?",
@@ -42,6 +44,7 @@ export function AiCoach() {
   const [busy, setBusy] = useState(false);
   const [suggest, setSuggest] = useState<string[]>(QUICK);
   const [chat, setChat] = useState<{ q: string; a: string; error?: boolean }[]>([]);
+  const [pay, setPay] = useState(false);
   if (!s?.profile) return null;
 
   async function send(question: string) {
@@ -62,12 +65,13 @@ export function AiCoach() {
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => (isPro(s) ? setOpen(true) : setPay(true))}
         aria-label="Öppna AI-coach"
         className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg md:bottom-6"
       >
         <Sparkles className="h-6 w-6" aria-hidden />
       </button>
+      <Paywall open={pay} onOpenChange={setPay} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>

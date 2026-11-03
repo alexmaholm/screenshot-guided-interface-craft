@@ -132,10 +132,7 @@ function Profile() {
         <span>✨ Visa introduktion</span><span aria-hidden>›</span>
       </button>
 
-      <section className="card-soft flex items-center justify-between p-5">
-        <div><div className="text-sm text-muted-foreground">Medlemskap</div><div className="font-semibold">Gratis</div></div>
-        <span className="rounded-full bg-muted px-3 py-1 text-xs">PRO kommer snart</span>
-      </section>
+      <Membership />
     </div>
   );
 }
