@@ -340,6 +340,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
       <ul className="space-y-3">
         {w.exercises.map((e, i) => {
           const prev = lastWeight(e.name, w.id, all);
+          const prevRows = lastSets(e.name, w.id, all);
           const rows = setRows(e);
           const labels = setLabels(rows);
           const timed = !e.reps && !!e.timeSec;
@@ -369,8 +370,12 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
               </div>
             </div>
             <ol className="mt-3 space-y-2">
-              {rows.map((r, s) => (
-                <li key={s} className="flex items-center gap-2">
+              {rows.map((r, s) => {
+                const pt = prevSetText(prevRows?.[s]);
+                return (
+                <li key={s}>
+                {pt && <p className="mb-0.5 pl-10 text-xs text-muted-foreground">Förra: {pt}</p>}
+                <div className="flex items-center gap-2">
                   <button
                     aria-label={`Set ${s + 1}: ${SET_TYPE_NAME[r.type ?? "normal"]}. Tryck för att byta typ`}
                     onClick={() => patchEx(i, (x) => withRows(x, setRows(x).map((q, k) => (k === s ? { ...q, type: nextSetType(q.type) } : q))))}
