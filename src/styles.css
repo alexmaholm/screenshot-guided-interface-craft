@@ -2,13 +2,15 @@
 @import "tw-animate-css";
 @import "@fontsource-variable/figtree";
 @import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/inter-tight";
 @source "../src";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter Tight Variable", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -97,6 +99,51 @@
   --sidebar-ring: oklch(0.55 0.14 35);
   --gradient-hero: linear-gradient(140deg, oklch(0.36 0.07 160), oklch(0.45 0.08 170));
   --shadow-soft: 0 10px 30px -14px oklch(0.36 0.07 160 / 0.35);
+}
+
+/* Nordic Stealth preview – remove this block to return to the warm theme */
+:root {
+  --font-display: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter Tight Variable", ui-sans-serif, system-ui, sans-serif;
+  --radius: 0.9rem;
+  --background: oklch(0.16 0.004 260);
+  --foreground: oklch(0.95 0.005 260);
+  --card: oklch(0.21 0.005 260);
+  --card-foreground: oklch(0.95 0.005 260);
+  --popover: oklch(0.21 0.005 260);
+  --popover-foreground: oklch(0.95 0.005 260);
+  --primary: oklch(0.9 0.17 120);
+  --primary-foreground: oklch(0.16 0.01 260);
+  --secondary: oklch(0.27 0.006 260);
+  --secondary-foreground: oklch(0.93 0.005 260);
+  --muted: oklch(0.25 0.005 260);
+  --muted-foreground: oklch(0.68 0.01 260);
+  --accent: oklch(0.32 0.04 125);
+  --accent-foreground: oklch(0.93 0.12 120);
+  --mint: oklch(0.36 0.06 125);
+  --sand: oklch(0.3 0.006 260);
+  --coral: oklch(0.65 0.2 25);
+  --amber: oklch(0.82 0.15 85);
+  --coral-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.62 0.21 25);
+  --border: oklch(0.3 0.006 260);
+  --input: oklch(0.33 0.006 260);
+  --ring: oklch(0.9 0.17 120);
+  --chart-1: oklch(0.9 0.17 120);
+  --chart-2: oklch(0.65 0.2 25);
+  --chart-3: oklch(0.7 0.1 200);
+  --chart-4: oklch(0.82 0.15 85);
+  --chart-5: oklch(0.6 0.01 260);
+  --sidebar: oklch(0.19 0.005 260);
+  --sidebar-foreground: oklch(0.95 0.005 260);
+  --sidebar-primary: oklch(0.9 0.17 120);
+  --sidebar-primary-foreground: oklch(0.16 0.01 260);
+  --sidebar-accent: oklch(0.27 0.006 260);
+  --sidebar-accent-foreground: oklch(0.93 0.005 260);
+  --sidebar-border: oklch(0.3 0.006 260);
+  --sidebar-ring: oklch(0.9 0.17 120);
+  --gradient-hero: linear-gradient(140deg, oklch(0.24 0.01 260), oklch(0.19 0.03 125));
+  --shadow-soft: 0 10px 30px -14px oklch(0 0 0 / 0.6);
 }
 
 @layer base {
