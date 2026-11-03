@@ -1,4 +1,5 @@
 import { FridgeIdeas } from "@/components/FridgeIdeas";
+import { ProGate } from "@/components/Paywall";
 import { WeekPlan } from "@/components/WeekPlan";
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { MacroSummary } from "@/components/MacroSummary";
@@ -181,7 +182,7 @@ function Mat() {
 
       <WaterTracker date={date} />
       <DailyHabits date={date} />
-      <FridgeIdeas profile={p} />
+      <ProGate title="Töm kylen"><FridgeIdeas profile={p} /></ProGate>
       <WeekPlan profile={p} />
 
 
@@ -275,7 +276,7 @@ function AddMealDialog({
             <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`min-h-10 shrink-0 rounded-full px-3 text-xs capitalize ${tab === t ? "bg-card font-semibold shadow-sm" : ""}`}>{t === "kod" ? "Streckkod" : t}</button>
           ))}
         </div>
-        {tab === "foto" && <PhotoLog diet={[s.profile?.diet, ...(s.profile?.restrictions ?? [])].filter(Boolean).join(", ")} showKcal={showKcal} onSave={(m) => onAdd({ type, ...m })} />}
+        {tab === "foto" && <ProGate title="AI-fotologg"><PhotoLog diet={[s.profile?.diet, ...(s.profile?.restrictions ?? [])].filter(Boolean).join(", ")} showKcal={showKcal} onSave={(m) => onAdd({ type, ...m })} /></ProGate>}
         {tab === "kod" && <BarcodeScan showKcal={showKcal} onSave={(m) => onAdd({ type, ...m })} />}
         {tab === "sök" && <FoodSearch showKcal={showKcal} onPick={(f) => onAdd({ type, ...f })} />}
         {tab === "egen" && (

@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { addDays, dateKey, update, useBalans } from "@/lib/balans";
 import { streakInfo } from "@/lib/habits";
 import { weightTrend } from "@/lib/progress";
+import { Paywall } from "@/components/Paywall";
+import { PLANS, status, trialDaysLeft } from "@/lib/tiers";
 
 function WeightTrendChart({ body }: { body: { date: string; weight: number }[] }) {
   const pts = weightTrend(body).slice(-60);
@@ -132,10 +134,7 @@ function Profile() {
         <span>✨ Visa introduktion</span><span aria-hidden>›</span>
       </button>
 
-      <section className="card-soft flex items-center justify-between p-5">
-        <div><div className="text-sm text-muted-foreground">Medlemskap</div><div className="font-semibold">Gratis</div></div>
-        <span className="rounded-full bg-muted px-3 py-1 text-xs">PRO kommer snart</span>
-      </section>
+      <Membership />
     </div>
   );
 }
@@ -179,6 +178,28 @@ function WeightLog() {
           )}
         </div>
       )}
+    </section>
+  );
+}
+
+function Membership() {
+  const s = useBalans()!;
+  const [open, setOpen] = useState(false);
+  const sub = s.subscription;
+  const st = status(sub);
+  const plan = PLANS.find((p) => p.id === sub?.plan);
+  const label = st === "free" ? "Gratis" : st === "trial" ? `PRO – provperiod (${trialDaysLeft(sub)} dagar kvar)` : `PRO – aktiv (${plan?.label})`;
+  return (
+    <section className="card-soft space-y-3 p-5">
+      <div className="flex items-center justify-between">
+        <div><div className="text-sm text-muted-foreground">Medlemskap</div><div className="font-semibold">{label}</div></div>
+        {st === "free" && <Button className="rounded-full" onClick={() => setOpen(true)}>Prova PRO</Button>}
+      </div>
+      {st !== "free" && plan && <p className="text-sm text-muted-foreground">{sub?.cancelled ? "Avslutad – PRO gäller provperioden ut." : `Därefter ${plan.price} kr per ${plan.months === 1 ? "månad" : `${plan.months} mån`}.`}</p>}
+      {st !== "free" && !sub?.cancelled && (
+        <Button variant="ghost" className="h-10 w-full rounded-full" onClick={() => { update((x) => (x.subscription ? { ...x, subscription: { ...x.subscription, cancelled: true } } : x)); toast("Prenumerationen är avslutad"); }}>Avsluta prenumeration</Button>
+      )}
+      <Paywall open={open} onOpenChange={setOpen} />
     </section>
   );
 }

@@ -142,6 +142,8 @@ export interface State {
   mealPlan: PlannedMeal[];
   /** Synced from Apple Health / Health Connect, per date. */
   health?: Record<string, { steps?: number; activeKcal?: number }> | undefined;
+  /** Balans PRO membership (see src/lib/tiers.ts). */
+  subscription?: import("@/lib/tiers").Subscription | undefined;
 }
 
 export interface PlannedMeal { id: string; date: string; type: MealType; name: string; kcal?: number | undefined; protein?: number | undefined }

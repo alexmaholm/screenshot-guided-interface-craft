@@ -18,3 +18,4 @@
 - All AI features (photo log, text log, coach) call Google Gemini through `src/lib/gemini.server.ts` with `GEMINI_API_KEY`; the owner chose their own Google key for lower running cost.
 
 - Cloud sync mirrors the whole local state as one JSON row per user (`user_state`) via `src/lib/cloudsync.ts`; local storage stays the source of truth so the app works offline.
+- Keep PRO plans, trial and membership status in `src/lib/tiers.ts` and gate PRO features with `ProGate`/`Paywall` so locks and prices stay consistent; purchases are simulated until native billing is added.

@@ -1,4 +1,5 @@
 import { DecimalInput } from "@/components/DecimalInput";
+import { ProGate } from "@/components/Paywall";
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { ExercisePicker, useExerciseLibrary } from "@/components/ExercisePicker";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -115,7 +116,7 @@ function Training() {
         </div>
       </section>
 
-      <MuscleMap workouts={s.workouts} today={today} />
+      <ProGate title="Muskelkarta"><MuscleMap workouts={s.workouts} today={today} /></ProGate>
 
       <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setBrowsing(true)}><Dumbbell /> Övningsbank</Button>
       <ExercisePicker open={browsing} onOpenChange={setBrowsing} onPick={(ex) => toast(`${ex.name} – lägg till den när du startar ett pass`)} />
@@ -327,7 +328,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
   };
   return (
     <div className="space-y-5">
-      {w.status !== "klart" && w.exercises.length > 0 && <VoiceLog onCommand={voice} />}
+      {w.status !== "klart" && w.exercises.length > 0 && <ProGate title="Röstloggning"><VoiceLog onCommand={voice} /></ProGate>}
       <button onClick={onBack} className="flex min-h-11 items-center gap-2 font-medium text-primary"><ArrowLeft className="h-5 w-5" /> Alla pass</button>
       <header className="bg-hero rounded-3xl p-6 text-primary-foreground">
         <p className="text-sm opacity-80">{KIND_LABEL[w.kind]}</p>
