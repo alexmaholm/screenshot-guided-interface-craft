@@ -13,7 +13,7 @@ export const PLANS: Plan[] = [
 export const TRIAL_DAYS = 7;
 const DAY = 86_400_000;
 
-export interface Subscription { plan: PlanId; startedAt: number; trialEndsAt: number; cancelled?: boolean | undefined }
+export interface Subscription { plan: PlanId; startedAt: number; trialEndsAt: number; cancelled?: boolean | undefined; lifetime?: boolean | undefined; codeLabel?: string | undefined }
 
 export const perMonth = (p: Plan) => Math.round(p.price / p.months);
 /** Percent saved versus paying the monthly price for the same period. */
@@ -26,6 +26,7 @@ export function startTrial(plan: PlanId, now = Date.now()): Subscription {
 export type Status = "free" | "trial" | "pro";
 export function status(sub: Subscription | undefined, now = Date.now()): Status {
   if (!sub) return "free";
+  if (sub.lifetime) return "pro";
   if (now < sub.trialEndsAt) return "trial";
   return sub.cancelled ? "free" : "pro";
 }
@@ -34,4 +35,24 @@ export const isPro = (s: State | null | undefined, now = Date.now()) => status(s
 
 export function trialDaysLeft(sub: Subscription | undefined, now = Date.now()) {
   return sub ? Math.max(0, Math.ceil((sub.trialEndsAt - now) / DAY)) : 0;
+}
+
+/** Redeemable codes, stored only as SHA-256 hashes so the real codes never appear in the app bundle. */
+const CODES: Record<string, { lifetime?: true; months?: number; label: string }> = {
+  d8dfd6766e7e817c8a05ff0801c9c460c69ec14fe6b14f9c63d9458a86816d91: { lifetime: true, label: "Grundare – livstid" },
+};
+
+export const normalizeCode = (c: string) => c.trim().toUpperCase().replace(/\s+/g, "");
+
+async function sha256(text: string) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Returns the new subscription for a valid code, or null. */
+export async function redeemCode(code: string, now = Date.now()): Promise<Subscription | null> {
+  const hit = CODES[await sha256(normalizeCode(code))];
+  if (!hit) return null;
+  if (hit.lifetime) return { plan: "year", startedAt: now, trialEndsAt: now, lifetime: true, codeLabel: hit.label };
+  return { plan: "month", startedAt: now, trialEndsAt: now + (hit.months ?? 1) * 30 * DAY, cancelled: true, codeLabel: hit.label };
 }
