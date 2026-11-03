@@ -9,7 +9,7 @@ import { addDays, dateKey, update, useBalans } from "@/lib/balans";
 import { streakInfo } from "@/lib/habits";
 import { weightTrend } from "@/lib/progress";
 import { Paywall } from "@/components/Paywall";
-import { PLANS, status, trialDaysLeft } from "@/lib/tiers";
+import { PLANS, redeemCode, status, trialDaysLeft } from "@/lib/tiers";
 
 function WeightTrendChart({ body }: { body: { date: string; weight: number }[] }) {
   const pts = weightTrend(body).slice(-60);
@@ -188,16 +188,30 @@ function Membership() {
   const sub = s.subscription;
   const st = status(sub);
   const plan = PLANS.find((p) => p.id === sub?.plan);
-  const label = st === "free" ? "Gratis" : st === "trial" ? `PRO – provperiod (${trialDaysLeft(sub)} dagar kvar)` : `PRO – aktiv (${plan?.label})`;
+  const [code, setCode] = useState("");
+  const redeem = async () => {
+    const next = await redeemCode(code);
+    if (!next) { toast.error("Koden är inte giltig"); return; }
+    update((x) => ({ ...x, subscription: next }));
+    setCode("");
+    toast.success(`Kod inlöst: ${next.codeLabel}`);
+  };
+  const label = sub?.lifetime ? `PRO – ${sub.codeLabel ?? "livstid"}` : st === "free" ? "Gratis" : st === "trial" ? `PRO – provperiod (${trialDaysLeft(sub)} dagar kvar)` : `PRO – aktiv (${plan?.label})`;
   return (
     <section className="card-soft space-y-3 p-5">
       <div className="flex items-center justify-between">
         <div><div className="text-sm text-muted-foreground">Medlemskap</div><div className="font-semibold">{label}</div></div>
         {st === "free" && <Button className="rounded-full" onClick={() => setOpen(true)}>Prova PRO</Button>}
       </div>
-      {st !== "free" && plan && <p className="text-sm text-muted-foreground">{sub?.cancelled ? "Avslutad – PRO gäller provperioden ut." : `Därefter ${plan.price} kr per ${plan.months === 1 ? "månad" : `${plan.months} mån`}.`}</p>}
-      {st !== "free" && !sub?.cancelled && (
+      {st !== "free" && plan && !sub?.lifetime && <p className="text-sm text-muted-foreground">{sub?.cancelled ? "Avslutad – PRO gäller provperioden ut." : `Därefter ${plan.price} kr per ${plan.months === 1 ? "månad" : `${plan.months} mån`}.`}</p>}
+      {st !== "free" && !sub?.cancelled && !sub?.lifetime && (
         <Button variant="ghost" className="h-10 w-full rounded-full" onClick={() => { update((x) => (x.subscription ? { ...x, subscription: { ...x.subscription, cancelled: true } } : x)); toast("Prenumerationen är avslutad"); }}>Avsluta prenumeration</Button>
+      )}
+      {!sub?.lifetime && (
+        <div className="flex gap-2 pt-1">
+          <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Har du en kampanjkod?" autoCapitalize="characters" className="h-10 rounded-full" />
+          <Button variant="outline" className="h-10 rounded-full" disabled={!code.trim()} onClick={redeem}>Lös in</Button>
+        </div>
       )}
       <Paywall open={open} onOpenChange={setOpen} />
     </section>
