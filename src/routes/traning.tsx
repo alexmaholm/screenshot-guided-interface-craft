@@ -9,7 +9,7 @@ import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { changeSetCount, improvements, lastWeight, nextSetType, setLabels, setRows, withRows } from "@/lib/progress";
+import { changeSetCount, improvements, lastSets, lastWeight, nextSetType, prevSetText, setLabels, setRows, withRows } from "@/lib/progress";
 import { VoiceLog } from "@/components/VoiceLog";
 import type { VoiceCommand } from "@/lib/voice";
 import type { SetType } from "@/lib/balans";
