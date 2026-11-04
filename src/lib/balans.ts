@@ -213,7 +213,7 @@ export function getState(): State {
 
 /** Replace the whole state, e.g. with data restored from the cloud. */
 export function replaceState(next: Partial<State>) {
-  update(() => ({ ...empty, ...next }));
+  update(() => normalizeState(next));
 }
 
 export function subscribeState(cb: () => void) {
