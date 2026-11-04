@@ -34,13 +34,13 @@ export function SundayReport({ workouts, days, restDays, streak, waterAvg, mealD
 
   return (
     <>
-      <button onClick={() => { setI(0); setOpen(true); }} className="bg-hero w-full rounded-3xl p-5 text-left text-primary-foreground active:scale-[0.99]">
+      <button onClick={() => { setI(0); setOpen(true); }} className="bg-hero w-full rounded-3xl p-5 text-left text-hero-foreground active:scale-[0.99]">
         <p className="text-sm opacity-80">Söndagsrapport</p>
         <p className="font-display text-2xl font-bold">Veckans rapport är redo 🎉</p>
         <p className="mt-1 text-sm opacity-90">Tryck för att se din vecka</p>
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-hero max-w-sm overflow-hidden rounded-3xl border-0 p-0 text-primary-foreground">
+        <DialogContent className="bg-hero max-w-sm overflow-hidden rounded-3xl border-0 p-0 text-hero-foreground">
           <DialogTitle className="sr-only">Söndagsrapport</DialogTitle>
           <div className="flex gap-1 px-5 pt-5">{slides.map((_, n) => <span key={n} className={`h-1 flex-1 rounded-full bg-primary-foreground ${n <= i ? "opacity-100" : "opacity-30"}`} />)}</div>
           <div className="flex min-h-[340px] flex-col justify-center px-6 py-8 text-center" onClick={() => setI((n) => Math.min(slides.length - 1, n + 1))}>

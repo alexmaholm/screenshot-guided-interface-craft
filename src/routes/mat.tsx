@@ -97,7 +97,7 @@ function Mat() {
           <h1 className="text-3xl font-bold">Mat</h1>
           <div className="mt-1 flex items-center gap-1">
             <button aria-label="Föregående dag" className="grid h-10 w-10 place-items-center rounded-full hover:bg-muted" onClick={() => setDate(addDays(date, -1))}><ChevronLeft className="h-5 w-5" /></button>
-            <span className="min-w-36 text-center text-sm capitalize text-muted-foreground">{isToday ? "Idag" : prettyDate(date)}</span>
+            <span className="min-w-20 text-center text-sm capitalize text-muted-foreground">{isToday ? "Idag" : prettyDate(date)}</span>
             <button aria-label="Nästa dag" className="grid h-10 w-10 place-items-center rounded-full hover:bg-muted disabled:opacity-30" disabled={isToday} onClick={() => setDate(addDays(date, 1))}><ChevronRight className="h-5 w-5" /></button>
           </div>
         </div>
