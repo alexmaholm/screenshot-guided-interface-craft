@@ -10,6 +10,19 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { isNativeHealthAvailable, healthSourceName, readHealthToday, mergeHealth, type HealthSyncPrefs } from "@/lib/health";
 import { dateKey, NUTRITION_FOCUS, nutritionFocusOf, resetAll, update, useBalans, WEEKDAYS, type Profile } from "@/lib/balans";
+import { supabase } from "@/integrations/supabase/client";
+import { deleteMyAccount } from "@/lib/account.functions";
+
+async function deleteEverything() {
+  if (!confirm("Radera konto och all data? Detta går inte att ångra.")) return;
+  const { data } = await supabase.auth.getSession();
+  if (data.session) {
+    try { await deleteMyAccount(); await supabase.auth.signOut(); }
+    catch { toast.error("Kunde inte radera kontot i molnet. Försök igen."); return; }
+  }
+  resetAll();
+  toast.success("All data är raderad");
+}
 
 export const Route = createFileRoute("/installningar")({
   head: () => ({
@@ -116,12 +129,14 @@ function Settings() {
       </Section>
 
       <Section title="Villkor & integritet">
-        <details className="text-sm"><summary className="cursor-pointer font-medium">Medicinsk friskrivning</summary><p className="mt-2 text-muted-foreground">Balans ger generell inspiration för livsstil och träning – inte medicinsk rådgivning, diagnos eller behandling. Rådfråga vården vid skador, sjukdom eller graviditet.</p></details>
-        <details className="text-sm"><summary className="cursor-pointer font-medium">Integritet</summary><p className="mt-2 text-muted-foreground">Din data lagras på enheten och, om du loggar in, krypterat i molnet. Bilder som analyseras med AI sparas inte permanent.</p></details>
-        <details className="text-sm"><summary className="cursor-pointer font-medium">Användarvillkor</summary><p className="mt-2 text-muted-foreground">AI-genererade förslag och näringsvärden är uppskattningar. Kontrollera alltid märkning och allergener.</p></details>
+        <p className="text-sm text-muted-foreground">Balans är inspiration för vardag och träning – inte medicinsk rådgivning.</p>
+        <div className="flex flex-col">
+          <Link to="/integritet" className="flex min-h-11 items-center text-sm font-medium underline-offset-4 hover:underline">Integritetspolicy</Link>
+          <Link to="/villkor" className="flex min-h-11 items-center text-sm font-medium underline-offset-4 hover:underline">Användarvillkor</Link>
+        </div>
       </Section>
 
-      <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => { if (confirm("Börja om? All din data raderas.")) resetAll(); }}>Radera all data</Button>
+      <Button variant="outline" className="h-12 w-full rounded-full text-destructive" onClick={deleteEverything}>Radera konto och all data</Button>
     </div>
   );
 }
