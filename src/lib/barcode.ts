@@ -61,6 +61,34 @@ export async function lookupBarcode(code: string): Promise<BarcodeProduct | null
   return parseOffProduct(code, await res.json());
 }
 
+/** Parse an Open Food Facts search response into products with nutrition (deduped by name). */
+export function parseOffSearch(json: unknown): BarcodeProduct[] {
+  const list = (json as { products?: Record<string, unknown>[] })?.products ?? [];
+  const seen = new Set<string>();
+  const out: BarcodeProduct[] = [];
+  for (const p of list) {
+    const code = String(p["code"] ?? "");
+    const prod = parseOffProduct(code, { product: p });
+    if (!prod || !(String(p["product_name_sv"] || p["product_name"] || "").trim())) continue;
+    const key = prod.name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(prod);
+  }
+  return out;
+}
+
+/** Free-text product search (Swedish market first) against Open Food Facts. */
+export async function searchProducts(query: string, signal?: AbortSignal): Promise<BarcodeProduct[]> {
+  const q = encodeURIComponent(query.trim());
+  const res = await fetch(
+    `https://se.openfoodfacts.org/cgi/search.pl?search_terms=${q}&search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,product_name_sv,brands,nutriments,serving_quantity`,
+    { signal },
+  );
+  if (!res.ok) return [];
+  return parseOffSearch(await res.json());
+}
+
 /** Household measures for packaged goods. Approximate grams per unit; "portion" uses the package serving. */
 export type Measure = "g" | "tsk" | "msk" | "dl" | "portion";
 export const MEASURE_G: Record<Exclude<Measure, "portion">, number> = { g: 1, tsk: 5, msk: 15, dl: 100 };
