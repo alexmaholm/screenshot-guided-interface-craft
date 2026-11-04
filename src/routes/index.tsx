@@ -54,7 +54,7 @@ function Today() {
         <h1 className="text-3xl font-bold">{greet}{p.name ? `, ${p.name}` : ""}</h1>
       </header>
 
-      <section className="bg-hero rounded-3xl p-6 text-primary-foreground shadow-[var(--shadow-soft)]">
+      <section className="bg-hero rounded-3xl p-6 text-hero-foreground shadow-[var(--shadow-soft)]">
         <p className="text-sm opacity-80">Dagens pass</p>
         {workout ? (
           <>
