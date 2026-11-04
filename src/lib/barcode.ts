@@ -36,7 +36,7 @@ export function parseOffProduct(code: string, json: unknown): BarcodeProduct | n
   const brand = String(p["brands"] ?? "").split(",")[0]?.trim();
   return {
     code,
-    name: [brand, name].filter(Boolean).join(" ") || `Produkt ${code}`,
+    name: (brand && name.toLowerCase().includes(brand.toLowerCase()) ? name : [brand, name].filter(Boolean).join(" ")) || `Produkt ${code}`,
     kcal: Math.round(kcal ?? 0), protein: protein ?? 0, carbs: carbs ?? 0, fat: fat ?? 0,
     servingG: num(p["serving_quantity"]),
     ...Object.fromEntries(Object.entries(micros).filter(([, v]) => v !== undefined)),
