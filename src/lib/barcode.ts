@@ -77,24 +77,3 @@ export function parseOffSearch(json: unknown): BarcodeProduct[] {
   }
   return out;
 }
-
-/** Free-text product search (Swedish market first) against Open Food Facts. */
-export async function searchProducts(query: string, signal?: AbortSignal): Promise<BarcodeProduct[]> {
-  const q = encodeURIComponent(query.trim());
-  const res = await fetch(
-    `https://se.openfoodfacts.org/cgi/search.pl?search_terms=${q}&search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,product_name_sv,brands,nutriments,serving_quantity`,
-    { signal },
-  );
-  if (!res.ok) return [];
-  return parseOffSearch(await res.json());
-}
-
-/** Household measures for packaged goods. Approximate grams per unit; "portion" uses the package serving. */
-export type Measure = "g" | "tsk" | "msk" | "dl" | "portion";
-export const MEASURE_G: Record<Exclude<Measure, "portion">, number> = { g: 1, tsk: 5, msk: 15, dl: 100 };
-export const MEASURE_STEP: Record<Measure, number> = { g: 10, tsk: 1, msk: 1, dl: 0.5, portion: 1 };
-
-export function measureGrams(unit: Measure, qty: number, servingG?: number) {
-  const per = unit === "portion" ? (servingG ?? 0) : MEASURE_G[unit];
-  return Math.round(Math.max(0, qty) * per);
-}

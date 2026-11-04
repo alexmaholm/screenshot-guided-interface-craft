@@ -3,7 +3,8 @@ import { Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { foodsFor, portion, UNIT_LABEL, useBalans, type Food, type Unit } from "@/lib/balans";
-import { searchProducts, type BarcodeProduct } from "@/lib/barcode";
+import type { BarcodeProduct } from "@/lib/barcode";
+import { searchBrandFoods } from "@/lib/foodsearch.functions";
 
 export interface FoodPick { name: string; amount: string; kcal: number; protein: number; carbs: number; fat: number }
 
@@ -30,9 +31,9 @@ export function FoodSearch({ onPick, showKcal }: { onPick: (p: FoodPick) => void
     const ctrl = new AbortController();
     setLoading(true);
     const t = setTimeout(() => {
-      searchProducts(term, ctrl.signal)
-        .then((r) => setBrands(r))
-        .catch((e) => { if ((e as Error).name !== "AbortError") { setBrands([]); setFailed(true); } })
+      searchBrandFoods({ data: { q: term } })
+        .then((r) => { if (!ctrl.signal.aborted) setBrands(r); })
+        .catch(() => { if (!ctrl.signal.aborted) { setBrands([]); setFailed(true); } })
         .finally(() => { if (!ctrl.signal.aborted) setLoading(false); });
     }, 400);
     return () => { clearTimeout(t); ctrl.abort(); };
