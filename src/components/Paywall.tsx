@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import { Check, Lock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,10 @@ export function Paywall({ open, onOpenChange }: { open: boolean; onOpenChange: (
           ))}
         </div>
         <Button className="h-12 w-full rounded-full" onClick={buy}>Starta {TRIAL_DAYS} dagar gratis</Button>
-        <p className="text-center text-xs text-muted-foreground">Avsluta när du vill. Debiteras först efter provperioden.</p>
+        <p className="text-center text-xs text-muted-foreground">Avsluta när du vill. Debiteras först efter provperioden och förnyas automatiskt tills du avslutar.</p>
+        <p className="text-center text-xs text-muted-foreground">
+          <Link to="/villkor" className="underline" onClick={() => onOpenChange(false)}>Användarvillkor</Link> · <Link to="/integritet" className="underline" onClick={() => onOpenChange(false)}>Integritetspolicy</Link>
+        </p>
       </DialogContent>
     </Dialog>
   );

@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FramstegRouteImport } from './routes/framsteg'
 import { Route as InstallningarRouteImport } from './routes/installningar'
+import { Route as IntegritetRouteImport } from './routes/integritet'
 import { Route as MatRouteImport } from './routes/mat'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TraningRouteImport } from './routes/traning'
+import { Route as VillkorRouteImport } from './routes/villkor'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -30,6 +32,11 @@ const FramstegRoute = FramstegRouteImport.update({
 const InstallningarRoute = InstallningarRouteImport.update({
   id: '/installningar',
   path: '/installningar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegritetRoute = IntegritetRouteImport.update({
+  id: '/integritet',
+  path: '/integritet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatRoute = MatRouteImport.update({
@@ -52,34 +59,45 @@ const TraningRoute = TraningRouteImport.update({
   path: '/traning',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VillkorRoute = VillkorRouteImport.update({
+  id: '/villkor',
+  path: '/villkor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/framsteg': typeof FramstegRoute
   '/installningar': typeof InstallningarRoute
+  '/integritet': typeof IntegritetRoute
   '/mat': typeof MatRoute
   '/profil': typeof ProfilRoute
   '/reset-password': typeof ResetPasswordRoute
   '/traning': typeof TraningRoute
+  '/villkor': typeof VillkorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/framsteg': typeof FramstegRoute
   '/installningar': typeof InstallningarRoute
+  '/integritet': typeof IntegritetRoute
   '/mat': typeof MatRoute
   '/profil': typeof ProfilRoute
   '/reset-password': typeof ResetPasswordRoute
   '/traning': typeof TraningRoute
+  '/villkor': typeof VillkorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/framsteg': typeof FramstegRoute
   '/installningar': typeof InstallningarRoute
+  '/integritet': typeof IntegritetRoute
   '/mat': typeof MatRoute
   '/profil': typeof ProfilRoute
   '/reset-password': typeof ResetPasswordRoute
   '/traning': typeof TraningRoute
+  '/villkor': typeof VillkorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,38 +105,46 @@ export interface FileRouteTypes {
     | '/'
     | '/framsteg'
     | '/installningar'
+    | '/integritet'
     | '/mat'
     | '/profil'
     | '/reset-password'
     | '/traning'
+    | '/villkor'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/framsteg'
     | '/installningar'
+    | '/integritet'
     | '/mat'
     | '/profil'
     | '/reset-password'
     | '/traning'
+    | '/villkor'
   id:
     | '__root__'
     | '/'
     | '/framsteg'
     | '/installningar'
+    | '/integritet'
     | '/mat'
     | '/profil'
     | '/reset-password'
     | '/traning'
+    | '/villkor'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FramstegRoute: typeof FramstegRoute
   InstallningarRoute: typeof InstallningarRoute
+  IntegritetRoute: typeof IntegritetRoute
   MatRoute: typeof MatRoute
   ProfilRoute: typeof ProfilRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TraningRoute: typeof TraningRoute
+  VillkorRoute: typeof VillkorRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -142,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/installningar'
       fullPath: '/installningar'
       preLoaderRoute: typeof InstallningarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integritet': {
+      id: '/integritet'
+      path: '/integritet'
+      fullPath: '/integritet'
+      preLoaderRoute: typeof IntegritetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mat': {
@@ -172,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TraningRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/villkor': {
+      id: '/villkor'
+      path: '/villkor'
+      fullPath: '/villkor'
+      preLoaderRoute: typeof VillkorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -179,10 +219,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FramstegRoute: FramstegRoute,
   InstallningarRoute: InstallningarRoute,
+  IntegritetRoute: IntegritetRoute,
   MatRoute: MatRoute,
   ProfilRoute: ProfilRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TraningRoute: TraningRoute,
+  VillkorRoute: VillkorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
