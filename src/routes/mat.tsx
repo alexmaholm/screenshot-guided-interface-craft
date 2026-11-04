@@ -264,7 +264,7 @@ function AddMealDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl">
+      <DialogContent className="max-h-[85dvh] overflow-y-auto overscroll-contain rounded-3xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <DialogHeader><DialogTitle className="font-display text-2xl">Lägg till måltid</DialogTitle></DialogHeader>
         <div className="flex flex-wrap gap-2">
           {MEAL_TYPES.map((t) => (
