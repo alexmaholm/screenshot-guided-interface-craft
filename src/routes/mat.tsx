@@ -266,14 +266,14 @@ function AddMealDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85dvh] overflow-y-auto overscroll-contain rounded-3xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <DialogHeader><DialogTitle className="font-display text-2xl">Lägg till måltid</DialogTitle></DialogHeader>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-4 gap-1.5">
           {MEAL_TYPES.map((t) => (
-            <button key={t} className="chip" aria-pressed={type === t} onClick={() => setType(t)}>{MEAL_LABEL[t]}</button>
+            <button key={t} className="chip justify-center px-1 text-xs" aria-pressed={type === t} onClick={() => setType(t)}>{MEAL_LABEL[t]}</button>
           ))}
         </div>
-        <div className="flex gap-1 overflow-x-auto rounded-full bg-muted p-1 text-sm" role="tablist">
+        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-muted p-1 text-sm" role="tablist">
           {(["foto", "kod", "sök", "egen", "favoriter", "tidigare"] as const).map((t) => (
-            <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`min-h-10 shrink-0 rounded-full px-3 text-xs capitalize ${tab === t ? "bg-card font-semibold shadow-sm" : ""}`}>{t === "kod" ? "Streckkod" : t}</button>
+            <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`min-h-10 rounded-xl px-2 text-xs capitalize ${tab === t ? "bg-card font-semibold shadow-sm" : ""}`}>{t === "kod" ? "Streckkod" : t}</button>
           ))}
         </div>
         {tab === "foto" && <ProGate title="AI-fotologg"><PhotoLog diet={[s.profile?.diet, ...(s.profile?.restrictions ?? [])].filter(Boolean).join(", ")} showKcal={showKcal} onSave={(m) => onAdd({ type, ...m })} /></ProGate>}
