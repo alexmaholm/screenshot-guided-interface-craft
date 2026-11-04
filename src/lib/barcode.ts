@@ -36,7 +36,7 @@ export function parseOffProduct(code: string, json: unknown): BarcodeProduct | n
   const brand = String(p["brands"] ?? "").split(",")[0]?.trim();
   return {
     code,
-    name: [brand, name].filter(Boolean).join(" ") || `Produkt ${code}`,
+    name: (brand && name.toLowerCase().includes(brand.toLowerCase()) ? name : [brand, name].filter(Boolean).join(" ")) || `Produkt ${code}`,
     kcal: Math.round(kcal ?? 0), protein: protein ?? 0, carbs: carbs ?? 0, fat: fat ?? 0,
     servingG: num(p["serving_quantity"]),
     ...Object.fromEntries(Object.entries(micros).filter(([, v]) => v !== undefined)),
@@ -59,6 +59,23 @@ export async function lookupBarcode(code: string): Promise<BarcodeProduct | null
   const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,product_name_sv,brands,nutriments,serving_quantity`);
   if (!res.ok) return null;
   return parseOffProduct(code, await res.json());
+}
+
+/** Parse an Open Food Facts search response into products with nutrition (deduped by name). */
+export function parseOffSearch(json: unknown): BarcodeProduct[] {
+  const list = (json as { products?: Record<string, unknown>[] })?.products ?? [];
+  const seen = new Set<string>();
+  const out: BarcodeProduct[] = [];
+  for (const p of list) {
+    const code = String(p["code"] ?? "");
+    const prod = parseOffProduct(code, { product: p });
+    if (!prod || !(String(p["product_name_sv"] || p["product_name"] || "").trim())) continue;
+    const key = prod.name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(prod);
+  }
+  return out;
 }
 
 /** Household measures for packaged goods. Approximate grams per unit; "portion" uses the package serving. */
