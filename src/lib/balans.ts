@@ -154,11 +154,36 @@ const empty: State = { profile: null, meals: [], favorites: [], workouts: [], ha
 let state: State | null = null;
 const listeners = new Set<() => void>();
 
+const arr = <T,>(v: unknown, d: T[] = []): T[] => (Array.isArray(v) ? (v as T[]) : d);
+/** Fills missing fields in saved/synced data so older or partial states never crash a page. */
+export function normalizeState(raw: Partial<State> | null | undefined): State {
+  const r = raw ?? {};
+  const p = r.profile as Partial<Profile> | null | undefined;
+  return {
+    ...empty,
+    ...r,
+    meals: arr(r.meals), favorites: arr(r.favorites), workouts: arr(r.workouts), body: arr(r.body),
+    customExercises: arr(r.customExercises), templates: arr(r.templates), mealPlan: arr(r.mealPlan),
+    habits: r.habits && typeof r.habits === "object" ? r.habits : {},
+    profile: p ? {
+      ...p,
+      name: p.name ?? "",
+      goal: p.goal ?? ("energi" as Goal),
+      equipment: arr(p.equipment, ["ingen"] as Equipment[]),
+      days: arr(p.days, [0, 2, 4]),
+      restrictions: arr(p.restrictions),
+      sessionMin: Number.isFinite(p.sessionMin) ? p.sessionMin! : 25,
+      hideCalories: !!p.hideCalories,
+      waterGoal: Number.isFinite(p.waterGoal) && p.waterGoal! > 0 ? p.waterGoal! : 8,
+    } as Profile : null,
+  } as State;
+}
+
 function load(): State {
   if (state) return state;
   try {
     const raw = localStorage.getItem(KEY);
-    state = raw ? { ...empty, ...JSON.parse(raw) } : empty;
+    state = raw ? normalizeState(JSON.parse(raw)) : empty;
   } catch {
     state = empty;
   }
@@ -188,7 +213,7 @@ export function getState(): State {
 
 /** Replace the whole state, e.g. with data restored from the cloud. */
 export function replaceState(next: Partial<State>) {
-  update(() => ({ ...empty, ...next }));
+  update(() => normalizeState(next));
 }
 
 export function subscribeState(cb: () => void) {
