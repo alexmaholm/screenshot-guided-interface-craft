@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { addDays, dateKey, update, useBalans } from "@/lib/balans";
 import { streakInfo } from "@/lib/habits";
 import { weightTrend } from "@/lib/progress";
+import { ThemePicker } from "@/components/ThemePicker";
 import { Paywall } from "@/components/Paywall";
 import { PLANS, redeemCode, status, trialDaysLeft } from "@/lib/tiers";
 
@@ -134,6 +135,7 @@ function Profile() {
         <span>✨ Visa introduktion</span><span aria-hidden>›</span>
       </button>
 
+      <ThemePicker />
       <Membership />
     </div>
   );

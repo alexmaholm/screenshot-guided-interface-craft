@@ -104,8 +104,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="sv">
+    <html lang="sv" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: "try{var t=localStorage.getItem('balans-theme');if(t==='warm')document.documentElement.dataset.theme='warm'}catch(e){}" }} />
         <HeadContent />
       </head>
       <body>

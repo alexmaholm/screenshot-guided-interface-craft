@@ -184,6 +184,10 @@ const SCENES: Record<Pattern, Scene> = {
 };
 
 const RULES: [RegExp, Pattern][] = [
+  [/utåtrotation|external rotation/, "lateral"],
+  [/reverse hyper/, "glute"],
+  [/jm-press/, "triceps"],
+  [/döda häng|dead hang/, "hang"],
   [/maghjul|rollout/, "rollout"],
   [/mountain|bear crawl/, "climber"],
   [/planka|plank|hollow|l-sitt/, "plank"],
@@ -231,7 +235,7 @@ export function setupFor(ex: Pick<ExercisePreset, "name" | "muscle"> & { eq?: st
   if (cable) gear = "cable";
   else if (/kettlebell|sving|swing|goblet/.test(n)) gear = "kettlebell";
   else if (/gummiband|band/.test(n)) gear = "band";
-  else if (/hantel|dumbbell|hantlar/.test(n)) gear = "dumbbell";
+  else if (/hantel|dumbbell|hantlar|renegade/.test(n)) gear = "dumbbell";
   else if (/skivstång|stång|barbell|trap bar|ez|militär|smith/.test(n)) gear = "barbell";
   else if (/maskin|machine|pec deck|benpress|bensträck|bencurl|hack/.test(n)) gear = "none";
   else if (/armhäv|planka|dips|chins|pull-?up|kroppsvikt|utan vikt/.test(n)) gear = "none";
