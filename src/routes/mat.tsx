@@ -158,11 +158,7 @@ function Mat() {
                       <div className="flex-1">
                         <p className="font-medium">{m.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {m.amount}
-                          {m.protein ? ` · ${m.protein} g P` : ""}
-                          {m.carbs ? ` · ${m.carbs} g K` : ""}
-                          {m.fat ? ` · ${m.fat} g F` : ""}
-                          {showKcal && m.kcal ? ` · ${m.kcal} kcal` : ""}
+                          {[m.amount, m.protein ? `${m.protein} g P` : "", m.carbs ? `${m.carbs} g K` : "", m.fat ? `${m.fat} g F` : "", showKcal && m.kcal ? `${m.kcal} kcal` : ""].filter(Boolean).join(" · ")}
                         </p>
                       </div>
                       <button aria-label={fav ? "Ta bort favorit" : "Spara som favorit"} aria-pressed={fav} onClick={() => toggleFav(m)} className="grid h-11 w-11 place-items-center rounded-full hover:bg-muted">
