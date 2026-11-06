@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { round1 } from "@/lib/utils";
 
 const schema = z.object({
   name: z.string(),
@@ -37,7 +38,16 @@ export const estimateText = createServerFn({ method: "POST" })
         maxRetries: 0,
         prompt: data.text,
       });
-      return { ok: true, result: await result.output };
+      const v = await result.output;
+      return {
+        ok: true,
+        result: {
+          ...v,
+          kcal: Math.round(v.kcal),
+          protein: round1(v.protein), carbs: round1(v.carbs), fat: round1(v.fat),
+          fiber: round1(v.fiber), sugar: round1(v.sugar), satFat: round1(v.satFat), salt: round1(v.salt),
+        },
+      };
     } catch (e) {
       const status = (e as { statusCode?: number }).statusCode;
       if (status === 429) return { ok: false, error: "För många beräkningar just nu – försök igen om en stund." };

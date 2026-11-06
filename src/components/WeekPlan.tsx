@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { dateKey, MEAL_LABEL, MEAL_TYPES, uid, update, useBalans, WEEKDAYS, type MealType, type Profile } from "@/lib/balans";
 import { DAY_HINT, dayKind, planText, weekDates } from "@/lib/mealplan";
+import { round1 } from "@/lib/utils";
 
-const num = (v: string) => { const n = Number(v.replace(",", ".")); return v.trim() && Number.isFinite(n) && n >= 0 ? n : undefined; };
+const num = (v: string) => { const n = Number(v.replace(",", ".")); return v.trim() && Number.isFinite(n) && n >= 0 ? round1(n) : undefined; };
 
 export function WeekPlan(_props: { profile: Profile }) {
   const s = useBalans();

@@ -8,6 +8,7 @@
 - [x] Etapp 2 – Makron i realtid: energi, protein, kolhydrater och fett mot dagliga mål, med kvarvarande mängd.
 - [x] Etapp 2 – Vattentracker: glas om 250 ml mot dagligt mål, på mat- och hemsidan.
 - [x] Etapp 3 – Hälsoscore och dagliga vanor (vatten, frukt & grönt, sömn, regelbundna måltider) med uppmuntrande feedback.
+- [x] Avrunda alla näringsvärden till max en decimal (kalorier heltal) i matlogg, AI-textlogg, favoriter och veckoplan.
 - [ ] Etapp 4 – Träningslyft: 100+ sökbara övningspresets, egna övningar, beskrivningar, tips, lätta videor, set/reps/vikt, historik, vilotimer och muskelåterhämtning.
 - [ ] Smarta vardagsrekommendationer: måltider som fyller dagens kvarvarande luckor.
 - [ ] Stämma av namnbyte från Balans samt prissättning för gratis- och PRO-nivå.

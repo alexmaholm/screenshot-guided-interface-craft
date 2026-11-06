@@ -1,4 +1,5 @@
 import type { DayHabits, Meal, Profile } from "@/lib/balans";
+import { round1 } from "@/lib/utils";
 
 export const PRODUCE_GOAL = 5;
 export const SLEEP_GOAL = 8;
@@ -23,7 +24,7 @@ export function parseNutrition(values: { kcal: string; protein: string; carbs: s
     if (!raw) continue;
     const value = Number(raw.replace(",", "."));
     if (!Number.isFinite(value) || value < 0) return null;
-    result[key] = value;
+    result[key] = key === "kcal" ? Math.round(value) : round1(value);
   }
   return result;
 }
