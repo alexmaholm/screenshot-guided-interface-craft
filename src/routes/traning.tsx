@@ -136,7 +136,7 @@ function Training() {
             <div className="mt-4 space-y-2 border-t border-border pt-4">
               <p className="text-sm font-medium capitalize">{picked === today ? "Idag" : prettyDate(picked)}</p>
               {ws.length === 0 ? <p className="text-sm text-muted-foreground">Inget pass den här dagen.</p> : ws.map((w) => {
-                const sets = w.exercises.reduce((n, e) => n + (e.done ? e.sets : 0), 0);
+                const sets = w.exercises.reduce((n, e) => n + (e.log ? e.log.filter((l) => l.done).length : e.done ? (e.sets ?? 0) : 0), 0);
                 return (
                   <button key={w.id} onClick={() => setActiveId(w.id)} className="flex w-full items-center justify-between rounded-2xl bg-secondary p-3 text-left">
                     <div>
