@@ -1,4 +1,5 @@
 import type { DayHabits, Meal, Profile } from "@/lib/balans";
+import { round1 } from "@/lib/utils";
 
 export const PRODUCE_GOAL = 5;
 export const SLEEP_GOAL = 8;

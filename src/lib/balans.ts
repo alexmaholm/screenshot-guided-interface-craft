@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { round1 } from "@/lib/utils";
 
 export type Goal = "energi" | "styrka" | "kondition" | "vanor" | "annat";
 export type Level = "nybörjare" | "van" | "erfaren";
