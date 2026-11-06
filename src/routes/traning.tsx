@@ -4,6 +4,8 @@ import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { ExercisePicker, useExerciseLibrary } from "@/components/ExercisePicker";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { Check, Clock, RefreshCw, CalendarDays, Plus, Minus, X, Play, ArrowLeft, Timer, Dumbbell, Info, Bookmark, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
@@ -66,12 +68,15 @@ function Training() {
   const [creating, setCreating] = useState(false);
   const [browsing, setBrowsing] = useState(false);
   const [moving, setMoving] = useState<Workout | null>(null);
+  const [picked, setPicked] = useState<string | null>(null);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [monthOpen, setMonthOpen] = useState(false);
 
   useEffect(() => {
     if (search.starta) setActiveId(search.starta);
   }, [search]);
 
-  const monday = addDays(today, -weekdayIndex(today));
+  const monday = addDays(addDays(today, -weekdayIndex(today)), weekOffset * 7);
   const week = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const upcoming = s.workouts.filter((w) => w.date >= today).sort((a, b) => a.date.localeCompare(b.date));
   const active = s.workouts.find((w) => w.id === activeId);
@@ -102,19 +107,74 @@ function Training() {
       </header>
 
       <section className="card-soft p-4" aria-label="Veckan">
+        <div className="mb-2 flex items-center justify-between">
+          <button className="rounded-full p-2 hover:bg-secondary" aria-label="Föregående vecka" onClick={() => setWeekOffset((o) => o - 1)}><ChevronLeft className="h-5 w-5" /></button>
+          <button className="flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium capitalize hover:bg-secondary" onClick={() => setMonthOpen(true)}>
+            <CalendarDays className="h-4 w-4" />
+            {new Date(monday + "T12:00:00").toLocaleDateString("sv-SE", { month: "long", year: "numeric" })}
+          </button>
+          <button className="rounded-full p-2 hover:bg-secondary" aria-label="Nästa vecka" onClick={() => setWeekOffset((o) => o + 1)}><ChevronRight className="h-5 w-5" /></button>
+        </div>
         <div className="grid grid-cols-7 gap-1 text-center">
           {week.map((d, i) => {
-            const w = s.workouts.find((x) => x.date === d);
+            const ws = s.workouts.filter((x) => x.date === d);
+            const w = ws.find((x) => x.status === "klart") ?? ws[0];
+            const sel = picked === d;
             return (
-              <div key={d} className={`rounded-2xl py-2 ${d === today ? "bg-secondary" : ""}`}>
-                <p className="text-xs text-muted-foreground">{WEEKDAYS[i]}</p>
+              <button key={d} onClick={() => setPicked(sel ? null : d)} aria-pressed={sel} className={`rounded-2xl py-2 ${sel ? "bg-primary text-primary-foreground" : d === today ? "bg-secondary" : ""}`}>
+                <p className={`text-xs ${sel ? "" : "text-muted-foreground"}`}>{WEEKDAYS[i]}</p>
                 <p className="font-semibold">{Number(d.slice(8))}</p>
-                <div className={`mx-auto mt-1 h-2.5 w-2.5 rounded-full ${w ? (w.status === "klart" ? "bg-primary" : "bg-coral") : "bg-muted"}`} aria-label={w ? `${KIND_LABEL[w.kind]}, ${w.status}` : "Inget pass"} />
-              </div>
+                <div className={`mx-auto mt-1 h-2.5 w-2.5 rounded-full ${w ? (w.status === "klart" ? (sel ? "bg-primary-foreground" : "bg-primary") : "bg-coral") : "bg-muted"}`} aria-label={w ? `${KIND_LABEL[w.kind]}, ${w.status}` : "Inget pass"} />
+              </button>
             );
           })}
         </div>
+        {weekOffset !== 0 && <button className="mt-2 w-full text-center text-sm text-muted-foreground underline" onClick={() => setWeekOffset(0)}>Till denna vecka</button>}
+        {picked && (() => {
+          const ws = s.workouts.filter((x) => x.date === picked);
+          return (
+            <div className="mt-4 space-y-2 border-t border-border pt-4">
+              <p className="text-sm font-medium capitalize">{picked === today ? "Idag" : prettyDate(picked)}</p>
+              {ws.length === 0 ? <p className="text-sm text-muted-foreground">Inget pass den här dagen.</p> : ws.map((w) => {
+                const sets = w.exercises.reduce((n, e) => n + (e.done ? e.sets : 0), 0);
+                return (
+                  <button key={w.id} onClick={() => setActiveId(w.id)} className="flex w-full items-center justify-between rounded-2xl bg-secondary p-3 text-left">
+                    <div>
+                      <p className="font-semibold">{w.title}</p>
+                      <p className="text-xs text-muted-foreground">{KIND_LABEL[w.kind]} · {w.durationMin} min · {w.exercises.length} moment{w.status === "klart" ? ` · ${sets} set klara` : ""}</p>
+                    </div>
+                    <span className={`text-xs font-medium ${w.status === "klart" ? "text-primary" : "text-muted-foreground"}`}>{w.status === "klart" ? "Klart" : "Planerat"}</span>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })()}
       </section>
+
+      <Dialog open={monthOpen} onOpenChange={setMonthOpen}>
+        <DialogContent className="rounded-3xl">
+          <DialogHeader><DialogTitle className="font-display text-2xl">Välj dag</DialogTitle></DialogHeader>
+          <Calendar
+            mode="single"
+            weekStartsOn={1}
+            className="mx-auto"
+            selected={picked ? new Date(picked + "T12:00:00") : undefined}
+            defaultMonth={new Date(monday + "T12:00:00")}
+            modifiers={{ done: s.workouts.filter((w) => w.status === "klart").map((w) => new Date(w.date + "T12:00:00")) }}
+            modifiersClassNames={{ done: "font-bold text-primary underline" }}
+            onSelect={(d) => {
+              if (!d) return;
+              const k = dateKey(d);
+              const thisMon = addDays(today, -weekdayIndex(today));
+              const targetMon = addDays(k, -weekdayIndex(k));
+              setWeekOffset(Math.round((new Date(targetMon).getTime() - new Date(thisMon).getTime()) / (7 * 864e5)));
+              setPicked(k);
+              setMonthOpen(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
 
       <ProGate title="Muskelkarta"><MuscleMap workouts={s.workouts} today={today} /></ProGate>
 
