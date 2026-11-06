@@ -390,7 +390,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
     <div className="space-y-5">
       {w.status !== "klart" && w.exercises.length > 0 && <ProGate title="Röstloggning"><VoiceLog onCommand={voice} /></ProGate>}
       <button onClick={onBack} className="flex min-h-11 items-center gap-2 font-medium text-primary"><ArrowLeft className="h-5 w-5" /> Alla pass</button>
-      <header className="bg-hero rounded-3xl p-6 text-primary-foreground">
+      <header className="bg-hero rounded-3xl p-6 text-hero-foreground">
         <p className="text-sm opacity-80">{KIND_LABEL[w.kind]}</p>
         <h1 className="text-3xl font-bold">{w.title}</h1>
         <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-primary-foreground/20">

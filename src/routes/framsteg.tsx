@@ -53,7 +53,7 @@ function Progress() {
         <p className="text-muted-foreground">Senaste 7 dagarna. Kontinuitet slår perfektion.</p>
       </header>
 
-      <section className="bg-hero rounded-3xl p-6 text-primary-foreground">
+      <section className="bg-hero rounded-3xl p-6 text-hero-foreground">
         <p className="text-sm opacity-80">Aktiva dagar i rad</p>
         <p className="font-display text-5xl font-bold">{streak}</p>
         <p className="mt-1 text-sm">{streak >= 3 ? "Du bygger en fin rutin." : "Varje dag är en ny chans – inga krav."}{restDays ? ` ${restDays} vilodag${restDays > 1 ? "ar" : ""} ingår – vila är också framsteg.` : ""}</p>
@@ -62,7 +62,7 @@ function Progress() {
       <SundayReport workouts={s.workouts} days={days} restDays={restDays} streak={streak} waterAvg={waterAvg} mealDays={mealDays} />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Box label="Genomförda pass" value={`${workoutsDone.length}/${planned.length || 0}`} />
+        <Box label="Genomförda pass" value={planned.length ? `${workoutsDone.length}/${planned.length}` : `${workoutsDone.length}`} />
         <Box label="Dagar med matlogg" value={`${mealDays}/7`} />
         <Box label="Vatten snitt" value={`${waterAvg.toFixed(1)} glas`} />
         <Box label="Sömn snitt" value={sleepAvg ? `${sleepAvg.toFixed(1)} h` : "–"} />
