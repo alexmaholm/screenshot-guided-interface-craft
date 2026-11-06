@@ -156,6 +156,23 @@ let state: State | null = null;
 const listeners = new Set<() => void>();
 
 const arr = <T,>(v: unknown, d: T[] = []): T[] => (Array.isArray(v) ? (v as T[]) : d);
+const rKcal = (n: number | undefined) => (typeof n === "number" && Number.isFinite(n) ? Math.round(n) : n);
+const rG = (n: number | undefined) => (typeof n === "number" && Number.isFinite(n) ? round1(n) : n);
+
+/** Rounds every stored nutrition value so float noise (5.000000000000001) never reaches the screen. */
+function roundMeal(m: Meal): Meal {
+  return {
+    ...m,
+    kcal: rKcal(m.kcal), protein: rG(m.protein), carbs: rG(m.carbs), fat: rG(m.fat),
+    fiber: rG(m.fiber), sugar: rG(m.sugar), satFat: rG(m.satFat), salt: rG(m.salt),
+  };
+}
+function roundFavorite(f: Favorite): Favorite {
+  return { ...f, kcal: rKcal(f.kcal), protein: rG(f.protein), carbs: rG(f.carbs), fat: rG(f.fat) };
+}
+function roundPlanned(p: PlannedMeal): PlannedMeal {
+  return { ...p, kcal: rKcal(p.kcal), protein: rG(p.protein) };
+}
 /** Fills missing fields in saved/synced data so older or partial states never crash a page. */
 export function normalizeState(raw: Partial<State> | null | undefined): State {
   const r = raw ?? {};
@@ -163,8 +180,9 @@ export function normalizeState(raw: Partial<State> | null | undefined): State {
   return {
     ...empty,
     ...r,
-    meals: arr(r.meals), favorites: arr(r.favorites), workouts: arr(r.workouts), body: arr(r.body),
-    customExercises: arr(r.customExercises), templates: arr(r.templates), mealPlan: arr(r.mealPlan),
+    meals: arr<Meal>(r.meals).map(roundMeal), favorites: arr<Favorite>(r.favorites).map(roundFavorite),
+    workouts: arr(r.workouts), body: arr(r.body),
+    customExercises: arr(r.customExercises), templates: arr(r.templates), mealPlan: arr<PlannedMeal>(r.mealPlan).map(roundPlanned),
     habits: r.habits && typeof r.habits === "object" ? r.habits : {},
     profile: p ? {
       ...p,
@@ -192,7 +210,7 @@ function load(): State {
 }
 
 export function update(fn: (s: State) => State) {
-  state = fn(load());
+  state = normalizeState(fn(load()));
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
   } catch {
