@@ -188,6 +188,9 @@ const RULES: [RegExp, Pattern][] = [
   [/reverse hyper/, "glute"],
   [/jm-press/, "triceps"],
   [/döda häng|dead hang/, "hang"],
+  [/skulderbladsdrag/, "vpull"],
+  [/kabelabduktion|fire hydrant|donkey|clamshell|sidoliggande benlyft/, "glute"],
+  [/fladderspark|saxspark|omvända crunches|dragon flag/, "legraise"],
   [/maghjul|rollout/, "rollout"],
   [/mountain|bear crawl/, "climber"],
   [/planka|plank|hollow|l-sitt/, "plank"],
@@ -231,18 +234,26 @@ export function setupFor(ex: Pick<ExercisePreset, "name" | "muscle"> & { eq?: st
   const pat = patternFor(ex);
   const base = SCENES[pat].gear;
   let gear: Gear = base;
-  const cable = /kabel|cable|crossover|kryssdrag|face pull|pushdown|latsdrag|pulldown|sittande rodd/.test(n);
+  const banded = /gummiband|med band|\bband/.test(n) && !/löpband/.test(n);
+  const cable = !banded && /kabel|cable|crossover|kryssdrag|face pull|pushdown|latsdrag|pulldown|sittande rodd|med rep/.test(n);
+  const eq = ex.eq ?? [];
   if (cable) gear = "cable";
   else if (/kettlebell|sving|swing|goblet/.test(n)) gear = "kettlebell";
-  else if (/gummiband|band/.test(n)) gear = "band";
+  else if (banded) gear = "band";
+  else if (/skulderblad/.test(n)) gear = "none";
   else if (/hantel|dumbbell|hantlar|renegade/.test(n)) gear = "dumbbell";
   else if (/skivstång|stång|barbell|trap bar|ez|militär|smith/.test(n)) gear = "barbell";
   else if (/maskin|machine|pec deck|benpress|bensträck|bencurl|hack/.test(n)) gear = "none";
-  else if (/armhäv|planka|dips|chins|pull-?up|kroppsvikt|utan vikt/.test(n)) gear = "none";
+  else if (/armhäv|planka|dips|chins|pull-?up|kroppsvikt|utan vikt|ring|handstående|roddmaskin|roddintervall|löpband|hyperext|ryggres|superman|greppklämm|skulderblad/.test(n)) gear = "none";
+  else if (/push press|landmine|viking|bradford|z-press|rensa och pressa|dragcurl/.test(n)) gear = "barbell";
+  else if (eq[0] === "ingen" && gear !== "wheel") gear = "none";
+  else if (eq[0] === "gummiband") gear = "band";
+  else if (eq[0] === "hantlar" && gear !== "none") gear = "dumbbell";
+  else if (eq[0] === "kettlebell" && gear !== "none") gear = "kettlebell";
   const machine = /maskin|machine|pec deck|benpress|hack|smith|bensträck|bencurl/.test(n);
   const incline = /lutande|incline/.test(n) && ["bench", "fly", "row", "curl", "lateral"].includes(pat);
   const decline = /decline|nedåtlutande/.test(n);
-  const c: Setup["cable"] = cable ? (pat === "row" || /face pull|crossover|kryss/.test(n) ? "mid" : HIGH_CABLE.includes(pat) ? "high" : LOW_CABLE.includes(pat) ? "low" : "mid") : undefined;
+  const c: Setup["cable"] = cable ? (/nerifrån/.test(n) ? "low" : /uppifrån/.test(n) ? "high" : pat === "row" || /face pull|crossover|kryss/.test(n) ? "mid" : HIGH_CABLE.includes(pat) ? "high" : LOW_CABLE.includes(pat) ? "low" : "mid") : undefined;
   let primary = PRIMARY[pat];
   if (pat === "bench" || pat === "fly") primary = incline ? "Övre bröst (clavicular)" : decline ? "Nedre bröst" : primary;
   if (/hammer/.test(n)) primary = "Brachialis & underarm";
