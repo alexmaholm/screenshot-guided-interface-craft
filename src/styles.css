@@ -57,9 +57,9 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-:root {
+:root[data-theme="warm"] {
   --radius: 1.25rem;
-  /* warm beige base, forest green ink */
+  /* Skandinavisk värme: warm beige base, forest green ink */
   --background: oklch(0.965 0.016 85);
   --foreground: oklch(0.27 0.045 160);
   --card: oklch(0.99 0.008 85);
@@ -102,7 +102,7 @@
   --shadow-soft: 0 10px 30px -14px oklch(0.36 0.07 160 / 0.35);
 }
 
-/* Nordic Stealth preview – remove this block to return to the warm theme */
+/* Nordic Stealth – default theme */
 :root {
   --font-display: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter Tight Variable", ui-sans-serif, system-ui, sans-serif;
