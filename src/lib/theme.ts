@@ -9,6 +9,6 @@ export function getTheme(): Theme {
 }
 export function setTheme(t: Theme) {
   try { localStorage.setItem(THEME_KEY, t); } catch { /* ignore */ }
-  if (t === "warm") document.documentElement.dataset.theme = "warm";
-  else delete document.documentElement.dataset.theme;
+  if (t === "warm") document.documentElement.dataset["theme"] = "warm";
+  else delete document.documentElement.dataset["theme"];
 }
