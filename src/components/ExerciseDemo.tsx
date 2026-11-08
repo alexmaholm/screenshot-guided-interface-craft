@@ -421,7 +421,8 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
   const setPhase = (p: 0 | 1) => { setPlaying(false); setT(p); };
   const n = ex.name.toLowerCase();
   const v = VARIANTS.find(([re]) => re.test(n))?.[2];
-  const base: Scene = { ...SCENES[patternFor(ex)], ...v };
+  const pat = patternFor(ex);
+  const base: Scene = { ...SCENES[pat], ...v };
   const su = setupFor(ex);
   const tilt = (p: Pose): Pose => {
     if (!su.incline || !base.bench || base.bench === "seat") return p;
@@ -487,13 +488,58 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
             <rect x={sc.bench === "seat" ? 50 : sc.bench === "low" ? 30 : 64} y={benchY + 5} width="3" height={93 - benchY - 5} />
           </g>
         )}
-        {su.cable && (
-          <g>
-            <rect x="88" y="4" width="4" height="89" rx="1.5" className="fill-foreground/35" />
-            <circle cx="88" cy={su.cable === "high" ? 8 : su.cable === "low" ? 86 : 45} r="2.4" className="fill-foreground/60" />
-            <line x1="88" y1={su.cable === "high" ? 8 : su.cable === "low" ? 86 : 45} x2={a.ha[0]} y2={a.ha[1]} strokeWidth="0.9" className="stroke-foreground/70" />
-          </g>
-        )}
+        {su.cable && (() => {
+          // Kabelstation: torn med viktmagasin som lyfts när vajern dras ut, trissa vid utgången.
+          const y0 = su.cable === "high" ? 8 : su.cable === "low" ? 86 : 45;
+          const anchor: P = sc.cableAt ?? [88, y0];
+          const left = anchor[0] < 30;
+          const tx = left ? 4 : 88;
+          const lift = 9 * t;
+          const plates = [0, 1, 2, 3, 4, 5];
+          const tower = (x: number, k: string) => (
+            <g key={k}>
+              <rect x={x} y="3" width="8" height="90" rx="1.5" className="fill-foreground/10 stroke-foreground/40" strokeWidth="0.6" />
+              <line x1={x + 4} y1="5" x2={x + 4} y2={78 - lift} strokeWidth="0.5" className="stroke-foreground/60" />
+              {plates.map((i) => {
+                const moving = i >= 3;
+                return <rect key={i} x={x + 1.2} y={89 - i * 3.2 - (moving ? lift : 0)} width="5.6" height="2.6" rx="0.6" className={moving ? "fill-coral/80" : "fill-foreground/45"} />;
+              })}
+              <circle cx={x + 4} cy="5" r="1.6" className="fill-card stroke-foreground/70" strokeWidth="0.7" />
+            </g>
+          );
+          const hand: P = gearAt === "ha" ? a.ha : a.ha;
+          return (
+            <g>
+              {tower(tx, "t1")}
+              {sc.dualCable && tower(4, "t2")}
+              {Math.abs(anchor[0] - (tx + 4)) > 6 && <path d={`M${tx + 4} 5 L${anchor[0]} 5 L${anchor[0]} ${anchor[1]}`} fill="none" strokeWidth="0.6" className="stroke-foreground/50" />}
+              <circle cx={anchor[0]} cy={anchor[1]} r="2" className="fill-card stroke-foreground/80" strokeWidth="0.8" />
+              <line x1={anchor[0]} y1={anchor[1]} x2={hand[0]} y2={hand[1]} strokeWidth="0.7" className="stroke-foreground/80" />
+              {sc.dualCable && <>
+                <circle cx="8" cy={anchor[1]} r="2" className="fill-card stroke-foreground/80" strokeWidth="0.8" />
+                <line x1="8" y1={anchor[1]} x2={a.ha2[0]} y2={a.ha2[1]} strokeWidth="0.7" className="stroke-foreground/80" />
+              </>}
+            </g>
+          );
+        })()}
+        {sc.legpress && (() => {
+          // Benpress 45°: sits/ryggstöd och fotplatta som glider på skenan.
+          const f = a.ft;
+          return (
+            <g>
+              <line x1="30" y1="86" x2="92" y2="36" strokeWidth="2" strokeLinecap="round" className="stroke-foreground/25" />
+              <path d="M10 44 L30 76 L46 78" fill="none" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="stroke-foreground/35" />
+              <rect x="34" y="78" width="6" height="15" className="fill-foreground/30" />
+              <g transform={`translate(${f[0] + 3} ${f[1] + 1}) rotate(-51)`}><rect x="-12" y="-1.6" width="24" height="3.2" rx="1" className="fill-foreground/60" /></g>
+            </g>
+          );
+        })()}
+        {sc.backrest && <rect x="22" y="22" width="5" height="44" rx="2" className="fill-foreground/35" />}
+        {pat === "pecdeck" && <>
+          <rect x={a.ha[0] - 2} y={a.ha[1] - 2} width="4" height="18" rx="1.5" className="fill-foreground/50" />
+          <rect x={a.ha2[0] - 2} y={a.ha2[1] - 2} width="4" height="18" rx="1.5" className="fill-foreground/50" />
+        </>}
+        {pat === "machinepress" && <rect x={a.ha[0] - 1} y={a.ha[1] - 6} width="2.4" height="12" rx="1" className="fill-foreground/60" />}
         {su.gear === "band" && <line x1={a.ft[0]} y1="91" x2={a.ha[0]} y2={a.ha[1]} strokeWidth="1.4" className="stroke-coral/70" />}
         {su.machine && !base.bench && <g className="fill-foreground/30"><rect x="8" y="10" width="5" height="83" rx="2" /><rect x="8" y="66" width="22" height="5" rx="2" /></g>}
         {su.incline && base.bench && base.bench !== "seat" && <line x1="54" y1="62" x2="30" y2="44" strokeWidth="5" strokeLinecap="round" className="stroke-foreground/35" />}
@@ -512,7 +558,11 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
         {sc.gear === "barbell" && at(gearAt, <g><circle r="8" className="fill-foreground" /><circle r="2.2" className="fill-card" /></g>)}
         {sc.gear === "dumbbell" && at(gearAt, <g className="fill-foreground"><rect x="-6" y="-2" width="12" height="4" rx="1" /><rect x="-7" y="-4.5" width="4" height="9" rx="1.5" /><rect x="3" y="-4.5" width="4" height="9" rx="1.5" /></g>)}
         {sc.gear === "kettlebell" && at(gearAt, <g><circle cy="3" r="4.5" className="fill-foreground" /><path d="M-2.5 -0.5 V-4 H2.5 V-0.5" fill="none" strokeWidth="1.4" className="stroke-foreground" /></g>)}
-        {sc.gear === "cable" && at(gearAt, <rect x="-3.5" y="-1.2" width="7" height="2.4" rx="1.2" className="fill-foreground" />)}
+        {sc.gear === "cable" && at(gearAt, /rep|rope|face pull/.test(n) || pat === "facepull"
+          ? <g className="stroke-foreground" strokeWidth="1.2" strokeLinecap="round" fill="none"><path d="M0 -2 L-2.5 3" /><path d="M0 -2 L2.5 3" /></g>
+          : pat === "vpull" || /latsdrag|pulldown/.test(n) ? <rect x="-9" y="-0.9" width="18" height="1.8" rx="0.9" className="fill-foreground" />
+          : <path d="M-2.5 -2.5 L2.5 -2.5 L1.5 2 L-1.5 2 Z" fill="none" strokeWidth="1.1" className="stroke-foreground" />)}
+        {sc.gear === "cable" && sc.dualCable && <path transform={`translate(${a.ha2[0]} ${a.ha2[1]})`} d="M-2.5 -2.5 L2.5 -2.5 L1.5 2 L-1.5 2 Z" fill="none" strokeWidth="1.1" className="stroke-foreground" />}
         {sc.gear === "wheel" && at(gearAt, <g><circle r="5" className="fill-foreground" /><circle r="1.6" className="fill-card" /></g>)}
         {moved && (() => {
           // Pilen ritas vid sidan av rörelsebanan, på den sida som är längst från kroppen, så den aldrig skär genom figuren.
