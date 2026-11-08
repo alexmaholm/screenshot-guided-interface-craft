@@ -25,6 +25,9 @@ import {
 import { MuscleMap } from "@/components/MuscleMap";
 import { TechniqueCoach } from "@/components/TechniqueCoach";
 import { EXERCISES, isDumbbell, totalLoadKg } from "@/lib/exercises";
+import { TemplateBuilder } from "@/components/TemplateBuilder";
+import { REST_PRESETS, REST_STEP, clampRest, rememberedRest } from "@/lib/rest";
+import type { WorkoutTemplate } from "@/lib/templates";
 import { BUILT_IN_TEMPLATES, templateFromWorkout, workoutFromTemplate } from "@/lib/templates";
 
 export const Route = createFileRoute("/traning")({
@@ -49,7 +52,7 @@ function TrainingPage() {
   return <AppShell>{!s ? <PageLoading /> : !s.profile ? <NeedsOnboarding /> : <Training />}</AppShell>;
 }
 
-const fmt = (sec: number) => (sec >= 60 ? `${Math.round(sec / 60)} min` : `${sec} s`);
+const fmt = (sec: number) => (sec >= 60 ? (sec % 60 ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")} min` : `${sec / 60} min`) : `${sec} s`);
 const SET_TYPE_NAME: Record<SetType, string> = { normal: "arbetsset", warmup: "uppvärmning", drop: "dropset", failure: "till failure" };
 const SET_TYPE_CLASS: Record<SetType, string> = {
   normal: "bg-secondary text-foreground",
@@ -243,14 +246,17 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
   const [blank, setBlank] = useState(false);
   const [mode, setMode] = useState<"forslag" | "blankt" | "mall">("forslag");
   const mine = useBalans()!.templates ?? [];
+  const [building, setBuilding] = useState<WorkoutTemplate | null | false>(false);
   const create = () => {
     if (blank && kind !== "vila") {
       onCreate({ id: uid(), date, title: "Mitt eget pass", kind, durationMin: min, exercises: [], status: "planerat" });
     } else onCreate(generateWorkout({ kind, level: p.level ?? "nybörjare", equipment: p.equipment, minutes: min, date }));
   };
   return (
+    <>
+    <TemplateBuilder open={building !== false} onOpenChange={(o) => !o && setBuilding(false)} initial={building || null} />
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl">
+      <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-3xl">
         <DialogHeader><DialogTitle className="font-display text-2xl">Skapa pass</DialogTitle></DialogHeader>
         <p className="text-sm font-medium">Typ</p>
         <div className="flex flex-wrap gap-2">
@@ -283,13 +289,15 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
           </>
         )}
         {kind !== "vila" && mode === "mall" ? (
-          <div className="max-h-64 space-y-2 overflow-y-auto">
+          <div className="space-y-2">
+            <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setBuilding(null)}><Plus /> Skapa ny mall</Button>
             {mine.length > 0 && <p className="text-xs font-semibold uppercase text-muted-foreground">Mina mallar</p>}
             {mine.map((t) => (
               <div key={t.id} className="flex items-center gap-2">
                 <button className="card-soft flex-1 p-3 text-left" onClick={() => onCreate(workoutFromTemplate(t, date))}>
                   <span className="block font-semibold">{t.title}</span><span className="text-xs text-muted-foreground">{t.exercises.length} övningar · {t.durationMin} min</span>
                 </button>
+                <button aria-label={`Redigera mallen ${t.title}`} className="grid h-11 w-11 place-items-center text-xs font-semibold text-muted-foreground" onClick={() => setBuilding(t)}>Ändra</button>
                 <button aria-label={`Ta bort mallen ${t.title}`} className="grid h-11 w-11 place-items-center text-muted-foreground" onClick={() => update((x) => ({ ...x, templates: (x.templates ?? []).filter((y) => y.id !== t.id) }))}><Trash2 className="h-4 w-4" /></button>
               </div>
             ))}
@@ -310,22 +318,24 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
         )}
       </DialogContent>
     </Dialog>
+    </>
   );
 }
 
-function RestTimer({ seconds, trigger = 0 }: { seconds: number; trigger?: number }) {
+function RestTimer({ seconds, trigger = 0, onChange }: { seconds: number; trigger?: number; onChange: (sec: number) => void }) {
   const [left, setLeft] = useState<number | null>(null);
+  const [menu, setMenu] = useState(false);
   const ref = useRef<ReturnType<typeof setInterval> | null>(null);
-  useEffect(() => () => { if (ref.current) clearInterval(ref.current); }, []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (trigger > 0) start(); }, [trigger]);
-  const start = () => {
-    if (ref.current) clearInterval(ref.current);
-    setLeft(seconds);
+  const stop = () => { if (ref.current) clearInterval(ref.current); ref.current = null; };
+  useEffect(() => stop, []);
+  const start = (from = seconds) => {
+    stop();
+    if (from <= 0) return;
+    setLeft(from);
     ref.current = setInterval(() => {
       setLeft((v) => {
         if (v === null || v <= 1) {
-          if (ref.current) clearInterval(ref.current);
+          stop();
           if (v === 1) toast.success("Vilan är över – dags för nästa set! 💪");
           return null;
         }
@@ -333,13 +343,36 @@ function RestTimer({ seconds, trigger = 0 }: { seconds: number; trigger?: number
       });
     }, 1000);
   };
-  if (left === null)
-    return <Button variant="outline" size="sm" className="h-9 rounded-full" onClick={start}><Timer className="h-4 w-4" /> Starta vila {fmt(seconds)}</Button>;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (trigger > 0) start(); }, [trigger]);
+  const adjust = (d: number) => {
+    onChange(clampRest(seconds + d));
+    if (left !== null) setLeft((v) => (v === null ? v : Math.max(1, v + d)));
+  };
   return (
-    <span className="flex items-center gap-2 rounded-full bg-secondary px-3 py-1.5 text-sm font-semibold text-primary" role="timer" aria-label="Vilotimer">
-      <Timer className="h-4 w-4" aria-hidden /> {Math.floor(left / 60)}:{String(left % 60).padStart(2, "0")}
-      <button className="underline" onClick={() => { if (ref.current) clearInterval(ref.current); setLeft(null); }}>Avbryt</button>
-    </span>
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <button type="button" aria-label="Minska vila 15 sekunder" className="h-9 rounded-full border border-border px-3 text-sm font-semibold tabular-nums" onClick={() => adjust(-REST_STEP)}>−15s</button>
+        {left === null ? (
+          <Button variant="outline" size="sm" className="h-9 flex-1 rounded-full tabular-nums" onClick={() => start()} disabled={seconds <= 0}><Timer className="h-4 w-4" /> {seconds > 0 ? `Vila ${fmt(seconds)}` : "Ingen vila"}</Button>
+        ) : (
+          <span className="flex h-9 flex-1 items-center justify-center gap-2 rounded-full bg-secondary px-3 text-sm font-semibold text-primary tabular-nums" role="timer" aria-label="Vilotimer">
+            <Timer className="h-4 w-4" aria-hidden /> {Math.floor(left / 60)}:{String(left % 60).padStart(2, "0")}
+            <button className="text-xs underline" onClick={() => { stop(); setLeft(null); }}>Hoppa över</button>
+          </span>
+        )}
+        <button type="button" aria-label="Öka vila 15 sekunder" className="h-9 rounded-full border border-border px-3 text-sm font-semibold tabular-nums" onClick={() => adjust(REST_STEP)}>+15s</button>
+        <button type="button" aria-label="Välj vilotid" aria-expanded={menu} className="grid h-9 w-9 place-items-center rounded-full border border-border" onClick={() => setMenu((m) => !m)}><Clock className="h-4 w-4" /></button>
+      </div>
+      {menu && (
+        <div className="flex flex-wrap gap-2">
+          {REST_PRESETS.map((p) => (
+            <button key={p} className="chip tabular-nums" aria-pressed={seconds === p} onClick={() => { onChange(p); setMenu(false); }}>{fmt(p)}</button>
+          ))}
+          <button className="chip" aria-pressed={seconds === 0} onClick={() => { onChange(0); stop(); setLeft(null); setMenu(false); }}>Av</button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -459,7 +492,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
                 );
               })}
             </ol>
-            {e.restSec > 0 ? <div className="mt-3"><RestTimer seconds={e.restSec} trigger={restTrigger[i] ?? 0} /></div> : null}
+            <div className="mt-3"><RestTimer seconds={e.restSec} trigger={restTrigger[i] ?? 0} onChange={(sec) => patchEx(i, (x) => ({ ...x, restSec: sec }))} /></div>
           </li>
           );
         })}
@@ -478,11 +511,12 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
       </Dialog>
       <ExercisePicker open={picking} onOpenChange={setPicking} onPick={(ex) => {
         const last = lastWeight(ex.name, w.id, all);
+        const rest = rememberedRest(ex.name, all.filter((x) => x.id !== w.id), ex.restSec);
         onPatch((x) => ({
           ...x,
           exercises: [...x.exercises, ex.track === "tid"
-            ? { name: ex.name, sets: 2, timeSec: 40, restSec: ex.restSec, done: false }
-            : { name: ex.name, sets: 3, reps: 10, restSec: ex.restSec, done: false, weightKg: ex.track === "vikt" ? last : undefined }],
+            ? { name: ex.name, sets: 2, timeSec: 40, restSec: rest, done: false }
+            : { name: ex.name, sets: 3, reps: 10, restSec: rest, done: false, weightKg: ex.track === "vikt" ? last : undefined }],
         }));
         toast.success(`${ex.name} tillagd i passet`);
       }} />
