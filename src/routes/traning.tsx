@@ -52,7 +52,7 @@ function TrainingPage() {
   return <AppShell>{!s ? <PageLoading /> : !s.profile ? <NeedsOnboarding /> : <Training />}</AppShell>;
 }
 
-const fmt = (sec: number) => (sec >= 60 ? `${Math.round(sec / 60)} min` : `${sec} s`);
+const fmt = (sec: number) => (sec >= 60 ? (sec % 60 ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")} min` : `${sec / 60} min`) : `${sec} s`);
 const SET_TYPE_NAME: Record<SetType, string> = { normal: "arbetsset", warmup: "uppvärmning", drop: "dropset", failure: "till failure" };
 const SET_TYPE_CLASS: Record<SetType, string> = {
   normal: "bg-secondary text-foreground",
