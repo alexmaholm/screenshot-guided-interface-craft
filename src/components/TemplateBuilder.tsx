@@ -42,8 +42,8 @@ export function TemplateBuilder({ open, onOpenChange, initial }: { open: boolean
 
   const save = () => {
     const name = title.trim();
-    if (!name) return toast.error("Ge mallen ett namn");
-    if (!exs.length) return toast.error("Lägg till minst en övning");
+    if (!name) { toast.error("Ge mallen ett namn"); return; }
+    if (!exs.length) { toast.error("Lägg till minst en övning"); return; }
     const t: WorkoutTemplate = { id: initial?.custom ? initial.id : uid(), title: name, kind, durationMin: min, exercises: exs, custom: true };
     update((x) => {
       const list = x.templates ?? [];
