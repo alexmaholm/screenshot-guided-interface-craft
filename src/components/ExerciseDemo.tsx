@@ -10,7 +10,7 @@ export type Pattern =
   | "vpull" | "row" | "curl" | "triceps" | "kickback" | "dips" | "core" | "plank" | "rollout"
   | "legraise" | "hang" | "climber" | "bridge" | "hipthrust" | "glute" | "calf" | "legext" | "legcurl"
   | "sled" | "cardio" | "crossover" | "seatedrow" | "facepull" | "legpress" | "pecdeck" | "machinepress"
-  | "cablepress" | "pallof" | "chop";
+  | "cablepress" | "pallof" | "chop" | "straightarm";
 type Gear = "barbell" | "dumbbell" | "wheel" | "kettlebell" | "cable" | "band" | "none";
 type Seg = "torso" | "thigh" | "shin" | "upper" | "fore";
 
@@ -180,6 +180,11 @@ const SCENES: Record<Pattern, Scene> = {
     a: full({ head: [70, 38], sh: [63, 43], hip: [43, 57], kn: [57, 68], ft: [52, 91], kn2: [38, 74], ft2: [26, 91], el: [72, 46], ha: [81, 47] }),
     b: full({ head: [70, 38], sh: [63, 43], hip: [43, 57], kn: [38, 74], ft: [26, 91], kn2: [57, 68], ft2: [52, 91], el: [72, 46], ha: [81, 47] }),
   },
+  straightarm: {
+    gear: "cable", cableAt: [86, 6], work: ["upper", "torso"], labels: ["Raka armar framåt-uppåt", "Pressa ner stången mot låren"],
+    a: S({ head: [46, 16], sh: [47, 28], el: [60, 20], ha: [72, 14] }),
+    b: S({ head: [46, 16], sh: [47, 28], el: [52, 42], ha: [56, 56] }),
+  },
   crossover: {
     gear: "cable", dualCable: true, work: ["torso", "upper"], labels: ["Armarna ute, lätt böj", "För ihop händerna framför"],
     a: F({ el: [68, 33], ha: [82, 26], el2: [32, 33], ha2: [18, 26] }),
@@ -233,6 +238,15 @@ const SCENES: Record<Pattern, Scene> = {
 };
 
 const RULES: [RegExp, Pattern][] = [
+  [/raka armars pulldown|straight-?arm|pullover i kabel|kabelpullover/, "straightarm"],
+  [/^benspark|leg extension/, "legext"],
+  [/y-lyft|y-raise/, "lateral"],
+  [/farmers walk|suitcase carry|bondgång/, "shrug"],
+  [/waiters walk/, "ohp"],
+  [/wall balls/, "squat"],
+  [/hang clean|kettlebell clean|power clean|sandsäckslyft|slam ball|kettlebell windmill/, "hinge"],
+  [/snatch|devil press|man makers/, "ohp"],
+  [/inchworm/, "pushup"],
   [/tåhäv|calf/, "calf"],
   [/face pull/, "facepull"],
   [/pec deck|butterfly|flyes i maskin/, "pecdeck"],
@@ -294,7 +308,7 @@ export function setupFor(ex: Pick<ExercisePreset, "name" | "muscle"> & { eq?: st
   const base = SCENES[pat].gear;
   let gear: Gear = base;
   const banded = /gummiband|med band|\bband/.test(n) && !/löpband/.test(n);
-  const cable = !banded && /kabel|cable|crossover|kryssdrag|face pull|pushdown|latsdrag|pulldown|sittande rodd|med rep|pallof|vedhugg|woodchop|katana|bayesian/.test(n) || (["crossover", "seatedrow", "facepull", "cablepress", "pallof", "chop"] as Pattern[]).includes(pat) && !banded;
+  const cable = !banded && /kabel|cable|crossover|kryssdrag|face pull|pushdown|latsdrag|pulldown|sittande rodd|med rep|pallof|vedhugg|woodchop|katana|bayesian/.test(n) || (["crossover", "seatedrow", "facepull", "cablepress", "pallof", "chop", "straightarm"] as Pattern[]).includes(pat) && !banded;
   const eq = ex.eq ?? [];
   if (cable) gear = "cable";
   else if (/kettlebell|sving|swing|goblet/.test(n)) gear = "kettlebell";
@@ -347,7 +361,7 @@ export const PRIMARY: Record<Pattern, string> = {
   legcurl: "Baksida lår", sled: "Framsida lår & rumpa", cardio: "Ben & kondition",
   crossover: "Bröst (inre & nedre)", seatedrow: "Mellersta rygg & latissimus", facepull: "Bakre delta & rotatorkuff",
   legpress: "Framsida lår & rumpa", pecdeck: "Bröst", machinepress: "Bröst & triceps", cablepress: "Bröst & triceps",
-  pallof: "Djupa bålen (antirotation)", chop: "Sneda magmuskler",
+  pallof: "Djupa bålen (antirotation)", chop: "Sneda magmuskler", straightarm: "Latissimus (raka armar)",
 };
 
 /** Övningsspecifika kroppsställningar för varianter som rör sig annorlunda än sin grundrörelse. */
@@ -384,7 +398,7 @@ export const VARIANTS: [RegExp, string, Partial<Scene>][] = [
     a: full({ head: [40, 22], sh: [41, 34], hip: [40, 60], kn: [58, 60], ft: [60, 86], el: [58, 46], ha: [72, 58] }),
     b: full({ head: [40, 22], sh: [41, 34], hip: [40, 60], kn: [58, 60], ft: [60, 86], el: [58, 46], ha: [56, 30] }),
   }],
-  [/latsdrag|pulldown/, "pulldown", {
+  [/latsdrag|^(?!.*raka armar).*pulldown/, "pulldown", {
     bar: false, bench: "seat", cableAt: [52, 3], labels: ["Sitt, armarna raka uppåt", "Dra stången till bröstet"],
     a: full({ ...seatedPull, el: [54, 22], ha: [52, 8] }),
     b: full({ ...seatedPull, head: [48, 26], el: [40, 42], ha: [52, 30] }),
