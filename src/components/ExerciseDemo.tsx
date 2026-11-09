@@ -33,6 +33,7 @@ const benchLie: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [22, 5
 const bentOver: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [72, 36], sh: [64, 41], hip: [41, 53], kn: [49, 73], ft: [47, 91] };
 const plankBody: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [80, 70], sh: [71, 75], hip: [46, 78], kn: [31, 82], ft: [16, 88] };
 
+const seatSide: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [42, 24], sh: [42, 36], hip: [40, 60], kn: [58, 60], ft: [60, 86] };
 const SCENES: Record<Pattern, Scene> = {
   squat: {
     gear: "barbell", work: ["thigh"], labels: ["Stå upp", "Sitt ner djupt"],
@@ -348,7 +349,6 @@ export const PRIMARY: Record<Pattern, string> = {
   legpress: "Framsida lår & rumpa", pecdeck: "Bröst", machinepress: "Bröst & triceps", cablepress: "Bröst & triceps",
   pallof: "Djupa bålen (antirotation)", chop: "Sneda magmuskler",
 };
-const seatSide: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [42, 24], sh: [42, 36], hip: [40, 60], kn: [58, 60], ft: [60, 86] };
 
 /** Övningsspecifika kroppsställningar för varianter som rör sig annorlunda än sin grundrörelse. */
 const seatedPull: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [50, 26], sh: [50, 37], hip: [48, 62], kn: [66, 62], ft: [68, 86] };

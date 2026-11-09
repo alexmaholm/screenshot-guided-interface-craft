@@ -12,7 +12,7 @@ describe("rätt demonstration per övning", () => {
     ["Militärpress", "ohp"], ["Bänkpress", "bench"], ["Flyes med hantlar", "fly"], ["Dips", "dips"],
     ["Triceps kickbacks", "kickback"], ["Lutande hantelcurl", "curl"], ["Gående utfall", "lunge"],
     ["Trap bar marklyft", "hinge"], ["Slädpress", "sled"], ["Tåhävningar", "calf"], ["Bensträck", "legext"],
-    ["Bencurl liggande", "legcurl"], ["Benpress", "squat"], ["Latsdrag", "vpull"], ["Armhävningar", "pushup"],
+    ["Bencurl liggande", "legcurl"], ["Benpress", "legpress"], ["Latsdrag", "vpull"], ["Armhävningar", "pushup"],
     ["Mountain climbers", "climber"], ["Smithmaskin knäböj", "squat"], ["Trappsteg", "cardio"],
   ])("%s → %s", (name, pat) => expect(p(name)).toBe(pat));
 });
