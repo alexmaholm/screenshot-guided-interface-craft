@@ -217,8 +217,8 @@ const SCENES: Record<Pattern, Scene> = {
   },
   cablepress: {
     gear: "cable", cableAt: [8, 38], work: ["torso", "upper"], labels: ["Handtagen vid bröstet", "Pressa fram och ihop"],
-    a: full({ ...stand, kn: [56, 73], ft: [60, 91], kn2: [44, 74], ft2: [36, 91], el: [38, 40], ha: [52, 38] }),
-    b: full({ ...stand, kn: [56, 73], ft: [60, 91], kn2: [44, 74], ft2: [36, 91], el: [62, 36], ha: [77, 37] }),
+    a: S({ kn: [56, 73], ft: [60, 91], kn2: [44, 74], ft2: [36, 91], el: [38, 40], ha: [52, 38] }),
+    b: S({ kn: [56, 73], ft: [60, 91], kn2: [44, 74], ft2: [36, 91], el: [62, 36], ha: [77, 37] }),
   },
   pallof: {
     gear: "cable", cableAt: [8, 40], work: ["torso"], labels: ["Handtaget mot bröstet", "Pressa ut – låt inte kroppen vrida"],
