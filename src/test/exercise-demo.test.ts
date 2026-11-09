@@ -39,3 +39,19 @@ d2("egna kroppsställningar", () => {
     e2(variantFor({ name: "Knäböj" })).toBeNull();
   });
 });
+
+describe("revision: varje övning har rätt animation", () => {
+  it.each([
+    ["Raka armars pulldown", "straightarm"], ["Benspark i maskin", "legext"], ["Y-lyft", "lateral"],
+    ["Farmers walk", "shrug"], ["Suitcase carry", "shrug"], ["Wall balls", "squat"], ["Hang clean", "hinge"],
+    ["Hantelsnatch", "ohp"], ["Inchworm", "pushup"], ["Face pulls", "facepull"], ["Sittande kabelrodd", "seatedrow"],
+    ["Kryssdrag i kabel", "crossover"], ["Pec deck", "pecdeck"], ["Pallof press med hållning", "pallof"],
+  ])("%s → %s", (name, pat) => expect(p(name)).toBe(pat));
+  it("raka armars pulldown är stående, inte sittande latsdrag", () => expect(variantFor({ name: "Raka armars pulldown" })).toBeNull());
+  it("alla kabelövningar visar kabelstation", () => {
+    for (const e of EXERCISES) if (/kabel/i.test(e.name) && !/band/i.test(e.name)) expect(setupFor(e).gear, e.name).toBe("cable");
+  });
+  it("ingen styrkeövning faller tillbaka på konditionsanimation", () => {
+    for (const e of EXERCISES) if (e.muscle !== "kondition" && e.muscle !== "helkropp") expect(patternFor(e), e.name).not.toBe("cardio");
+  });
+});
