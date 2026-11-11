@@ -651,7 +651,7 @@ export function setupFor(ex: Pick<ExercisePreset, "name" | "muscle"> & { eq?: st
   let primary = PRIMARY[pat];
   if (pat === "bench" || pat === "fly") primary = incline ? "Övre bröst (clavicular)" : decline ? "Nedre bröst" : primary;
   if (/hammer/.test(n)) primary = "Brachialis & underarm";
-  if (/omvänd flyes|omvänd pec|reverse|face pull/.test(n)) primary = "Bakre delta & övre rygg";
+  if (/omvänd flyes|omvänd pec|reverse pec|reverse fly|face pull/.test(n)) primary = "Bakre delta & övre rygg";
   if (/smal|close/.test(n) && pat === "bench") primary = "Triceps & inre bröst";
   if (/rumänsk|rdl|stela ben|good morning/.test(n)) primary = "Baksida lår (hamstrings)";
   if (/sumo/.test(n)) primary = "Insida lår & rumpa";
