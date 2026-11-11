@@ -42,7 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <WelcomeAccount />
       <nav
         aria-label="Huvudmeny"
-        className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/80 backdrop-blur-xl md:hidden"
       >
         <ul className="mx-auto grid max-w-md grid-cols-5">
           {TABS.map(({ to, label, icon: Icon }) => (
@@ -50,9 +50,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 to={to}
                 activeOptions={{ exact: true }}
-                className="flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-medium text-muted-foreground data-[status=active]:text-primary"
+                className="flex min-h-16 flex-col items-center justify-center gap-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground data-[status=active]:text-foreground"
               >
-                <Icon className="h-6 w-6" aria-hidden />
+                <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden />
                 {label}
               </Link>
             </li>

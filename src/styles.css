@@ -106,19 +106,19 @@
 :root {
   --font-display: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter Tight Variable", ui-sans-serif, system-ui, sans-serif;
-  --radius: 0.9rem;
-  --background: oklch(0.16 0.004 260);
+  --radius: 0.75rem;
+  --background: oklch(0.11 0.003 260);
   --foreground: oklch(0.95 0.005 260);
-  --card: oklch(0.21 0.005 260);
+  --card: oklch(0.155 0.004 260);
   --card-foreground: oklch(0.95 0.005 260);
-  --popover: oklch(0.21 0.005 260);
+  --popover: oklch(0.17 0.004 260);
   --popover-foreground: oklch(0.95 0.005 260);
   --primary: oklch(0.9 0.17 120);
   --primary-foreground: oklch(0.16 0.01 260);
-  --secondary: oklch(0.27 0.006 260);
+  --secondary: oklch(0.21 0.005 260);
   --secondary-foreground: oklch(0.93 0.005 260);
-  --muted: oklch(0.25 0.005 260);
-  --muted-foreground: oklch(0.68 0.01 260);
+  --muted: oklch(0.19 0.004 260);
+  --muted-foreground: oklch(0.62 0.01 260);
   --accent: oklch(0.32 0.04 125);
   --accent-foreground: oklch(0.93 0.12 120);
   --mint: oklch(0.36 0.06 125);
@@ -127,8 +127,8 @@
   --amber: oklch(0.82 0.15 85);
   --coral-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.62 0.21 25);
-  --border: oklch(0.3 0.006 260);
-  --input: oklch(0.33 0.006 260);
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(1 0 0 / 0.12);
   --ring: oklch(0.9 0.17 120);
   --chart-1: oklch(0.9 0.17 120);
   --chart-2: oklch(0.65 0.2 25);
@@ -146,7 +146,8 @@
   --gradient-hero: radial-gradient(120% 90% at 100% 0%, oklch(0.9 0.17 120 / 0.16), transparent 55%), linear-gradient(150deg, oklch(0.235 0.008 260), oklch(0.185 0.012 200));
   --hero-foreground: oklch(0.96 0.005 260);
   --hero-ring: inset 0 1px 0 oklch(1 0 0 / 0.06), 0 0 0 1px oklch(0.9 0.17 120 / 0.14);
-  --shadow-soft: 0 10px 30px -14px oklch(0 0 0 / 0.6);
+  --shadow-soft: inset 0 1px 0 oklch(1 0 0 / 0.04);
+  --glow-primary: 0 0 24px -6px oklch(0.9 0.17 120 / 0.55);
 }
 
 @layer base {
@@ -200,4 +201,29 @@
     color: var(--primary-foreground);
     border-color: var(--primary);
   }
+}
+
+@utility panel {
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.035), oklch(1 0 0 / 0.01));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+}
+
+@utility telemetry {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+@utility label-xs {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+@utility glow-primary {
+  box-shadow: var(--glow-primary);
 }
