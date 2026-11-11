@@ -42,7 +42,7 @@ d2("egna kroppsställningar", () => {
 
 describe("revision: varje övning har rätt animation", () => {
   it.each([
-    ["Raka armars pulldown", "straightarm"], ["Benspark i maskin", "legext"], ["Y-lyft", "lateral"],
+    ["Raka armars pulldown", "straightarm"], ["Benspark i maskin", "glute"], ["Y-lyft", "lateral"],
     ["Farmers walk", "shrug"], ["Suitcase carry", "shrug"], ["Wall balls", "squat"], ["Hang clean", "hinge"],
     ["Hantelsnatch", "ohp"], ["Inchworm", "pushup"], ["Face pulls", "facepull"], ["Sittande kabelrodd", "seatedrow"],
     ["Kryssdrag i kabel", "crossover"], ["Pec deck", "pecdeck"], ["Pallof press med hållning", "pallof"],
