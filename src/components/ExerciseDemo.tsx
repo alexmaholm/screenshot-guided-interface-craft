@@ -515,8 +515,8 @@ const RULES: [RegExp, Pattern][] = [
   [/wall sit/, "wallsit"],
   [/sidoutfall|kosack/, "sidelunge"],
   [/tricepsdips på bänk|tricepsdips med raka ben|bänkdips/, "benchdip"],
-  [/fransk press med skivstång|jm-press|skull ?crusher|liggande triceps/, "skullcrusher"],
-  [/fransk press|overhead triceps|triceps overhead|katana/, "overheadtri"],
+  [/fransk press|jm-press|skull ?crusher|liggande triceps/, "skullcrusher"],
+  [/overhead triceps|triceps overhead|katana/, "overheadtri"],
   [/^pullovers?$/, "pullover"],
   [/ryska twist|russian twist|rotationsmaskin/, "twist"],
   [/bird dog/, "birddog"],
@@ -660,8 +660,10 @@ export function setupFor(ex: Pick<ExercisePreset, "name" | "muscle"> & { eq?: st
   if (/sidoplanka|sneda|rysk|russian|vedhugg|woodchop/.test(n)) primary = "Sneda magmuskler";
   if (/sittande tå|seated calf/.test(n)) primary = "Djupa vadmuskeln (soleus)";
   if (/över huvudet|overhead|fransk/.test(n) && pat === "triceps") primary = "Triceps (långa huvudet)";
-  if (/chins|underhand/.test(n)) primary = "Latissimus & biceps";
+  if (/chins|underhand/.test(n) && (pat === "vpull" || pat === "row")) primary = "Latissimus & biceps";
   if (/bred|wide/.test(n) && pat === "vpull") primary = "Latissimus (bredd)";
+  const cue = CUES.find(([re]) => re.test(n));
+  if (cue?.[2]) primary = cue[2];
   return { gear, cable: c, incline, decline, machine, primary };
 }
 
@@ -701,12 +703,270 @@ export const PRIMARY: Record<Pattern, string> = {
 /** Övningsspecifika kroppsställningar för varianter som rör sig annorlunda än sin grundrörelse. */
 const seatedPull: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [50, 26], sh: [50, 37], hip: [48, 62], kn: [66, 62], ft: [68, 86] };
 export const VARIANTS: [RegExp, string, Partial<Scene>][] = [
+  // ── Precisionsvarianter: övningar som rör sig annorlunda än sin grundrörelse ──
+  [/omvända wrist curls|wrist curls/, "wrist", {
+    bench: "seat", work: ["fore"], labels: ["Underarmen vilar på låret", "Rulla vikten upp med handleden"],
+    a: full({ ...seatSide, el: [46, 58], ha: [58, 62] }),
+    b: full({ ...seatSide, el: [46, 58], ha: [58, 54] }),
+  }],
+  [/greppklämm/, "grip", {
+    work: ["fore"], labels: ["Öppen hand", "Kläm ihop och håll"],
+    a: S({ el: [54, 40], ha: [62, 41] }), b: S({ el: [54, 40], ha: [62, 39] }),
+  }],
+  [/dragcurl/, "dragcurl", {
+    labels: ["Stången mot låren", "Dra stången längs kroppen, armbågarna bak"],
+    a: S({ el: [52, 42], ha: [55, 58] }), b: S({ el: [40, 40], ha: [54, 38] }),
+  }],
+  [/sidolyft sittande/, "seatedlateral", {
+    bench: "seat", labels: ["Sitt rakt, armarna längs sidan", "Lyft ut till axelhöjd"],
+    a: F({ head: [50, 26], sh: [50, 38], hip: [50, 62], kn: [56, 64], ft: [57, 88], kn2: [44, 64], ft2: [43, 88], el: [57, 52], ha: [58, 64], el2: [43, 52], ha2: [42, 64] }),
+    b: F({ head: [50, 26], sh: [50, 38], hip: [50, 62], kn: [56, 64], ft: [57, 88], kn2: [44, 64], ft2: [43, 88], el: [63, 40], ha: [75, 39], el2: [37, 40], ha2: [25, 39] }),
+  }],
+  [/lutande sidolyft/, "inclinelateral", {
+    bench: "high", labels: ["Ligg på sidan mot lutande bänk", "Lyft armen ut i en båge"],
+    a: full({ ...benchLie, el: [42, 62], ha: [52, 62] }), b: full({ ...benchLie, el: [34, 46], ha: [34, 32] }),
+  }],
+  [/y-lyft/, "ylift", {
+    labels: ["Armarna nere framför låren", "Lyft i ett Y ovanför huvudet"],
+    a: F({}), b: F({ el: [60, 22], ha: [68, 8], el2: [40, 22], ha2: [32, 8] }),
+  }],
+  [/bradford/, "bradford", {
+    labels: ["Stången precis ovanför huvudet", "Sänk bakom nacken, pressa upp och fram"],
+    a: S({ el: [54, 13], ha: [52, 1] }), b: S({ el: [40, 30], ha: [44, 22] }),
+  }],
+  [/kroksrodd/, "chestrow", {
+    bench: "high", labels: ["Bröstet mot bänken, armarna raka", "Dra hantlarna mot höften"],
+    a: full({ head: [76, 52], sh: [68, 57], hip: [40, 60], kn: [26, 74], ft: [20, 91], el: [68, 70], ha: [68, 84] }),
+    b: full({ head: [76, 52], sh: [68, 57], hip: [40, 60], kn: [26, 74], ft: [20, 91], el: [54, 52], ha: [60, 62] }),
+  }],
+  [/pendlay/, "pendlay", {
+    labels: ["Stången vilar på golvet, ryggen vågrät", "Explosivt drag till nedre bröstet"],
+    a: full({ head: [74, 44], sh: [66, 47], hip: [42, 50], kn: [50, 72], ft: [47, 91], el: [66, 64], ha: [66, 82] }),
+    b: full({ head: [74, 44], sh: [66, 47], hip: [42, 50], kn: [50, 72], ft: [47, 91], el: [50, 44], ha: [57, 52] }),
+  }],
+  [/döda häng|dead hang/, "deadhang", {
+    bar: true, work: ["fore", "upper"], labels: ["Greppa stången, häng still", "Låt axlarna sjunka, andas lugnt"],
+    a: full({ head: [50, 20], sh: [50, 31], hip: [50, 57], kn: [51, 74], ft: [50, 91], el: [51, 19], ha: [50, 7] }),
+    b: full({ head: [50, 22], sh: [50, 33], hip: [50, 59], kn: [51, 76], ft: [50, 92], el: [51, 20], ha: [50, 7] }),
+  }],
+  [/skulderbladsdrag/, "scappull", {
+    bar: true, work: ["torso", "upper"], labels: ["Häng med raka armar", "Dra ner skulderbladen, armarna raka"],
+    a: full({ head: [50, 24], sh: [50, 35], hip: [50, 61], kn: [51, 78], ft: [50, 93], el: [51, 21], ha: [50, 7] }),
+    b: full({ head: [50, 20], sh: [50, 31], hip: [50, 57], kn: [51, 74], ft: [50, 89], el: [51, 19], ha: [50, 7] }),
+  }],
+  [/armhävningar med klapp/, "clappush", {
+    labels: ["Sänk bröstet mot golvet", "Explodera upp, klappa händerna"],
+    a: full({ head: [80, 78], sh: [70, 81], hip: [45, 84], kn: [31, 86], ft: [16, 89], el: [58, 80], ha: [70, 91] }),
+    b: full({ head: [79, 52], sh: [70, 57], hip: [45, 68], kn: [31, 77], ft: [16, 88], el: [72, 68], ha: [72, 80] }),
+  }],
+  [/adduktormaskin/, "adduct", {
+    labels: ["Benen isär mot dynorna", "Pressa ihop knäna"], a: SCENES.abduct.b, b: SCENES.abduct.a,
+  }],
+  [/hack squat|vänd benpress/, "hack", {
+    backrest: false, labels: ["Ryggen mot dynan, axlarna under stöden", "Sitt ner djupt, pressa upp"], legpress: false, gearAt: "ha",
+    a: S({ el: [46, 30], ha: [50, 26] }),
+    b: full({ head: [44, 38], sh: [45, 50], hip: [34, 68], kn: [58, 66], ft: [54, 91], el: [40, 44], ha: [46, 40] }),
+  }],
+  [/tåhävningar i benpress/, "legpresscalf", {
+    legpress: true, gearAt: "ft", work: ["shin"], labels: ["Benen raka, bara tårna på plattan", "Pressa plattan med tårna"],
+    a: full({ head: [17, 47], sh: [24, 56], hip: [38, 72], kn: [56, 57], ft: [72, 46], el: [30, 66], ha: [38, 76] }),
+    b: full({ head: [17, 47], sh: [24, 56], hip: [38, 72], kn: [56, 57], ft: [75, 43], el: [30, 66], ha: [38, 76] }),
+  }],
+  [/sissy/, "sissy", {
+    labels: ["Stå på tå, rak höft", "Knäna fram, luta bakåt i rak linje"],
+    a: S({ el: [58, 40], ha: [66, 42] }),
+    b: full({ head: [40, 30], sh: [42, 42], hip: [46, 64], kn: [66, 76], ft: [52, 91], el: [50, 52], ha: [58, 56] }),
+  }],
+  [/curtsy/, "curtsy", {
+    labels: ["Stå höftbrett", "Kliv snett bakom, sänk i en nigning"],
+    a: F({}), b: F({ head: [50, 30], sh: [50, 42], hip: [50, 66], kn: [56, 76], ft: [56, 91], kn2: [56, 86], ft2: [66, 92], el: [57, 54], ha: [58, 66], el2: [43, 54], ha2: [42, 66] }),
+  }],
+  [/copenhagen/, "copenhagen", {
+    bench: "low", mat: false, work: ["thigh", "torso"], labels: ["Övre benet på bänken", "Lyft höften, spänn insida lår"],
+    a: full({ head: [78, 74], sh: [70, 80], hip: [46, 84], kn: [30, 77], ft: [18, 68], el: [70, 90], ha: [80, 90] }),
+    b: full({ head: [78, 72], sh: [70, 78], hip: [46, 76], kn: [30, 72], ft: [18, 68], el: [70, 90], ha: [80, 90] }),
+  }],
+  [/sidoplanka/, "sideplank", {
+    labels: ["Underarmen under axeln", "Lyft höften i rak linje"],
+    a: full({ head: [78, 72], sh: [70, 78], hip: [46, 86], kn: [30, 88], ft: [16, 90], el: [70, 90], ha: [80, 90] }),
+    b: full({ head: [78, 72], sh: [70, 78], hip: [46, 80], kn: [30, 85], ft: [16, 90], el: [70, 90], ha: [80, 90] }),
+  }],
+  [/sågplanka/, "sawplank", {
+    labels: ["Underarmsplanka, rak kropp", "Skjut kroppen bakåt och tillbaka"],
+    a: full({ ...plankBody, el: [71, 90], ha: [81, 90] }),
+    b: full({ head: [73, 70], sh: [64, 75], hip: [40, 78], kn: [26, 82], ft: [14, 88], el: [69, 90], ha: [79, 90] }),
+  }],
+  [/dragon flag/, "dragonflag", {
+    bench: "high", mat: false, labels: ["Rak kropp, sänk mot bänken", "Lyft hela kroppen från skuldrorna"],
+    a: full({ head: [16, 58], sh: [24, 59], hip: [48, 54], kn: [64, 51], ft: [80, 48], el: [18, 52], ha: [12, 58] }),
+    b: full({ head: [16, 58], sh: [24, 59], hip: [44, 34], kn: [54, 20], ft: [62, 6], el: [18, 52], ha: [12, 58] }),
+  }],
+  [/vindrutetorkare liggande/, "wiper", {
+    labels: ["Benen rakt upp, armarna ut", "Fäll benen åt sidan, axlarna i golvet"],
+    a: full({ head: [16, 84], sh: [26, 86], hip: [52, 88], kn: [54, 72], ft: [56, 55], el: [36, 90], ha: [46, 90] }),
+    b: full({ head: [16, 84], sh: [26, 86], hip: [52, 88], kn: [62, 76], ft: [70, 64], el: [36, 90], ha: [46, 90] }),
+  }],
+  [/hängande vindrutetorkare/, "hangwiper", {
+    labels: ["Benen uppe i hängläge", "Pendla benen från sida till sida"],
+    a: full({ head: [50, 20], sh: [50, 31], hip: [50, 57], kn: [66, 46], ft: [74, 32], el: [51, 19], ha: [50, 7] }),
+    b: full({ head: [50, 20], sh: [50, 31], hip: [50, 57], kn: [60, 48], ft: [58, 32], el: [51, 19], ha: [50, 7] }),
+  }],
+  [/suitcase carry|farmers walk|bondgång|waiters walk/, "carry", {
+    work: ["fore", "torso"], labels: ["Vikten i handen, rak bål", "Gå med korta, kontrollerade steg"],
+    a: S({ kn: [58, 72], ft: [60, 91], kn2: [44, 73], ft2: [40, 91], el: [51, 42], ha: [52, 58], el2: [49, 42], ha2: [49, 58] }),
+    b: S({ kn: [44, 73], ft: [40, 91], kn2: [58, 72], ft2: [60, 91], el: [51, 42], ha: [52, 58], el2: [49, 42], ha2: [49, 58] }),
+  }],
+  [/kettlebell windmill/, "windmill", {
+    work: ["torso"], labels: ["Vikten rakt upp, blicken mot den", "Fäll höften åt sidan, armen låst"],
+    a: F({ el: [57, 13], ha: [58, 1] }),
+    b: F({ head: [38, 34], sh: [42, 40], hip: [52, 56], el: [50, 24], ha: [56, 8], el2: [40, 58], ha2: [42, 74] }),
+  }],
+  [/slam ball/, "slam", {
+    ball: false, work: ["torso", "upper"], labels: ["Bollen högt över huvudet", "Slå ner bollen i golvet"],
+    a: S({ el: [52, 12], ha: [54, 0] }),
+    b: full({ head: [66, 46], sh: [60, 50], hip: [38, 60], kn: [54, 74], ft: [50, 91], el: [66, 66], ha: [70, 82] }),
+  }],
+  [/bear crawl/, "bear", {
+    labels: ["Knäna strax över golvet", "Kryp fram, motsatt hand och fot"],
+    a: full({ head: [78, 62], sh: [70, 66], hip: [42, 66], kn: [50, 82], ft: [30, 90], kn2: [34, 84], ft2: [22, 90], el: [70, 78], ha: [72, 91], el2: [66, 78], ha2: [64, 91] }),
+    b: full({ head: [78, 62], sh: [70, 66], hip: [42, 66], kn: [34, 84], ft: [22, 90], kn2: [50, 82], ft2: [30, 90], el: [66, 78], ha: [64, 91], el2: [70, 78], ha2: [72, 91] }),
+  }],
+  [/skidmaskin/, "skierg", {
+    work: ["torso", "upper"], labels: ["Armarna högt, handtagen i händerna", "Dra ner med bål och armar"],
+    a: S({ el: [60, 14], ha: [66, 6] }),
+    b: full({ head: [64, 30], sh: [58, 38], hip: [46, 60], kn: [56, 74], ft: [50, 91], el: [56, 58], ha: [50, 72] }),
+  }],
+  [/simning/, "swim", {
+    work: ["torso", "upper"], labels: ["Höger arm drar", "Vänster arm drar"],
+    a: full({ head: [78, 58], sh: [70, 60], hip: [44, 62], kn: [28, 62], ft: [14, 60], kn2: [28, 64], ft2: [14, 66], el: [84, 56], ha: [94, 58], el2: [62, 68], ha2: [52, 66] }),
+    b: full({ head: [78, 58], sh: [70, 60], hip: [44, 62], kn: [28, 64], ft: [14, 66], kn2: [28, 62], ft2: [14, 60], el: [62, 68], ha: [52, 66], el2: [84, 56], ha2: [94, 58] }),
+  }],
+  [/crosstrainer/, "elliptical", {
+    labels: ["Höger pedal fram", "Vänster pedal fram"],
+    a: S({ kn: [58, 66], ft: [60, 84], kn2: [46, 72], ft2: [38, 88], el: [58, 40], ha: [66, 34], el2: [46, 40], ha2: [56, 40] }),
+    b: S({ kn: [46, 72], ft: [38, 88], kn2: [58, 66], ft2: [60, 84], el: [46, 40], ha: [56, 40], el2: [58, 40], ha2: [66, 34] }),
+  }],
+  [/trappsteg|stairmaster/, "stairs", {
+    labels: ["Kliv upp med höger", "Kliv upp med vänster"],
+    a: S({ kn: [62, 62], ft: [62, 78], kn2: [50, 73], ft2: [48, 91] }),
+    b: S({ kn: [50, 73], ft: [48, 91], kn2: [62, 62], ft2: [62, 78] }),
+  }],
+  [/jacob/, "jacob", {
+    work: ["thigh", "upper"], labels: ["Greppa stegen, kliv upp", "Klättra i jämn takt"],
+    a: S({ head: [56, 17], sh: [54, 29], el: [62, 22], ha: [68, 14], el2: [60, 34], ha2: [66, 30], kn: [62, 64], ft: [64, 78], kn2: [50, 74], ft2: [48, 91] }),
+    b: S({ head: [56, 17], sh: [54, 29], el: [60, 34], ha: [66, 30], el2: [62, 22], ha2: [68, 14], kn: [50, 74], ft: [48, 91], kn2: [62, 64], ft2: [64, 78] }),
+  }],
+  [/thruster/, "thruster", {
+    work: ["thigh", "upper"], labels: ["Djup böj, vikten vid axlarna", "Res dig explosivt och pressa upp"],
+    a: full({ head: [58, 39], sh: [55, 50], hip: [35, 66], kn: [58, 70], ft: [50, 91], el: [64, 56], ha: [60, 46] }),
+    b: S({ el: [54, 13], ha: [52, 1] }),
+  }],
+  [/rensa och pressa/, "cleanpress", {
+    work: ["torso", "thigh", "upper"], labels: ["Stången vid smalbenen", "Vänd upp till axlarna och pressa"],
+    a: full({ head: [72, 40], sh: [65, 45], hip: [42, 56], kn: [54, 72], ft: [50, 91], el: [63, 62], ha: [61, 80] }),
+    b: S({ el: [54, 13], ha: [52, 1] }),
+  }],
+  [/kettlebell clean/, "kbclean", {
+    work: ["torso", "thigh"], labels: ["Vikten mellan benen", "Dra upp till rackläge vid bröstet"],
+    a: full({ head: [70, 38], sh: [63, 43], hip: [42, 56], kn: [54, 72], ft: [50, 91], el: [56, 58], ha: [48, 70] }),
+    b: S({ el: [58, 38], ha: [56, 30] }),
+  }],
+  [/hang clean|power clean/, "hangclean", {
+    work: ["torso", "thigh"], labels: ["Stången strax ovanför knäna", "Explodera upp och fånga på axlarna"],
+    a: full({ head: [68, 30], sh: [62, 36], hip: [44, 54], kn: [54, 72], ft: [50, 91], el: [60, 52], ha: [60, 64] }),
+    b: S({ el: [62, 32], ha: [56, 26] }),
+  }],
+  [/snatch/, "snatch", {
+    work: ["torso", "thigh", "upper"], labels: ["Vikten mellan fötterna", "Dra upp i en båge till rak arm"],
+    a: full({ head: [72, 40], sh: [65, 45], hip: [42, 56], kn: [54, 72], ft: [50, 91], el: [63, 62], ha: [61, 80], el2: [60, 60], ha2: [58, 74] }),
+    b: S({ el: [53, 13], ha: [52, 1] }),
+  }],
+  [/devil press|man makers/, "devil", {
+    work: ["torso", "thigh", "upper"], labels: ["Bröstet ner, händerna på hantlarna", "Hoppa in och svinga upp över huvudet"],
+    a: full({ head: [79, 62], sh: [70, 66], hip: [45, 72], kn: [31, 78], ft: [16, 88], el: [70, 78], ha: [70, 90] }),
+    b: S({ el: [54, 13], ha: [52, 1] }),
+  }],
+  [/inchworm/, "inchworm", {
+    work: ["torso", "upper"], labels: ["Fäll fram, händerna i golvet", "Gå ut med händerna till planka"],
+    a: full({ head: [50, 80], sh: [48, 72], hip: [40, 52], kn: [41, 72], ft: [40, 91], el: [48, 82], ha: [50, 91] }),
+    b: full({ head: [94, 72], sh: [86, 76], hip: [64, 82], kn: [52, 86], ft: [40, 90], el: [86, 84], ha: [86, 91] }),
+  }],
+  [/zercher/, "zercher", {
+    gearAt: "el", labels: ["Stången i armbågsvecken", "Sitt ner med upprätt bål"],
+    a: S({ el: [58, 42], ha: [56, 34], el2: [56, 42], ha2: [54, 34] }),
+    b: full({ head: [56, 39], sh: [54, 50], hip: [35, 66], kn: [58, 70], ft: [50, 91], el: [62, 62], ha: [60, 54], el2: [60, 62], ha2: [58, 54] }),
+  }],
+  [/boxknäböj/, "boxsquat", {
+    bench: "low", labels: ["Stå upp", "Sitt kort på boxen, res dig"],
+    b: full({ head: [58, 39], sh: [55, 50], hip: [32, 66], kn: [58, 70], ft: [50, 91], el: [46, 55], ha: [53, 48], el2: [44, 55], ha2: [51, 48] }),
+  }],
+  [/z-press/, "zpress", {
+    labels: ["Sitt på golvet, benen raka", "Pressa rakt upp utan stöd"],
+    a: full({ head: [30, 57], sh: [30, 69], hip: [30, 90], kn: [50, 90], ft: [70, 90], el: [38, 74], ha: [36, 62] }),
+    b: full({ head: [30, 57], sh: [30, 69], hip: [30, 90], kn: [50, 90], ft: [70, 90], el: [32, 54], ha: [31, 42] }),
+  }],
+  [/landmine press/, "landminepress", {
+    labels: ["Stångänden vid axeln", "Pressa upp och fram"],
+    a: S({ el: [58, 38], ha: [58, 28] }), b: S({ el: [64, 22], ha: [74, 12] }),
+  }],
+  [/landmine rodd|t-bar/, "tbar", {
+    labels: ["Stången mellan benen, rak rygg", "Dra handtaget mot bröstet"],
+    a: full({ ...bentOver, el: [60, 58], ha: [58, 72] }), b: full({ ...bentOver, el: [48, 46], ha: [56, 58] }),
+  }],
+  [/arnold/, "arnold", {
+    labels: ["Handflatorna mot dig vid hakan", "Vrid ut och pressa upp"],
+    a: S({ el: [58, 38], ha: [56, 24] }), b: S({ el: [54, 13], ha: [52, 1] }),
+  }],
+  [/captain/, "captain", {
+    bar: false, backrest: true, labels: ["Underarmarna på stöden, ryggen mot dynan", "Lyft knäna till höfthöjd"],
+    a: full({ head: [50, 24], sh: [50, 35], hip: [50, 60], kn: [51, 76], ft: [50, 92], el: [52, 46], ha: [62, 46] }),
+    b: full({ head: [50, 24], sh: [50, 35], hip: [50, 60], kn: [66, 56], ft: [64, 74], el: [52, 46], ha: [62, 46] }),
+  }],
+  [/toe touches/, "toetouch", {
+    labels: ["Benen rakt upp", "Nå fingrarna mot tårna"],
+    a: full({ head: [16, 84], sh: [26, 86], hip: [52, 88], kn: [54, 72], ft: [56, 55], el: [30, 74], ha: [36, 64] }),
+    b: full({ head: [24, 74], sh: [32, 80], hip: [52, 88], kn: [54, 72], ft: [56, 55], el: [42, 66], ha: [52, 56] }),
+  }],
+  [/släddrag/, "sledpull", {
+    labels: ["Luta bakåt, armarna raka", "Gå bakåt med korta, kraftiga steg"],
+    a: full({ head: [38, 22], sh: [40, 34], hip: [46, 58], kn: [56, 72], ft: [52, 91], kn2: [40, 74], ft2: [36, 91], el: [54, 44], ha: [66, 52] }),
+    b: full({ head: [38, 22], sh: [40, 34], hip: [46, 58], kn: [40, 74], ft: [36, 91], kn2: [56, 72], ft2: [52, 91], el: [54, 44], ha: [66, 52] }),
+  }],
+  [/fladderspark|saxspark/, "flutter", {
+    labels: ["Höger ben upp", "Vänster ben upp"],
+    a: full({ head: [16, 84], sh: [26, 86], hip: [52, 88], kn: [68, 82], ft: [84, 76], kn2: [68, 87], ft2: [84, 85], el: [36, 90], ha: [46, 90] }),
+    b: full({ head: [16, 84], sh: [26, 86], hip: [52, 88], kn: [68, 87], ft: [84, 85], kn2: [68, 82], ft2: [84, 76], el: [36, 90], ha: [46, 90] }),
+  }],
+  [/spanish squat/, "spanish", {
+    labels: ["Bandet bakom knäna, luta bakåt", "Sitt ner med lodräta smalben"],
+    a: S({ el: [58, 40], ha: [66, 42] }),
+    b: full({ head: [52, 36], sh: [51, 48], hip: [32, 66], kn: [54, 68], ft: [54, 91], el: [60, 52], ha: [68, 52] }),
+  }],
+  [/tuck jump/, "tuck", {
+    labels: ["Ladda kort", "Hoppa och dra knäna mot bröstet"],
+    b: full({ head: [50, 4], sh: [50, 15], hip: [48, 40], kn: [62, 30], ft: [56, 48], el: [58, 24], ha: [64, 30] }),
+  }],
+  [/broad jump/, "broad", {
+    labels: ["Sitt ner, armarna bak", "Hoppa långt framåt"],
+    a: full({ head: [58, 41], sh: [55, 52], hip: [36, 68], kn: [58, 72], ft: [50, 91], el: [42, 62], ha: [32, 68] }),
+    b: full({ head: [76, 18], sh: [72, 28], hip: [58, 48], kn: [72, 58], ft: [66, 74], el: [80, 22], ha: [88, 16] }),
+  }],
+  [/sandsäck/, "sandbag", {
+    labels: ["Säcken mellan fötterna", "Lyft upp till axeln"],
+    a: full({ head: [72, 40], sh: [65, 45], hip: [42, 56], kn: [54, 72], ft: [50, 91], el: [63, 62], ha: [61, 80] }),
+    b: S({ el: [58, 30], ha: [54, 22] }),
+  }],
+  [/ettbens marklyft/, "slrdl", {
+    labels: ["Stå på ett ben", "Fäll fram, bakre benet i linje med ryggen"],
+    a: S({ el: [51, 42], ha: [53, 58], kn2: [47, 73], ft2: [46, 88] }),
+    b: full({ head: [78, 44], sh: [70, 47], hip: [44, 54], kn: [48, 72], ft: [50, 91], el: [70, 62], ha: [70, 76], kn2: [26, 56], ft2: [10, 58] }),
+  }],
   [/frontböj|front ?squat/, "frontsquat", {
     labels: ["Stången på främre axlarna", "Sitt ner, armbågarna högt"],
     a: S({ el: [60, 30], ha: [54, 27], el2: [58, 30], ha2: [52, 27] }),
     b: full({ head: [54, 40], sh: [52, 51], hip: [36, 69], kn: [60, 72], ft: [50, 91], el: [62, 52], ha: [56, 49], el2: [60, 52], ha2: [54, 49] }),
   }],
-  [/goblet/, "goblet", {
+  [/goblet squat/, "goblet", {
     gearAt: "ha", labels: ["Vikten mot bröstet", "Sitt ner mellan knäna"],
     a: S({ el: [55, 40], ha: [56, 33], el2: [53, 40], ha2: [54, 33] }),
     b: full({ head: [55, 41], sh: [53, 52], hip: [36, 69], kn: [60, 72], ft: [50, 91], el: [58, 62], ha: [60, 54], el2: [56, 62], ha2: [58, 54] }),
@@ -737,10 +997,79 @@ export const VARIANTS: [RegExp, string, Partial<Scene>][] = [
     a: full({ ...seatedPull, el: [54, 22], ha: [52, 8] }),
     b: full({ ...seatedPull, head: [48, 26], el: [40, 42], ha: [52, 30] }),
   }],
-  [/dips/, "dips", {
+  [/^dips|dips i maskin/, "dips", {
     a: full({ head: [57, 19], sh: [53, 30], hip: [47, 55], kn: [44, 72], ft: [56, 80], el: [50, 43], ha: [50, 56] }),
     b: full({ head: [60, 32], sh: [55, 43], hip: [47, 66], kn: [44, 82], ft: [56, 89], el: [40, 49], ha: [50, 56] }),
   }],
+];
+
+/** Övningsspecifika instruktioner och primär muskel där grundrörelsen är rätt men greppet/fokuset skiljer. */
+const CUES: [RegExp, [string, string] | null, string?][] = [
+  [/omvända wrist curls/, ["Underarmen på låret, handflatan ner", "Lyft handryggen uppåt"], "Underarmens sträckare"],
+  [/wrist curls/, ["Underarmen på låret, handflatan upp", "Rulla vikten upp med handleden"], "Underarmens böjare"],
+  [/greppklämm/, null, "Grepp & underarm"],
+  [/dragcurl/, null, "Biceps (långa huvudet)"],
+  [/zottman/, ["Böj upp med handflatan uppåt", "Vrid och sänk med handflatan nedåt"], "Biceps & brachioradialis"],
+  [/omvänd curl/, ["Överhandsgrepp, armen rak", "Böj upp, handryggen uppåt"], "Brachioradialis & underarm"],
+  [/pushdown med underhand/, ["Underhandsgrepp, armbågarna i sidan", "Sträck ner armarna helt"], "Triceps (mediala huvudet)"],
+  [/y-lyft/, null, "Nedre trapezius & bakre delta"],
+  [/bradford/, null, "Axlar (främre & sido-delta)"],
+  [/skivstångsrodd med underhand/, ["Underhandsgrepp, armarna raka", "Dra mot naveln, armbågarna nära"]],
+  [/döda häng|dead hang/, null, "Grepp, axlar & latissimus"],
+  [/skulderbladsdrag/, null, "Nedre trapezius & latissimus"],
+  [/archer/, ["Brett grepp, armarna raka", "Sänk mot ena handen, andra armen rak"], "Bröst & triceps (en sida i taget)"],
+  [/diamant|armhävningar med smalt/, ["Händerna nära varandra under bröstet", "Sänk bröstet, armbågarna nära kroppen"], "Triceps & inre bröst"],
+  [/breda armhävningar/, ["Händerna brett isär", "Sänk bröstet mellan händerna"], "Bröst (yttre)"],
+  [/lutande armhävningar/, ["Händerna på bänken, rak kropp", "Sänk bröstet mot bänkkanten"], "Nedre bröst & triceps"],
+  [/nedåtlutande armhävningar/, ["Fötterna på bänken, rak kropp", "Sänk bröstet mot golvet"], "Övre bröst & axlar"],
+  [/adduktormaskin/, null, "Insida lår (adduktorer)"],
+  [/abduktormaskin/, null, "Utsida höft (gluteus medius)"],
+  [/hack squat|vänd benpress/, null, "Framsida lår (quads)"],
+  [/tåhävningar i benpress/, null, "Vader"],
+  [/sissy/, null, "Framsida lår (rectus femoris)"],
+  [/curtsy/, null, "Rumpa (gluteus medius) & lår"],
+  [/frog pumps/, ["Fotsulorna ihop, knäna utåt", "Pressa upp höften, kläm rumpan"], "Rumpa"],
+  [/copenhagen/, null, "Insida lår & sneda magmuskler"],
+  [/sidoplanka med höftlyft/, ["Sänk höften mot golvet", "Lyft höften i rak linje"]],
+  [/sågplanka|planka med axeltryck|plankjack|planka med benlyft/, null, "Hela bålen"],
+  [/planka med axeltryck/, ["Rak planka på händerna", "Tryck ena handen mot motsatt axel"]],
+  [/dragon flag/, null, "Hela magen (rak kropp)"],
+  [/goblet march/, null, "Bål & höftböjare"],
+  [/vindrutetorkare/, null, "Sneda magmuskler"],
+  [/suitcase carry/, ["Vikten i ena handen, rak bål", "Gå utan att luta åt sidan"], "Sneda magmuskler & grepp"],
+  [/farmers walk|bondgång/, ["Tunga vikter i båda händerna", "Gå med korta, raka steg"], "Grepp, trapezius & bål"],
+  [/waiters walk/, ["Vikten rakt upp, armen låst", "Gå med stabil axel och bål"], "Axelstabilitet & bål"],
+  [/kettlebell windmill/, null, "Sneda magmuskler & axelstabilitet"],
+  [/slam ball/, null, "Bål, latissimus & helkropp"],
+  [/bear crawl/, null, "Bål & axlar"],
+  [/skidmaskin/, null, "Latissimus, triceps & kondition"],
+  [/simning/, null, "Rygg, axlar & kondition"],
+  [/stavgång/, ["Staven i marken, skjut ifrån", "Långa steg, motsatt arm fram"], "Helkropp & kondition"],
+  [/jacob/, null, "Helkropp & kondition"],
+  [/thruster/, null, "Ben, rumpa & axlar"],
+  [/rensa och pressa/, null, "Helkropp (bakre kedja & axlar)"],
+  [/kettlebell clean|hang clean|power clean/, null, "Bakre kedjan & trapezius (explosivitet)"],
+  [/snatch/, null, "Helkropp & axlar (explosivitet)"],
+  [/devil press/, null, "Helkropp & kondition"],
+  [/man makers/, ["Plankläge på hantlarna", "Ro, hoppa in, vänd upp och pressa"], "Helkropp & kondition"],
+  [/inchworm/, null, "Baksida lår, bål & axlar"],
+  [/zercher/, null, "Framsida lår, övre rygg & bål"],
+  [/pausknäböj/, ["Stå upp", "Sitt djupt, pausa 1–2 s, res dig"]],
+  [/z-press/, null, "Axlar & bål"],
+  [/landmine press/, null, "Övre bröst & främre delta"],
+  [/viking/, ["Handtagen vid axlarna", "Pressa upp längs armens bana"], "Axlar & triceps"],
+  [/captain/, null, "Nedre mage & höftböjare"],
+  [/toe touches/, null, "Raka magmuskeln (övre)"],
+  [/släddrag/, null, "Framsida lår & rygg"],
+  [/spanish squat/, null, "Framsida lår (quads)"],
+  [/sandsäck/, null, "Bakre kedjan & helkropp"],
+  [/latsdrag med brett/, ["Brett grepp, armarna raka", "Dra stången till övre bröstet"]],
+  [/latsdrag med smalt/, ["Smalt grepp, armarna raka", "Dra handtaget till bröstet"], "Latissimus (nedre)"],
+  [/latsdrag med underhand|chins med underhand/, ["Underhandsgrepp, armarna raka", "Dra till bröstet, armbågarna ner"]],
+  [/chins med neutralt/, ["Neutralt grepp, häng rakt", "Dra bröstet mot stången"], "Latissimus & brachialis"],
+  [/negativa chins/, ["Börja i toppläget, hakan över stången", "Sänk långsamt, 3–5 s"]],
+  [/hantelpress med neutralt/, ["Handflatorna mot varandra vid bröstet", "Pressa upp, neutralt grepp"], "Bröst & triceps"],
+  [/kettlebell-sving med en arm/, ["Vikten mellan benen, en hand", "Driv höften fram, vikten till brösthöjd"]],
 ];
 
 export function variantFor(ex: Pick<ExercisePreset, "name">): string | null {
@@ -770,14 +1099,22 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
   const n = ex.name.toLowerCase();
   const v = VARIANTS.find(([re]) => re.test(n))?.[2];
   const pat = patternFor(ex);
-  const base: Scene = { ...SCENES[pat], ...v };
+  const cue = CUES.find(([re]) => re.test(n));
+  const base: Scene = { ...SCENES[pat], ...v, ...(cue?.[1] ? { labels: cue[1] } : {}) };
   const su = setupFor(ex);
   const tilt = (p: Pose): Pose => {
     if (!su.incline || !base.bench || base.bench === "seat") return p;
     const lift = (q: P, k: number): P => [q[0] + 4 * k, q[1] - 16 * k];
     return { ...p, head: lift(p.head, 1.2), sh: lift(p.sh, 1), el: lift(p.el, 0.9), el2: lift(p.el2, 0.9), ha: lift(p.ha, 0.8), ha2: lift(p.ha2, 0.8) };
   };
-  const sc = { ...base, gear: su.gear, a: tilt(base.a), b: tilt(base.b) };
+  // Enarms-/enbensövningar: den passiva lemmen hålls still relativt kroppen så bara den aktiva arbetar.
+  const uniArm = /enarms|en arm|alternerande|hantelsnatch|suitcase/.test(n);
+  const uniLeg = /ettbens|enbens/.test(n) && !/marklyft/.test(n);
+  const pin = (p: Pose): Pose => {
+    const rel = (j: J, root: J): P => [p[root][0] + base.a[j][0] - base.a[root][0], p[root][1] + base.a[j][1] - base.a[root][1]];
+    return { ...p, ...(uniArm ? { el2: rel("el2", "sh"), ha2: rel("ha2", "sh") } : {}), ...(uniLeg ? { kn2: rel("kn2", "hip"), ft2: rel("ft2", "hip") } : {}) };
+  };
+  const sc = { ...base, gear: su.gear, a: pin(tilt(base.a)), b: pin(tilt(base.b)) };
   const a = Object.fromEntries((Object.keys(sc.a) as J[]).map((j) => [j, [sc.a[j][0] + (sc.b[j][0] - sc.a[j][0]) * t, sc.a[j][1] + (sc.b[j][1] - sc.a[j][1]) * t]])) as Pose;
   const other = sc.b;
   const gearAt = sc.gearAt ?? "ha";
