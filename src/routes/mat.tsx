@@ -1,9 +1,7 @@
 import { ProGate } from "@/components/Paywall";
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { MacroSummary } from "@/components/MacroSummary";
-import { WaterTracker } from "@/components/WaterTracker";
 import { FoodSearch } from "@/components/FoodSearch";
-import { DailyHabits } from "@/components/DailyHabits";
 import { PhotoLog } from "@/components/PhotoLog";
 import { BarcodeScan } from "@/components/BarcodeScan";
 import { parseNutrition } from "@/lib/habits";
@@ -150,7 +148,7 @@ function Mat() {
               </button>
             </div>
             {list.length === 0 ? (
-              <p className="mt-2 text-sm text-muted-foreground">Inget loggat – helt okej.</p>
+              <p className="telemetry mt-2 text-xs text-muted-foreground/60">—</p>
             ) : (
               <ul className="mt-2 divide-y divide-border">
                 {list.map((m) => {
@@ -177,9 +175,6 @@ function Mat() {
           </section>
         );
       })}
-
-      <WaterTracker date={date} />
-      <DailyHabits date={date} />
 
       <AddMealDialog open={open} onOpenChange={setOpen} type={type} setType={setType} onAdd={(m) => { addMeal(m); setOpen(false); }} showKcal={showKcal} />
     </div>

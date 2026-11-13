@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { SundayReport } from "@/components/SundayReport";
 import { StrengthProgress } from "@/components/StrengthProgress";
+import { DailyHabits } from "@/components/DailyHabits";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addDays, dateKey, prettyDate, resetAll, update, useBalans, weekdayIndex, WEEKDAYS } from "@/lib/balans";
@@ -68,6 +69,7 @@ function Progress() {
         <Box label="Sömn snitt" value={sleepAvg ? `${sleepAvg.toFixed(1)} h` : "–"} />
       </section>
 
+      <DailyHabits date={today} />
       <StrengthProgress workouts={s.workouts} />
 
       <section className="card-soft p-5">
