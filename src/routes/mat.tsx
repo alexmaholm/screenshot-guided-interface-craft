@@ -1,6 +1,4 @@
-import { FridgeIdeas } from "@/components/FridgeIdeas";
 import { ProGate } from "@/components/Paywall";
-import { WeekPlan } from "@/components/WeekPlan";
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { MacroSummary } from "@/components/MacroSummary";
 import { WaterTracker } from "@/components/WaterTracker";
@@ -111,9 +109,9 @@ function Mat() {
       </button>
 
       <RecoveryMeals profile={p} workout={[...s.workouts].reverse().find((w) => w.date === date && w.status === "klart" && w.kind !== "vila")} date={date} />
-      <section className="card-soft space-y-4 p-5">
+      <section className="panel space-y-4 p-5">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">Dagens näring</h2>
+          <h2 className="label-xs text-muted-foreground">Dagens näring</h2>
           <button
             className="flex min-h-11 items-center gap-2 rounded-full px-3 text-sm text-muted-foreground hover:bg-muted"
             onClick={() => update((st) => st.profile ? ({ ...st, profile: { ...st.profile, hideCalories: !p.hideCalories } }) : st)}
@@ -144,24 +142,24 @@ function Mat() {
       {MEAL_TYPES.map((t) => {
         const list = meals.filter((m) => m.type === t);
         return (
-          <section key={t} className="card-soft p-5">
+          <section key={t} className="panel p-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">{MEAL_LABEL[t]}</h2>
-              <button aria-label={`Lägg till ${MEAL_LABEL[t]}`} onClick={() => { setType(t); setOpen(true); }} className="grid h-11 w-11 place-items-center rounded-full bg-secondary text-primary">
+              <h2 className="label-xs text-muted-foreground">{MEAL_LABEL[t]}</h2>
+              <button aria-label={`Lägg till ${MEAL_LABEL[t]}`} onClick={() => { setType(t); setOpen(true); }} className="grid h-11 w-11 place-items-center rounded-full border border-border text-primary hover:bg-muted">
                 <Plus className="h-5 w-5" />
               </button>
             </div>
             {list.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">Inget loggat – helt okej.</p>
             ) : (
-              <ul className="mt-2 divide-y">
+              <ul className="mt-2 divide-y divide-border">
                 {list.map((m) => {
                   const fav = s.favorites.some((f) => f.name === m.name);
                   return (
                     <li key={m.id} className="flex items-center gap-2 py-3">
                       <div className="flex-1">
                         <p className="font-medium">{m.name}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="telemetry text-xs text-muted-foreground">
                           {[m.amount, m.protein ? `${m.protein} g P` : "", m.carbs ? `${m.carbs} g K` : "", m.fat ? `${m.fat} g F` : "", showKcal && m.kcal ? `${m.kcal} kcal` : ""].filter(Boolean).join(" · ")}
                         </p>
                       </div>
@@ -182,9 +180,6 @@ function Mat() {
 
       <WaterTracker date={date} />
       <DailyHabits date={date} />
-      <ProGate title="Töm kylen"><FridgeIdeas profile={p} /></ProGate>
-      <WeekPlan profile={p} />
-
 
       <AddMealDialog open={open} onOpenChange={setOpen} type={type} setType={setType} onAdd={(m) => { addMeal(m); setOpen(false); }} showKcal={showKcal} />
     </div>
