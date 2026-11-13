@@ -12,7 +12,7 @@ import { parseNutrition } from "@/lib/habits";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Star, Trash2, Plus, ChevronLeft, ChevronRight, ChevronDown, Eye, EyeOff, Sparkles, Loader2 } from "lucide-react";
+import { Star, Trash2, Plus, ChevronLeft, ChevronRight, ChevronDown, Eye, EyeOff, Sparkles, Loader2, Search, ScanBarcode, PenLine, Camera, History } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -92,19 +92,23 @@ function Mat() {
 
   return (
     <div className="space-y-5">
-      <header className="flex items-end justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold">Mat</h1>
-          <div className="mt-1 flex items-center gap-1">
-            <button aria-label="Föregående dag" className="grid h-10 w-10 place-items-center rounded-full hover:bg-muted" onClick={() => setDate(addDays(date, -1))}><ChevronLeft className="h-5 w-5" /></button>
-            <span className="min-w-20 text-center text-sm capitalize text-muted-foreground">{isToday ? "Idag" : prettyDate(date)}</span>
-            <button aria-label="Nästa dag" className="grid h-10 w-10 place-items-center rounded-full hover:bg-muted disabled:opacity-30" disabled={isToday} onClick={() => setDate(addDays(date, 1))}><ChevronRight className="h-5 w-5" /></button>
+      <header className="space-y-1">
+        <p className="label-xs text-muted-foreground">Näring · {isToday ? "Idag" : prettyDate(date)}</p>
+        <div className="flex items-end justify-between gap-3">
+          <h1 className="text-4xl font-semibold tracking-tight">Mat</h1>
+          <div className="flex items-center gap-1">
+            <button aria-label="Föregående dag" className="grid h-10 w-10 place-items-center rounded-full border border-border hover:bg-muted" onClick={() => setDate(addDays(date, -1))}><ChevronLeft className="h-4 w-4" /></button>
+            <button aria-label="Nästa dag" className="grid h-10 w-10 place-items-center rounded-full border border-border hover:bg-muted disabled:opacity-30" disabled={isToday} onClick={() => setDate(addDays(date, 1))}><ChevronRight className="h-4 w-4" /></button>
           </div>
         </div>
-        <Button className="h-12 rounded-full px-5" onClick={() => { setType(guessType()); setOpen(true); }}>
-          <Plus /> Lägg till
-        </Button>
       </header>
+
+      <button
+        onClick={() => { setType(guessType()); setOpen(true); }}
+        className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-semibold text-primary-foreground active:scale-[0.99] transition"
+      >
+        <Plus className="h-5 w-5" /> Logga måltid
+      </button>
 
       <RecoveryMeals profile={p} workout={[...s.workouts].reverse().find((w) => w.date === date && w.status === "klart" && w.kind !== "vila")} date={date} />
       <section className="card-soft space-y-4 p-5">
@@ -199,7 +203,7 @@ function AddMealDialog({
   onAdd: (m: Omit<Meal, "id" | "date">) => void; showKcal: boolean;
 }) {
   const s = useBalans();
-  const [tab, setTab] = useState<"foto" | "kod" | "sök" | "egen" | "favoriter" | "tidigare">("foto");
+  const [tab, setTab] = useState<null | "foto" | "kod" | "sök" | "egen" | "favoriter" | "tidigare">(null);
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [kcal, setKcal] = useState("");
@@ -212,7 +216,7 @@ function AddMealDialog({
   const [micros, setMicros] = useState<Micros | null>(null);
   const estimate = useServerFn(estimateText);
 
-  useEffect(() => { if (open) { setName(""); setAmount(""); setKcal(""); setProtein(""); setCarbs(""); setFat(""); setErr(""); setAiText(""); setMicros(null); } }, [open]);
+  useEffect(() => { if (open) { setName(""); setAmount(""); setKcal(""); setProtein(""); setCarbs(""); setFat(""); setErr(""); setAiText(""); setMicros(null); setTab(null); } }, [open]);
 
   if (!s) return null;
 
@@ -261,17 +265,32 @@ function AddMealDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85dvh] overflow-y-auto overscroll-contain rounded-3xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-        <DialogHeader><DialogTitle className="font-display text-2xl">Lägg till måltid</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle className="text-2xl font-semibold tracking-tight">Logga måltid</DialogTitle></DialogHeader>
         <div className="grid grid-cols-4 gap-1.5">
           {MEAL_TYPES.map((t) => (
             <button key={t} className="chip justify-center px-1 text-xs" aria-pressed={type === t} onClick={() => setType(t)}>{MEAL_LABEL[t]}</button>
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-muted p-1 text-sm" role="tablist">
-          {(["foto", "kod", "sök", "egen", "favoriter", "tidigare"] as const).map((t) => (
-            <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`min-h-10 rounded-xl px-2 text-xs capitalize ${tab === t ? "bg-card font-semibold shadow-sm" : ""}`}>{t === "kod" ? "Streckkod" : t}</button>
-          ))}
-        </div>
+        {tab === null ? (
+          <div className="grid gap-2">
+            {([
+              ["sök", Search, "Sök livsmedel", "Databas med livsmedel"],
+              ["kod", ScanBarcode, "Skanna streckkod", "Förpackade varor"],
+              ["egen", PenLine, "Skriv in", "Beskriv fritt – AI räknar, eller fyll i själv"],
+              ["foto", Camera, "Fota tallriken", "AI läser av måltiden"],
+              ["favoriter", Star, "Favoriter", `${s.favorites.length} sparade`],
+              ["tidigare", History, "Senaste", "Logga igen med ett tryck"],
+            ] as const).map(([k, Icon, title, sub]) => (
+              <button key={k} onClick={() => setTab(k)} className="flex min-h-16 items-center gap-4 rounded-2xl border border-border bg-card px-4 text-left hover:bg-muted">
+                <Icon className="h-5 w-5 text-primary" />
+                <span className="flex-1"><span className="block font-medium">{title}</span><span className="text-xs text-muted-foreground">{sub}</span></span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <button onClick={() => setTab(null)} className="flex min-h-10 items-center gap-1 self-start text-sm text-muted-foreground"><ChevronLeft className="h-4 w-4" /> Alla sätt att logga</button>
+        )}
         {tab === "foto" && <ProGate title="AI-fotologg"><PhotoLog diet={[s.profile?.diet, ...(s.profile?.restrictions ?? [])].filter(Boolean).join(", ")} showKcal={showKcal} onSave={(m) => onAdd({ type, ...m })} /></ProGate>}
         {tab === "kod" && <BarcodeScan showKcal={showKcal} onSave={(m) => onAdd({ type, ...m })} />}
         {tab === "sök" && <FoodSearch showKcal={showKcal} onPick={(f) => onAdd({ type, ...f })} />}
