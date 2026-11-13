@@ -1,6 +1,8 @@
 import { RecoveryMeals } from "@/components/RecoveryMeals";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Droplets, Dumbbell, Sparkles, Plus, Play } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Droplets, Dumbbell, Plus, Play, ChevronRight } from "lucide-react";
+import { greetingFor } from "@/lib/greeting";
 import { AppShell, PageLoading } from "@/components/AppShell";
 import { StartScreen } from "@/components/StartScreen";
 import { dateKey, GLASS_ML, KIND_LABEL, macroTargets, prettyDate, sumMacros, update, useBalans } from "@/lib/balans";
@@ -32,6 +34,13 @@ function Index() {
 
 function Today() {
   const s = useBalans();
+  const [greeting, setGreeting] = useState<string | null>(null);
+  useEffect(() => {
+    const tick = () => setGreeting(greetingFor(new Date().getHours()));
+    tick();
+    const id = setInterval(tick, 60_000);
+    return () => clearInterval(id);
+  }, []);
   const p = s?.profile;
   if (!s || !p) return null;
   const today = dateKey();
@@ -52,14 +61,12 @@ function Today() {
 
   return (
     <div className="space-y-4">
-      <header className="flex items-end justify-between pt-2">
-        <div>
-          <p className="label-xs">{prettyDate(today)}</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">{p.name ? p.name : "Översikt"}</h1>
-        </div>
-        <span className="flex items-center gap-2 label-xs">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary glow-primary" aria-hidden /> Live
-        </span>
+      <header className="pt-4 pb-2">
+        <p className="label-xs telemetry">{prettyDate(today)}</p>
+        <h1 className="mt-2 text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em]">
+          <span className="text-muted-foreground">{greeting ?? "\u00a0"}{greeting && p.name ? "," : ""}</span>
+          {p.name && <><br />{p.name}</>}
+        </h1>
       </header>
 
       <section className="panel p-5" aria-label="Energi idag">
@@ -121,12 +128,12 @@ function Today() {
         </div>
       </section>
 
-      <Link to="/mat" search={{ ny: true }} className="panel flex min-h-14 items-center justify-between px-5">
+      <Link to="/mat" search={{ ny: true }} className="panel flex min-h-14 items-center justify-between px-5 transition-colors active:bg-muted">
         <span className="flex items-center gap-3">
-          <Sparkles className="h-4 w-4 text-primary" aria-hidden />
-          <span className="text-sm">Skriv vad du åt – AI räknar ut resten</span>
+          <span className="flex h-7 w-7 items-center justify-center rounded-md border"><Plus className="h-4 w-4 text-primary" aria-hidden /></span>
+          <span className="text-sm font-medium">Logga måltid</span>
         </span>
-        <Plus className="h-4 w-4 text-muted-foreground" aria-hidden />
+        <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
       </Link>
     </div>
   );
