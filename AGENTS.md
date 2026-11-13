@@ -11,7 +11,7 @@
 
 - Keep dietary eligibility and recovery selection in `src/lib/balans.ts` so onboarding, meal suggestions, and recovery meals use the same rules.
 - Reuse dietary selectors and recovery recommendations across pages through focused components so restrictions cannot diverge between views.
-- Preserve the existing browser-local storage flow for this milestone; connected accounts and payments require a separate implementation.
+- Preserve the existing browser-local storage flow; payments require a separate implementation.
 - Bundle fonts through Fontsource CSS imports so rendering does not depend on external font hosts.
 - Keep daily habit scoring in `src/lib/habits.ts` and its shared display in `DailyHabits` so logged meals and water use the same score across views; scores describe logging progress, not medical health.
 - Parse manual nutrition values through `parseNutrition` before saving so all four macros share decimal and nonnegative validation.
