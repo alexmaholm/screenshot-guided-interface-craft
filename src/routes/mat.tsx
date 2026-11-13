@@ -12,7 +12,7 @@ import { parseNutrition } from "@/lib/habits";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Star, Trash2, Plus, ChevronLeft, ChevronRight, ChevronDown, Eye, EyeOff, Sparkles, Loader2, Search, ScanBarcode, PenLine, Camera, History } from "lucide-react";
+import { Star, Trash2, Plus, ChevronLeft, ChevronRight, ChevronDown, Eye, EyeOff, Sparkles, Loader2, Search as SearchIcon, ScanBarcode, PenLine, Camera, History } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, NeedsOnboarding, PageLoading } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -274,7 +274,7 @@ function AddMealDialog({
         {tab === null ? (
           <div className="grid gap-2">
             {([
-              ["sök", Search, "Sök livsmedel", "Databas med livsmedel"],
+              ["sök", SearchIcon, "Sök livsmedel", "Databas med livsmedel"],
               ["kod", ScanBarcode, "Skanna streckkod", "Förpackade varor"],
               ["egen", PenLine, "Skriv in", "Beskriv fritt – AI räknar, eller fyll i själv"],
               ["foto", Camera, "Fota tallriken", "AI läser av måltiden"],
