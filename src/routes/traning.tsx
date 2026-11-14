@@ -104,19 +104,22 @@ function Training() {
 
   return (
     <div className="space-y-5">
-      <header className="flex items-end justify-between">
-        <h1 className="text-3xl font-bold">Träning</h1>
-        <Button className="h-12 rounded-full px-5" onClick={() => setCreating(true)}><Plus /> Nytt pass</Button>
+      <header className="flex items-end justify-between pt-4 pb-2">
+        <div>
+          <p className="label-xs telemetry">{prettyDate(today)}</p>
+          <h1 className="mt-2 text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em]">Träning</h1>
+        </div>
+        <Button className="h-11 rounded-md px-4" onClick={() => setCreating(true)}><Plus /> Nytt pass</Button>
       </header>
 
-      <section className="card-soft p-4" aria-label="Veckan">
+      <section className="panel p-4" aria-label="Veckan">
         <div className="mb-2 flex items-center justify-between">
-          <button className="rounded-full p-2 hover:bg-secondary" aria-label="Föregående vecka" onClick={() => setWeekOffset((o) => o - 1)}><ChevronLeft className="h-5 w-5" /></button>
-          <button className="flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium capitalize hover:bg-secondary" onClick={() => setMonthOpen(true)}>
+          <button className="rounded-md p-2 text-muted-foreground hover:bg-secondary" aria-label="Föregående vecka" onClick={() => setWeekOffset((o) => o - 1)}><ChevronLeft className="h-5 w-5" /></button>
+          <button className="label-xs telemetry flex items-center gap-2 rounded-md px-3 py-1 hover:bg-secondary" onClick={() => setMonthOpen(true)}>
             <CalendarDays className="h-4 w-4" />
             {new Date(monday + "T12:00:00").toLocaleDateString("sv-SE", { month: "long", year: "numeric" })}
           </button>
-          <button className="rounded-full p-2 hover:bg-secondary" aria-label="Nästa vecka" onClick={() => setWeekOffset((o) => o + 1)}><ChevronRight className="h-5 w-5" /></button>
+          <button className="rounded-md p-2 text-muted-foreground hover:bg-secondary" aria-label="Nästa vecka" onClick={() => setWeekOffset((o) => o + 1)}><ChevronRight className="h-5 w-5" /></button>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center">
           {week.map((d, i) => {
@@ -124,10 +127,10 @@ function Training() {
             const w = ws.find((x) => x.status === "klart") ?? ws[0];
             const sel = picked === d;
             return (
-              <button key={d} onClick={() => setPicked(sel ? null : d)} aria-pressed={sel} className={`rounded-2xl py-2 ${sel ? "bg-primary text-primary-foreground" : d === today ? "bg-secondary" : ""}`}>
-                <p className={`text-xs ${sel ? "" : "text-muted-foreground"}`}>{WEEKDAYS[i]}</p>
-                <p className="font-semibold">{Number(d.slice(8))}</p>
-                <div className={`mx-auto mt-1 h-2.5 w-2.5 rounded-full ${w ? (w.status === "klart" ? (sel ? "bg-primary-foreground" : "bg-primary") : "bg-coral") : "bg-muted"}`} aria-label={w ? `${KIND_LABEL[w.kind]}, ${w.status}` : "Inget pass"} />
+              <button key={d} onClick={() => setPicked(sel ? null : d)} aria-pressed={sel} className={`rounded-md border py-2 transition-colors ${sel ? "border-primary bg-primary/10" : d === today ? "border-border bg-secondary" : "border-transparent"}`}>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{WEEKDAYS[i]}</p>
+                <p className={`telemetry font-semibold ${sel ? "text-primary" : ""}`}>{Number(d.slice(8))}</p>
+                <div className={`mx-auto mt-1.5 h-0.5 w-4 ${w ? (w.status === "klart" ? "bg-primary glow-primary" : "bg-muted-foreground") : "bg-border"}`} aria-label={w ? `${KIND_LABEL[w.kind]}, ${w.status}` : "Inget pass"} />
               </button>
             );
           })}
@@ -141,10 +144,10 @@ function Training() {
               {ws.length === 0 ? <p className="text-sm text-muted-foreground">Inget pass den här dagen.</p> : ws.map((w) => {
                 const sets = w.exercises.reduce((n, e) => n + (e.log ? e.log.filter((l) => l.done).length : e.done ? (e.sets ?? 0) : 0), 0);
                 return (
-                  <button key={w.id} onClick={() => setActiveId(w.id)} className="flex w-full items-center justify-between rounded-2xl bg-secondary p-3 text-left">
+                  <button key={w.id} onClick={() => setActiveId(w.id)} className="flex w-full items-center justify-between rounded-md border border-border p-3 text-left hover:bg-secondary">
                     <div>
                       <p className="font-semibold">{w.title}</p>
-                      <p className="text-xs text-muted-foreground">{KIND_LABEL[w.kind]} · {w.durationMin} min · {w.exercises.length} moment{w.status === "klart" ? ` · ${sets} set klara` : ""}</p>
+                      <p className="telemetry text-[11px] uppercase tracking-wider text-muted-foreground">{KIND_LABEL[w.kind]} · {w.durationMin} min · {w.exercises.length} moment{w.status === "klart" ? ` · ${sets} set klara` : ""}</p>
                     </div>
                     <span className={`text-xs font-medium ${w.status === "klart" ? "text-primary" : "text-muted-foreground"}`}>{w.status === "klart" ? "Klart" : "Planerat"}</span>
                   </button>
@@ -181,29 +184,29 @@ function Training() {
 
       <ProGate title="Muskelkarta"><MuscleMap workouts={s.workouts} today={today} /></ProGate>
 
-      <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setBrowsing(true)}><Dumbbell /> Övningsbank</Button>
+      <Button variant="outline" className="h-12 w-full rounded-md" onClick={() => setBrowsing(true)}><Dumbbell /> Övningsbank</Button>
       <ExercisePicker open={browsing} onOpenChange={setBrowsing} onPick={(ex) => toast(`${ex.name} – lägg till den när du startar ett pass`)} />
 
       <RecoveryMeals profile={p} workout={[...s.workouts].reverse().find((w) => w.date === today && w.status === "klart" && w.kind !== "vila")} date={today} />
-      <h2 className="text-lg font-semibold">Kommande pass</h2>
+      <h2 className="label-xs pt-2">Kommande pass</h2>
       {upcoming.length === 0 ? (
-        <div className="card-soft p-6 text-center text-muted-foreground">Inga planerade pass. Skapa ett när det passar dig.</div>
+        <div className="panel p-6 text-center text-sm text-muted-foreground">Inga planerade pass. Skapa ett när det passar dig.</div>
       ) : (
         <ul className="space-y-3">
           {upcoming.map((w) => (
-            <li key={w.id} className="card-soft p-5">
+            <li key={w.id} className="panel p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm capitalize text-muted-foreground">{w.date === today ? "Idag" : prettyDate(w.date)}</p>
-                  <h3 className="text-xl font-semibold">{w.title}</h3>
-                  <p className="text-sm text-muted-foreground">{KIND_LABEL[w.kind]} · {w.durationMin} min · {w.exercises.length} moment</p>
+                  <p className="label-xs telemetry">{w.date === today ? "Idag" : prettyDate(w.date)}</p>
+                  <h3 className="mt-1 text-xl font-semibold tracking-[-0.02em]">{w.title}</h3>
+                  <p className="telemetry mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">{KIND_LABEL[w.kind]} · {w.durationMin} min · {w.exercises.length} moment</p>
                 </div>
-                {w.status === "klart" && <span className="rounded-full bg-secondary px-3 py-1 text-sm font-medium text-primary">Klart</span>}
+                {w.status === "klart" && <span className="label-xs rounded-sm border border-primary/40 px-2 py-1 text-primary">Klart</span>}
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button className="h-11 rounded-full" onClick={() => setActiveId(w.id)}><Play /> {w.status === "klart" ? "Visa" : "Starta"}</Button>
-                <Button variant="outline" className="h-11 rounded-full" onClick={() => setMoving(w)}><CalendarDays /> Flytta</Button>
-                {w.status !== "klart" && <Button variant="outline" className="h-11 rounded-full" onClick={() => swap(w)}><RefreshCw /> Byt pass</Button>}
+                <Button className="h-10 rounded-md" onClick={() => setActiveId(w.id)}><Play /> {w.status === "klart" ? "Visa" : "Starta"}</Button>
+                <Button variant="outline" className="h-10 rounded-md" onClick={() => setMoving(w)}><CalendarDays /> Flytta</Button>
+                {w.status !== "klart" && <Button variant="outline" className="h-10 rounded-md" onClick={() => swap(w)}><RefreshCw /> Byt pass</Button>}
               </div>
             </li>
           ))}
@@ -352,17 +355,17 @@ function RestTimer({ seconds, trigger = 0, onChange }: { seconds: number; trigge
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <button type="button" aria-label="Minska vila 15 sekunder" className="h-9 rounded-full border border-border px-3 text-sm font-semibold tabular-nums" onClick={() => adjust(-REST_STEP)}>−15s</button>
+        <button type="button" aria-label="Minska vila 15 sekunder" className="telemetry h-9 rounded-md border border-border px-3 text-sm font-semibold" onClick={() => adjust(-REST_STEP)}>−15s</button>
         {left === null ? (
-          <Button variant="outline" size="sm" className="h-9 flex-1 rounded-full tabular-nums" onClick={() => start()} disabled={seconds <= 0}><Timer className="h-4 w-4" /> {seconds > 0 ? `Vila ${fmt(seconds)}` : "Ingen vila"}</Button>
+          <Button variant="outline" size="sm" className="telemetry h-9 flex-1 rounded-md" onClick={() => start()} disabled={seconds <= 0}><Timer className="h-4 w-4" /> {seconds > 0 ? `Vila ${fmt(seconds)}` : "Ingen vila"}</Button>
         ) : (
-          <span className="flex h-9 flex-1 items-center justify-center gap-2 rounded-full bg-secondary px-3 text-sm font-semibold text-primary tabular-nums" role="timer" aria-label="Vilotimer">
+          <span className="flex h-9 flex-1 items-center justify-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 text-sm font-semibold text-primary telemetry" role="timer" aria-label="Vilotimer">
             <Timer className="h-4 w-4" aria-hidden /> {Math.floor(left / 60)}:{String(left % 60).padStart(2, "0")}
             <button className="text-xs underline" onClick={() => { stop(); setLeft(null); }}>Hoppa över</button>
           </span>
         )}
-        <button type="button" aria-label="Öka vila 15 sekunder" className="h-9 rounded-full border border-border px-3 text-sm font-semibold tabular-nums" onClick={() => adjust(REST_STEP)}>+15s</button>
-        <button type="button" aria-label="Välj vilotid" aria-expanded={menu} className="grid h-9 w-9 place-items-center rounded-full border border-border" onClick={() => setMenu((m) => !m)}><Clock className="h-4 w-4" /></button>
+        <button type="button" aria-label="Öka vila 15 sekunder" className="telemetry h-9 rounded-md border border-border px-3 text-sm font-semibold" onClick={() => adjust(REST_STEP)}>+15s</button>
+        <button type="button" aria-label="Välj vilotid" aria-expanded={menu} className="grid h-9 w-9 place-items-center rounded-md border border-border" onClick={() => setMenu((m) => !m)}><Clock className="h-4 w-4" /></button>
       </div>
       {menu && (
         <div className="flex flex-wrap gap-2">
@@ -422,14 +425,17 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
   return (
     <div className="space-y-5">
       {w.status !== "klart" && w.exercises.length > 0 && <ProGate title="Röstloggning"><VoiceLog onCommand={voice} /></ProGate>}
-      <button onClick={onBack} className="flex min-h-11 items-center gap-2 font-medium text-primary"><ArrowLeft className="h-5 w-5" /> Alla pass</button>
-      <header className="bg-hero rounded-3xl p-6 text-hero-foreground">
-        <p className="text-sm opacity-80">{KIND_LABEL[w.kind]}</p>
-        <h1 className="text-3xl font-bold">{w.title}</h1>
-        <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-primary-foreground/20">
-          <div className="h-full rounded-full bg-coral transition-all" style={{ width: `${(done / w.exercises.length) * 100}%` }} />
+      <button onClick={onBack} className="label-xs flex min-h-11 items-center gap-2 text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Alla pass</button>
+      <header className="panel p-5">
+        <p className="label-xs telemetry">{KIND_LABEL[w.kind]} · {w.durationMin} min</p>
+        <h1 className="mt-2 text-[1.75rem] font-semibold leading-[1.1] tracking-[-0.03em]">{w.title}</h1>
+        <div className="mt-4 flex items-baseline justify-between">
+          <p className="telemetry text-3xl font-semibold">{done}<span className="text-base font-normal text-muted-foreground">/{w.exercises.length}</span></p>
+          <p className="label-xs">Övningar klara</p>
         </div>
-        <p className="mt-2 text-sm">{done} av {w.exercises.length} klara</p>
+        <div className="mt-3 h-px w-full bg-border">
+          <div className="h-px bg-primary glow-primary transition-all" style={{ width: `${w.exercises.length ? (done / w.exercises.length) * 100 : 0}%` }} />
+        </div>
       </header>
       <ul className="space-y-3">
         {w.exercises.map((e, i) => {
@@ -439,14 +445,14 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
           const labels = setLabels(rows);
           const timed = !e.reps && !!e.timeSec;
           return (
-          <li key={i} className="card-soft p-4">
+          <li key={i} className="panel p-4">
             <button onClick={() => toggle(i)} aria-pressed={e.done} className="flex min-h-12 w-full items-center gap-4 text-left">
-              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 ${e.done ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>
+              <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-md border ${e.done ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>
                 {e.done && <Check className="h-5 w-5" />}
               </span>
               <span className="flex-1">
                 <span className={`block font-semibold ${e.done ? "line-through opacity-60" : ""}`}>{e.name}</span>
-                <span className="text-sm text-muted-foreground">
+                <span className="telemetry text-[11px] uppercase tracking-wider text-muted-foreground">
                   {prev ? `Förra passet ${prev} kg` : null}
                   {e.restSec ? <>{prev ? " · " : ""}<Clock className="inline h-3.5 w-3.5" aria-hidden /> vila {fmt(e.restSec)}</> : null}
                 </span>
@@ -456,10 +462,10 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
               <button onClick={() => setDemo(e.name)} className="mt-1 flex min-h-10 items-center gap-1.5 text-sm font-medium text-primary"><Info className="h-4 w-4" /> Se hur övningen går till</button>
             )}
             <div className="mt-3 flex items-center justify-between">
-              <span className="text-sm font-medium">Antal set</span>
+              <span className="label-xs">Antal set</span>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" className="h-10 w-10 rounded-full" aria-label="Ta bort set" disabled={rows.length <= 1} onClick={() => patchEx(i, (x) => changeSetCount(x, -1))}><Minus className="h-4 w-4" /></Button>
-                <span className="w-6 text-center text-lg font-bold" aria-live="polite">{rows.length}</span>
+                <span className="telemetry w-6 text-center text-lg font-semibold" aria-live="polite">{rows.length}</span>
                 <Button variant="outline" size="icon" className="h-10 w-10 rounded-full" aria-label="Lägg till set" onClick={() => patchEx(i, (x) => changeSetCount(x, 1))}><Plus className="h-4 w-4" /></Button>
               </div>
             </div>
@@ -473,19 +479,19 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
                   <button
                     aria-label={`Set ${s + 1}: ${SET_TYPE_NAME[r.type ?? "normal"]}. Tryck för att byta typ`}
                     onClick={() => patchEx(i, (x) => withRows(x, setRows(x).map((q, k) => (k === s ? { ...q, type: nextSetType(q.type) } : q))))}
-                    className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-bold transition-colors ${SET_TYPE_CLASS[r.type ?? "normal"]}`}
+                    className={`telemetry grid h-8 w-8 shrink-0 place-items-center rounded-md text-sm font-semibold transition-colors ${SET_TYPE_CLASS[r.type ?? "normal"]}`}
                   >{labels[s]}</button>
-                  <Input aria-label={`${timed ? "Sekunder" : "Reps"} set ${s + 1}`} type="number" inputMode="numeric" min={0} className="h-10 w-16 px-2 text-center" value={(timed ? r.timeSec : r.reps) ?? ""} onChange={(ev) => setRow(i, s, timed ? "timeSec" : "reps", ev.target.value)} />
+                  <Input aria-label={`${timed ? "Sekunder" : "Reps"} set ${s + 1}`} type="number" inputMode="numeric" min={0} className="telemetry h-10 w-16 rounded-md px-2 text-center" value={(timed ? r.timeSec : r.reps) ?? ""} onChange={(ev) => setRow(i, s, timed ? "timeSec" : "reps", ev.target.value)} />
                   <span className="text-xs text-muted-foreground">{timed ? "sek" : "reps"}</span>
                   {!timed && (
                     <>
-                      <button aria-label={`Minska vikt set ${s + 1}`} onClick={() => setRow(i, s, "kg", String(Math.max(0, (r.kg ?? 0) - 2.5)))} className="grid h-10 w-7 place-items-center rounded-full border border-border text-lg leading-none">−</button>
-                      <DecimalInput aria-label={`Vikt set ${s + 1}, kg`} placeholder="–" className="h-10 w-14 px-1 text-center" value={r.kg} onValue={(n) => setRow(i, s, "kg", n === undefined ? "" : String(n))} />
-                      <button aria-label={`Öka vikt set ${s + 1}`} onClick={() => setRow(i, s, "kg", String((r.kg ?? 0) + 2.5))} className="grid h-10 w-7 place-items-center rounded-full border border-border text-lg leading-none">+</button>
+                      <button aria-label={`Minska vikt set ${s + 1}`} onClick={() => setRow(i, s, "kg", String(Math.max(0, (r.kg ?? 0) - 2.5)))} className="grid h-10 w-7 place-items-center rounded-md border border-border text-lg leading-none">−</button>
+                      <DecimalInput aria-label={`Vikt set ${s + 1}, kg`} placeholder="–" className="telemetry h-10 w-14 rounded-md px-1 text-center" value={r.kg} onValue={(n) => setRow(i, s, "kg", n === undefined ? "" : String(n))} />
+                      <button aria-label={`Öka vikt set ${s + 1}`} onClick={() => setRow(i, s, "kg", String((r.kg ?? 0) + 2.5))} className="grid h-10 w-7 place-items-center rounded-md border border-border text-lg leading-none">+</button>
                       <span className="text-xs leading-tight text-muted-foreground">{isDumbbell(e.name) ? <>kg/hantel{r.kg ? <><br />= {totalLoadKg(e.name, r.kg)} kg</> : null}</> : "kg"}</span>
                     </>
                   )}
-                  <button aria-label={`Set ${s + 1} klart`} aria-pressed={r.done} onClick={() => toggleSet(i, s)} className={`ml-auto grid h-10 w-10 place-items-center rounded-full border-2 ${r.done ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}><Check className="h-4 w-4" /></button>
+                  <button aria-label={`Set ${s + 1} klart`} aria-pressed={r.done} onClick={() => toggleSet(i, s)} className={`ml-auto grid h-10 w-10 place-items-center rounded-md border ${r.done ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}><Check className="h-4 w-4" /></button>
                   <button aria-label={`Ta bort set ${s + 1}`} disabled={rows.length <= 1} onClick={() => patchEx(i, (x) => withRows(x, setRows(x).filter((_, k) => k !== s)))} className="grid h-10 w-8 place-items-center text-muted-foreground disabled:opacity-30"><X className="h-4 w-4" /></button>
                 </div>
                 </li>
@@ -497,8 +503,8 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
           );
         })}
       </ul>
-      <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setPicking(true)}><Plus /> Lägg till övning</Button>
-      <Button variant="ghost" className="h-11 w-full rounded-full" disabled={!w.exercises.length} onClick={saveTemplate}><Bookmark /> Spara som mall</Button>
+      <Button variant="outline" className="h-12 w-full rounded-md" onClick={() => setPicking(true)}><Plus /> Lägg till övning</Button>
+      <Button variant="ghost" className="h-11 w-full rounded-md" disabled={!w.exercises.length} onClick={saveTemplate}><Bookmark /> Spara som mall</Button>
       <Dialog open={!!demoEx} onOpenChange={(o) => !o && setDemo(null)}>
         <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl">
           {demoEx && (
@@ -520,17 +526,17 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
         }));
         toast.success(`${ex.name} tillagd i passet`);
       }} />
-      <section className="card-soft space-y-3 p-5">
-        <p className="text-sm font-medium">Hur länge tränade du?</p>
+      <section className="panel space-y-3 p-5">
+        <p className="label-xs">Hur länge tränade du?</p>
         <MinutesInput value={w.durationMin} onChange={(m) => onPatch((x) => ({ ...x, durationMin: m }))} />
-        <h2 className="text-lg font-semibold">Hur kändes det?</h2>
+        <h2 className="label-xs pt-2">Hur kändes det?</h2>
         <div className="flex flex-wrap gap-2">
           {["Tungt", "Utmanande", "Lagom", "Bra", "Superbra"].map((l, i) => (
             <button key={l} className="chip" aria-pressed={feeling === i + 1} onClick={() => setFeeling(i + 1)}>{l}</button>
           ))}
         </div>
-        <Textarea className="rounded-2xl" placeholder="Anteckning (valfritt)" value={note} onChange={(e) => setNote(e.target.value)} aria-label="Anteckning" />
-        <Button className="h-12 w-full rounded-full" onClick={finish}>{w.status === "klart" ? "Spara ändringar" : "Avsluta och logga pass"}</Button>
+        <Textarea className="rounded-md" placeholder="Anteckning (valfritt)" value={note} onChange={(e) => setNote(e.target.value)} aria-label="Anteckning" />
+        <Button className="h-12 w-full rounded-md" onClick={finish}>{w.status === "klart" ? "Spara ändringar" : "Avsluta och logga pass"}</Button>
       </section>
     </div>
   );
