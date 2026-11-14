@@ -49,77 +49,77 @@ function Progress() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-3xl font-bold">Framsteg</h1>
-        <p className="text-muted-foreground">Senaste 7 dagarna. Kontinuitet slår perfektion.</p>
+      <header className="pt-2">
+        <p className="label-xs telemetry">Veckoöversikt · 7 dagar</p>
+        <h1 className="mt-2 text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em]">Framsteg</h1>
       </header>
 
-      <section className="bg-hero rounded-3xl p-6 text-hero-foreground">
-        <p className="text-sm opacity-80">Aktiva dagar i rad</p>
-        <p className="font-display text-5xl font-bold">{streak}</p>
-        <p className="mt-1 text-sm">{streak >= 3 ? "Du bygger en fin rutin." : "Varje dag är en ny chans – inga krav."}{restDays ? ` ${restDays} vilodag${restDays > 1 ? "ar" : ""} ingår – vila är också framsteg.` : ""}</p>
+      <section className="panel p-5" aria-label="Aktiva dagar i rad">
+        <p className="label-xs">Aktiva dagar i rad</p>
+        <p className="telemetry mt-2 text-6xl font-semibold leading-none tracking-[-0.04em]">{streak}<span className="ml-2 text-base font-normal text-muted-foreground">{streak === 1 ? "dag" : "dagar"}</span></p>
+        <div className="mt-4 h-px w-full bg-border"><div className="glow-primary h-px bg-primary" style={{ width: `${Math.min(100, (streak / 7) * 100)}%` }} /></div>
+        <p className="mt-3 text-sm text-muted-foreground">{streak >= 3 ? "Rutinen sitter." : "Varje dag är en ny start."}{restDays ? ` ${restDays} vilodag${restDays > 1 ? "ar" : ""} ingår – vila räknas.` : ""}</p>
+      </section>
+
+      <section className="panel grid grid-cols-4 divide-x divide-border">
+        <Box label="Pass" value={planned.length ? `${workoutsDone.length}/${planned.length}` : `${workoutsDone.length}`} />
+        <Box label="Matlogg" value={`${mealDays}/7`} />
+        <Box label="Vatten" value={waterAvg.toFixed(1)} unit="glas" />
+        <Box label="Sömn" value={sleepAvg ? sleepAvg.toFixed(1) : "–"} unit={sleepAvg ? "h" : undefined} />
       </section>
 
       <SundayReport workouts={s.workouts} days={days} restDays={restDays} streak={streak} waterAvg={waterAvg} mealDays={mealDays} />
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Box label="Genomförda pass" value={planned.length ? `${workoutsDone.length}/${planned.length}` : `${workoutsDone.length}`} />
-        <Box label="Dagar med matlogg" value={`${mealDays}/7`} />
-        <Box label="Vatten snitt" value={`${waterAvg.toFixed(1)} glas`} />
-        <Box label="Sömn snitt" value={sleepAvg ? `${sleepAvg.toFixed(1)} h` : "–"} />
-      </section>
-
-      <DailyHabits date={today} />
       <StrengthProgress workouts={s.workouts} />
 
-      <section className="card-soft p-5">
-        <h2 className="text-lg font-semibold">Måltider per dag</h2>
-        <div className="mt-4 flex h-40 items-end gap-2" role="img" aria-label="Stapeldiagram över loggade måltider per dag">
+      <section className="panel p-5">
+        <div className="flex items-baseline justify-between">
+          <h2 className="label-xs">Veckomatris</h2>
+          <p className="label-xs flex gap-3"><span className="flex items-center gap-1.5"><span className="h-2 w-2 bg-foreground/70" /> Måltider</span><span className="flex items-center gap-1.5"><span className="h-2 w-2 bg-primary" /> Pass</span></p>
+        </div>
+        <div className="mt-5 flex h-36 items-end gap-2" role="img" aria-label="Loggade måltider och pass per dag">
           {days.map((d) => {
             const n = new Set(s.meals.filter((m) => m.date === d).map((m) => m.type)).size;
             const w = s.workouts.find((x) => x.date === d && x.status === "klart");
             return (
-              <div key={d} className="flex flex-1 flex-col items-center gap-1">
-                <div className="flex w-full flex-1 items-end">
-                  <div className="w-full rounded-t-xl bg-mint" style={{ height: `${Math.max(6, (n / maxMeals) * 100)}%` }} title={`${n} måltider`} />
+              <div key={d} className="flex flex-1 flex-col items-center gap-2">
+                <div className="flex w-full flex-1 items-end border-b border-border">
+                  <div className={`w-full ${d === today ? "bg-foreground" : "bg-foreground/40"}`} style={{ height: `${Math.max(3, (n / maxMeals) * 100)}%` }} title={`${n} måltider`} />
                 </div>
-                <div className={`h-2.5 w-2.5 rounded-full ${w ? "bg-coral" : "bg-muted"}`} title={w ? "Pass klart" : "Inget pass"} />
-                <span className="text-xs text-muted-foreground">{WEEKDAYS[weekdayIndex(d)]}</span>
+                <div className={`h-1 w-full ${w ? "glow-primary bg-primary" : "bg-border"}`} title={w ? "Pass klart" : "Inget pass"} />
+                <span className={`telemetry text-[10px] uppercase ${d === today ? "text-foreground" : "text-muted-foreground"}`}>{WEEKDAYS[weekdayIndex(d)]}</span>
               </div>
             );
           })}
         </div>
-        <p className="mt-3 flex gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-mint" /> Måltider</span>
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-coral" /> Pass klart</span>
-        </p>
       </section>
 
-      <section className="card-soft p-5">
-        <h2 className="text-lg font-semibold">Genomförda pass</h2>
+      <section className="panel p-5">
+        <h2 className="label-xs">Genomförda pass</h2>
         {workoutsDone.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">Inga pass loggade den här veckan än.</p>
+          <p className="mt-3 text-sm text-muted-foreground">–</p>
         ) : (
-          <ul className="mt-2 divide-y">
+          <ul className="mt-2 divide-y divide-border">
             {workoutsDone.map((w) => (
-              <li key={w.id} className="flex justify-between py-3">
-                <span><span className="font-medium">{w.title}</span><span className="block text-sm capitalize text-muted-foreground">{prettyDate(w.date)}</span></span>
-                <span className="text-sm text-muted-foreground">{w.feeling ? ["Tungt", "Utmanande", "Lagom", "Bra", "Superbra"][w.feeling - 1] : ""}</span>
+              <li key={w.id} className="flex items-center justify-between py-3">
+                <span><span className="font-medium">{w.title}</span><span className="label-xs telemetry mt-0.5 block">{prettyDate(w.date)}</span></span>
+                <span className="label-xs">{w.feeling ? ["Tungt", "Utmanande", "Lagom", "Bra", "Superbra"][w.feeling - 1] : ""}</span>
               </li>
             ))}
           </ul>
         )}
       </section>
 
+      <DailyHabits date={today} />
     </div>
   );
 }
 
-function Box({ label, value }: { label: string; value: string }) {
+function Box({ label, value, unit }: { label: string; value: string; unit?: string }) {
   return (
-    <div className="card-soft p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xl font-bold">{value}</p>
+    <div className="px-3 py-4">
+      <p className="label-xs">{label}</p>
+      <p className="telemetry mt-1.5 text-lg font-semibold">{value}{unit && <span className="ml-0.5 text-[10px] font-normal text-muted-foreground">{unit}</span>}</p>
     </div>
   );
 }
