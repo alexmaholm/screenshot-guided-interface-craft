@@ -115,7 +115,7 @@ function Progress() {
   );
 }
 
-function Box({ label, value, unit }: { label: string; value: string; unit?: string }) {
+function Box({ label, value, unit }: { label: string; value: string; unit?: string | undefined }) {
   return (
     <div className="px-3 py-4">
       <p className="label-xs">{label}</p>
