@@ -357,15 +357,15 @@ function RestTimer({ seconds, trigger = 0, onChange }: { seconds: number; trigge
       <div className="flex items-center gap-2">
         <button type="button" aria-label="Minska vila 15 sekunder" className="telemetry h-9 rounded-md border border-border px-3 text-sm font-semibold" onClick={() => adjust(-REST_STEP)}>−15s</button>
         {left === null ? (
-          <Button variant="outline" size="sm" className="h-9 flex-1 rounded-full tabular-nums" onClick={() => start()} disabled={seconds <= 0}><Timer className="h-4 w-4" /> {seconds > 0 ? `Vila ${fmt(seconds)}` : "Ingen vila"}</Button>
+          <Button variant="outline" size="sm" className="telemetry h-9 flex-1 rounded-md" onClick={() => start()} disabled={seconds <= 0}><Timer className="h-4 w-4" /> {seconds > 0 ? `Vila ${fmt(seconds)}` : "Ingen vila"}</Button>
         ) : (
-          <span className="flex h-9 flex-1 items-center justify-center gap-2 rounded-full bg-secondary px-3 text-sm font-semibold text-primary tabular-nums" role="timer" aria-label="Vilotimer">
+          <span className="flex h-9 flex-1 items-center justify-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 text-sm font-semibold text-primary telemetry" role="timer" aria-label="Vilotimer">
             <Timer className="h-4 w-4" aria-hidden /> {Math.floor(left / 60)}:{String(left % 60).padStart(2, "0")}
             <button className="text-xs underline" onClick={() => { stop(); setLeft(null); }}>Hoppa över</button>
           </span>
         )}
-        <button type="button" aria-label="Öka vila 15 sekunder" className="h-9 rounded-full border border-border px-3 text-sm font-semibold tabular-nums" onClick={() => adjust(REST_STEP)}>+15s</button>
-        <button type="button" aria-label="Välj vilotid" aria-expanded={menu} className="grid h-9 w-9 place-items-center rounded-full border border-border" onClick={() => setMenu((m) => !m)}><Clock className="h-4 w-4" /></button>
+        <button type="button" aria-label="Öka vila 15 sekunder" className="telemetry h-9 rounded-md border border-border px-3 text-sm font-semibold" onClick={() => adjust(REST_STEP)}>+15s</button>
+        <button type="button" aria-label="Välj vilotid" aria-expanded={menu} className="grid h-9 w-9 place-items-center rounded-md border border-border" onClick={() => setMenu((m) => !m)}><Clock className="h-4 w-4" /></button>
       </div>
       {menu && (
         <div className="flex flex-wrap gap-2">
