@@ -55,26 +55,26 @@ export function SignInOptions({ onDone }: { onDone?: () => void }) {
   if (mode === "buttons") {
     return (
       <div className="space-y-3">
-        <Button className="h-12 w-full rounded-full" onClick={() => oauth("apple")}>Fortsätt med Apple</Button>
-        <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => oauth("google")}>Fortsätt med Google</Button>
-        <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setMode("signup")}>Fortsätt med e-post</Button>
+        <Button className="h-12 w-full rounded-md" onClick={() => oauth("apple")}>Fortsätt med Apple</Button>
+        <Button variant="outline" className="h-12 w-full rounded-md" onClick={() => oauth("google")}>Fortsätt med Google</Button>
+        <Button variant="outline" className="h-12 w-full rounded-md" onClick={() => setMode("signup")}>Fortsätt med e-post</Button>
       </div>
     );
   }
 
   return (
     <form onSubmit={submit} className="space-y-3 text-left">
-      <div className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1">
+      <div className="grid grid-cols-2 gap-1 rounded-md border border-border p-1">
         {(["signup", "login"] as const).map((m) => (
           <button key={m} type="button" onClick={() => setMode(m)}
-            className={`h-9 rounded-full text-sm font-medium ${mode === m ? "bg-background shadow-sm" : "text-muted-foreground"}`}>
+            className={`h-9 rounded-sm text-sm font-medium ${mode === m ? "bg-background shadow-sm" : "text-muted-foreground"}`}>
             {m === "signup" ? "Skapa konto" : "Logga in"}
           </button>
         ))}
       </div>
       <Input type="email" required autoComplete="email" placeholder="E-post" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12" />
       <Input type="password" required autoComplete={mode === "signup" ? "new-password" : "current-password"} placeholder="Lösenord (minst 6 tecken)" value={password} onChange={(e) => setPassword(e.target.value)} className="h-12" />
-      <Button type="submit" disabled={busy} className="h-12 w-full rounded-full">
+      <Button type="submit" disabled={busy} className="h-12 w-full rounded-md">
         {busy ? "Vänta…" : mode === "signup" ? "Skapa konto" : "Logga in"}
       </Button>
       <div className="flex justify-between text-sm">
@@ -106,7 +106,7 @@ export function AccountCard() {
         <p className="text-sm text-muted-foreground">
           Inloggad som <span className="font-medium text-foreground">{user.email ?? "ditt konto"}</span>. Din data säkerhetskopieras automatiskt i molnet.
         </p>
-        <Button variant="outline" className="h-11 w-full rounded-full" onClick={async () => { await supabase.auth.signOut(); toast.success("Du är utloggad"); }}>
+        <Button variant="outline" className="h-11 w-full rounded-md" onClick={async () => { await supabase.auth.signOut(); toast.success("Du är utloggad"); }}>
           Logga ut
         </Button>
       </div>
