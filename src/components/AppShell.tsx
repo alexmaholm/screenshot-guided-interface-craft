@@ -36,13 +36,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           Balans ger generell inspiration och ersätter inte vård eller individuell kostrådgivning.
         </p>
       </aside>
-      <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 md:px-8 md:pb-12">{children}</main>
+      <main className="mx-auto w-full max-w-3xl px-4 pb-[calc(9rem+env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] md:px-8 md:pb-12">{children}</main>
       <AiCoach />
       <AppTour />
       <WelcomeAccount />
       <nav
         aria-label="Huvudmeny"
-        className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/80 backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
       >
         <ul className="mx-auto grid max-w-md grid-cols-5">
           {TABS.map(({ to, label, icon: Icon }) => (
@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 to={to}
                 activeOptions={{ exact: true }}
-                className="flex min-h-16 flex-col items-center justify-center gap-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground data-[status=active]:text-foreground"
+                className="flex min-h-14 flex-col items-center justify-center gap-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground data-[status=active]:text-foreground"
               >
                 <Icon className="h-5 w-5" strokeWidth={1.5} aria-hidden />
                 {label}
@@ -75,8 +75,8 @@ export function PageLoading() {
 
 export function NeedsOnboarding() {
   return (
-    <div className="card-soft p-8 text-center">
-      <h1 className="text-2xl font-bold">Välkommen till Balans</h1>
+    <div className="panel p-8 text-center">
+      <h1 className="text-[2rem] font-semibold tracking-[-0.03em]">Välkommen till Balans</h1>
       <p className="mt-2 text-muted-foreground">Svara på några korta frågor så skapar vi din personliga start.</p>
       <Link to="/" className="mt-6 inline-flex min-h-12 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground">
         Kom igång
