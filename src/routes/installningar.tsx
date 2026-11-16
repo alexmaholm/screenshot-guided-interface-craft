@@ -44,7 +44,7 @@ function SettingsPage() {
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="card-soft space-y-4 p-5"><h2 className="font-semibold">{title}</h2>{children}</section>;
+  return <section className="space-y-2"><h2 className="label-xs px-1 text-muted-foreground">{title}</h2><div className="panel space-y-4 p-5">{children}</div></section>;
 }
 
 function Settings() {
@@ -57,15 +57,18 @@ function Settings() {
 
   return (
     <div className="space-y-5">
-      <header className="flex items-center gap-2">
-        <Link to="/profil" aria-label="Tillbaka till profil" className="flex h-12 w-12 items-center justify-center rounded-full bg-muted"><ChevronLeft className="h-5 w-5" aria-hidden /></Link>
-        <h1 className="text-3xl font-bold">Inställningar</h1>
+      <header className="space-y-3">
+        <Link to="/profil" className="-ml-1 inline-flex h-9 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="h-4 w-4" aria-hidden /> Profil</Link>
+        <div>
+          <p className="label-xs telemetry text-muted-foreground">Konto · Inställningar</p>
+          <h1 className="mt-1 text-[2rem] font-semibold tracking-[-0.03em]">Inställningar</h1>
+        </div>
       </header>
 
       <Section title="Ditt fokus">
         <div className="flex flex-wrap gap-2">
           {NUTRITION_FOCUS.map((f) => (
-            <Button key={f.value} variant="outline" className="chip" aria-pressed={focus === f.value} onClick={() => set({ nutritionFocus: f.value })}>{f.label}</Button>
+            <Button key={f.value} variant="outline" className="h-10 rounded-md aria-pressed:border-primary aria-pressed:text-primary" aria-pressed={focus === f.value} onClick={() => set({ nutritionFocus: f.value })}>{f.label}</Button>
           ))}
         </div>
       </Section>
@@ -79,8 +82,8 @@ function Settings() {
           update((st) => ({ ...st, body: [...st.body.filter((b) => b.date !== today), { date: today, weight: v }] }));
           toast.success("Vikten är sparad");
         }}>
-          <Input aria-label="Vikt i kilo" inputMode="decimal" placeholder="Kilo" className="h-12 rounded-xl" value={weight} onChange={(e) => setWeight(e.target.value)} />
-          <Button type="submit" className="h-12 rounded-full">Spara</Button>
+          <Input aria-label="Vikt i kilo" inputMode="decimal" placeholder="Kilo" className="h-11 rounded-md telemetry" value={weight} onChange={(e) => setWeight(e.target.value)} />
+          <Button type="submit" className="h-11 rounded-md">Spara</Button>
         </form>
       </Section>
 
@@ -91,11 +94,11 @@ function Settings() {
       <Section title="Träningsdagar">
         <div className="grid grid-cols-7 gap-1">
           {WEEKDAYS.map((d, i) => (
-            <button key={d} type="button" aria-pressed={p.days.includes(i)} onClick={() => set({ days: p.days.includes(i) ? p.days.filter((x) => x !== i) : [...p.days, i].sort() })} className="h-11 rounded-xl border text-sm aria-pressed:border-primary aria-pressed:bg-secondary aria-pressed:text-primary">{d}</button>
+            <button key={d} type="button" aria-pressed={p.days.includes(i)} onClick={() => set({ days: p.days.includes(i) ? p.days.filter((x) => x !== i) : [...p.days, i].sort() })} className="label-xs h-11 rounded-md border border-border text-muted-foreground aria-pressed:border-primary aria-pressed:text-primary">{d}</button>
           ))}
         </div>
         <label className="flex items-center justify-between gap-3 text-sm">Passlängd (minuter)
-          <Input type="number" min={10} max={120} className="h-11 w-24 rounded-xl" value={p.sessionMin} onChange={(e) => set({ sessionMin: Math.min(120, Math.max(10, Number(e.target.value) || 30)) })} />
+          <Input type="number" min={10} max={120} className="h-11 w-24 rounded-md telemetry text-right" value={p.sessionMin} onChange={(e) => set({ sessionMin: Math.min(120, Math.max(10, Number(e.target.value) || 30)) })} />
         </label>
       </Section>
 
@@ -104,7 +107,7 @@ function Settings() {
           <Switch checked={p.hideCalories} onCheckedChange={(v) => set({ hideCalories: v })} />
         </label>
         <label className="flex items-center justify-between gap-3 text-sm">Vattenmål (glas/dag)
-          <Input type="number" min={1} max={20} className="h-11 w-24 rounded-xl" value={p.waterGoal} onChange={(e) => set({ waterGoal: Math.min(20, Math.max(1, Number(e.target.value) || 1)) })} />
+          <Input type="number" min={1} max={20} className="h-11 w-24 rounded-md telemetry text-right" value={p.waterGoal} onChange={(e) => set({ waterGoal: Math.min(20, Math.max(1, Number(e.target.value) || 1)) })} />
         </label>
       </Section>
 
@@ -136,7 +139,7 @@ function Settings() {
         </div>
       </Section>
 
-      <Button variant="outline" className="h-12 w-full rounded-full text-destructive" onClick={deleteEverything}>Radera konto och all data</Button>
+      <Button variant="outline" className="h-12 w-full rounded-md border-destructive/40 text-destructive" onClick={deleteEverything}>Radera konto och all data</Button>
     </div>
   );
 }
@@ -158,9 +161,9 @@ function HealthToday({ prefs }: { prefs: HealthSyncPrefs }) {
     finally { setBusy(false); }
   };
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/50 p-3 text-sm">
-      <span className="text-muted-foreground">Idag: {d?.steps ?? "–"} steg · {d?.activeKcal ?? "–"} aktiva kcal</span>
-      <Button size="sm" variant="outline" className="rounded-full" disabled={busy} onClick={sync}>{busy ? "Synkar…" : "Synka nu"}</Button>
+    <div className="flex items-center justify-between gap-3 rounded-md border border-border p-3 text-sm">
+      <span className="telemetry text-muted-foreground">Idag: {d?.steps ?? "–"} steg · {d?.activeKcal ?? "–"} aktiva kcal</span>
+      <Button size="sm" variant="outline" className="rounded-md" disabled={busy} onClick={sync}>{busy ? "Synkar…" : "Synka nu"}</Button>
     </div>
   );
 }
