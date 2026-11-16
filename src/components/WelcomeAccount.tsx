@@ -17,7 +17,7 @@ export function WelcomeAccount() {
   const open = ready && !user && !seen && !!s?.profile?.tourSeen;
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) close(); }}>
-      <DialogContent className="max-w-sm rounded-3xl p-8 text-center">
+      <DialogContent className="max-w-sm rounded-xl p-8 text-center">
         <DialogTitle className="text-2xl">Skapa ditt konto</DialogTitle>
         <DialogDescription className="text-base">Spara dina pass, måltider och svit i molnet – så följer allt med om du byter telefon.</DialogDescription>
         <SignInOptions onDone={close} />

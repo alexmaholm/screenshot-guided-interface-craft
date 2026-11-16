@@ -43,7 +43,7 @@ export function FridgeIdeas({ profile }: { profile: Profile }) {
   };
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 space-y-3">
+    <section className="rounded-lg border border-border bg-card p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Refrigerator className="h-5 w-5 text-primary" />
         <h2 className="font-semibold">Töm kylen</h2>
@@ -54,7 +54,7 @@ export function FridgeIdeas({ profile }: { profile: Profile }) {
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Ge mig förslag"}
       </Button>
       {dishes.map((d) => (
-        <div key={d.name} className="rounded-xl bg-muted/50 p-3 space-y-2">
+        <div key={d.name} className="rounded-md bg-muted/50 p-3 space-y-2">
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="font-medium">{d.name}</p>

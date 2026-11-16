@@ -52,7 +52,7 @@ export function WeekPlan(_props: { profile: Profile }) {
     <section className="card-soft space-y-3 p-5">
       <div className="flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 text-lg font-semibold"><CalendarDays className="h-5 w-5 text-primary" /> Veckoplan</h2>
-        <Button variant="secondary" size="sm" className="rounded-full" onClick={copy}><Copy /> Kopiera</Button>
+        <Button variant="secondary" size="sm" className="rounded-md" onClick={copy}><Copy /> Kopiera</Button>
       </div>
       <div className="grid grid-cols-7 gap-1">
         {dates.map((d, i) => {
@@ -60,7 +60,7 @@ export function WeekPlan(_props: { profile: Profile }) {
           const n = plan.filter((x) => x.date === d).length;
           return (
             <button key={d} onClick={() => setDay(d)} aria-pressed={d === day}
-              className={`flex min-h-16 flex-col items-center justify-center gap-0.5 rounded-2xl text-xs ${d === day ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+              className={`flex min-h-16 flex-col items-center justify-center gap-0.5 rounded-lg text-xs ${d === day ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
               <span className="font-semibold">{WEEKDAYS[i]}</span>
               {k === "träning" ? <Dumbbell className="h-3.5 w-3.5" aria-label="Träning" /> : k === "vila" ? <Leaf className="h-3.5 w-3.5" aria-label="Vila" /> : <span className="h-3.5" />}
               <span>{n || ""}</span>
@@ -71,17 +71,17 @@ export function WeekPlan(_props: { profile: Profile }) {
       <p className="text-sm text-muted-foreground">{DAY_HINT[kind]}</p>
       <ul className="space-y-2">
         {MEAL_TYPES.map((t) => (
-          <li key={t} className="rounded-2xl bg-muted p-3">
+          <li key={t} className="rounded-lg bg-muted p-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold">{MEAL_LABEL[t]}</span>
-              <button onClick={() => open(t)} className="flex h-9 w-9 items-center justify-center rounded-full bg-card" aria-label={`Planera ${MEAL_LABEL[t]}`}><Plus className="h-4 w-4" /></button>
+              <button onClick={() => open(t)} className="flex h-9 w-9 items-center justify-center rounded-md bg-card" aria-label={`Planera ${MEAL_LABEL[t]}`}><Plus className="h-4 w-4" /></button>
             </div>
             {plan.filter((x) => x.date === day && x.type === t).map((pm) => (
               <div key={pm.id} className="mt-2 flex items-center justify-between gap-2 text-sm">
                 <span>{pm.name}{pm.kcal != null && <span className="text-muted-foreground"> · {pm.kcal} kcal</span>}</span>
                 <span className="flex gap-1">
-                  {day === today && <button onClick={() => eat(pm.id)} className="flex h-9 items-center gap-1 rounded-full bg-primary px-3 text-xs text-primary-foreground"><Check className="h-3.5 w-3.5" /> Ät idag</button>}
-                  <button onClick={() => remove(pm.id)} className="flex h-9 w-9 items-center justify-center rounded-full" aria-label="Ta bort"><Trash2 className="h-4 w-4" /></button>
+                  {day === today && <button onClick={() => eat(pm.id)} className="flex h-9 items-center gap-1 rounded-md bg-primary px-3 text-xs text-primary-foreground"><Check className="h-3.5 w-3.5" /> Ät idag</button>}
+                  <button onClick={() => remove(pm.id)} className="flex h-9 w-9 items-center justify-center rounded-md" aria-label="Ta bort"><Trash2 className="h-4 w-4" /></button>
                 </span>
               </div>
             ))}
@@ -98,7 +98,7 @@ export function WeekPlan(_props: { profile: Profile }) {
               <Input inputMode="decimal" value={kcal} onChange={(e) => setKcal(e.target.value)} placeholder="kcal (valfritt)" />
               <Input inputMode="decimal" value={protein} onChange={(e) => setProtein(e.target.value)} placeholder="Protein g (valfritt)" />
             </div>
-            <Button type="submit" className="w-full rounded-full" disabled={!name.trim()}>Lägg till</Button>
+            <Button type="submit" className="w-full rounded-md" disabled={!name.trim()}>Lägg till</Button>
           </form>
         </DialogContent>
       </Dialog>

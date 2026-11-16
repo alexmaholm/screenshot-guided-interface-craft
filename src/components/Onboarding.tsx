@@ -52,7 +52,7 @@ export function Onboarding() {
           </Button>
         ) : (
           <div className="flex items-center gap-2 font-display text-xl font-bold text-primary">
-            <Leaf className="h-5 w-5 text-coral" aria-hidden /> Balans
+            <Leaf className="h-5 w-5 text-primary" aria-hidden /> Balans
           </div>
         )}
         <span className="text-sm text-muted-foreground">
@@ -69,7 +69,7 @@ export function Onboarding() {
             <h1 className="text-4xl font-bold">Hej! Vad vill du att vi kallar dig?</h1>
             <p className="mt-3 text-muted-foreground">Balans hjälper dig planera mat, träning och vila – i din takt.</p>
             <label className="mt-8 block text-sm font-medium" htmlFor="name">Förnamn eller smeknamn</label>
-            <Input id="name" className="mt-2 h-14 rounded-2xl text-lg" value={p.name} onChange={(e) => set({ name: e.target.value })} placeholder="T.ex. Alex" />
+            <Input id="name" className="mt-2 h-14 rounded-lg text-lg" value={p.name} onChange={(e) => set({ name: e.target.value })} placeholder="T.ex. Alex" />
           </section>
         )}
         {step === 1 && (
@@ -77,7 +77,7 @@ export function Onboarding() {
             <h1 className="text-3xl font-bold">Vad vill du främst uppnå?</h1>
             <div className="mt-6 grid gap-3">
               {GOALS.map((g) => (
-                <button key={g.v} aria-pressed={p.goal === g.v} onClick={() => set({ goal: g.v })} className="chip justify-between rounded-2xl! px-5! py-4! text-left">
+                <button key={g.v} aria-pressed={p.goal === g.v} onClick={() => set({ goal: g.v })} className="chip justify-between rounded-lg! px-5! py-4! text-left">
                   <span>
                     <span className="block font-semibold">{g.l}</span>
                     <span className="block text-sm opacity-80">{g.d}</span>
@@ -85,7 +85,7 @@ export function Onboarding() {
                 </button>
               ))}
               {p.goal === "annat" && (
-                <Input className="h-12 rounded-2xl" placeholder="Beskriv ditt mål" value={p.goalOther ?? ""} onChange={(e) => set({ goalOther: e.target.value })} />
+                <Input className="h-12 rounded-lg" placeholder="Beskriv ditt mål" value={p.goalOther ?? ""} onChange={(e) => set({ goalOther: e.target.value })} />
               )}
             </div>
           </section>
@@ -96,7 +96,7 @@ export function Onboarding() {
             <p className="mt-2 text-muted-foreground">Vi anpassar passens upplägg efter det.</p>
             <div className="mt-6 grid gap-3">
               {LEVELS.map((l) => (
-                <button key={l.v} aria-pressed={p.level === l.v} onClick={() => set({ level: l.v })} className="chip rounded-2xl! py-4!">
+                <button key={l.v} aria-pressed={p.level === l.v} onClick={() => set({ level: l.v })} className="chip rounded-lg! py-4!">
                   {l.l}
                 </button>
               ))}
@@ -141,7 +141,7 @@ export function Onboarding() {
           <section>
             <h1 className="text-3xl font-bold">Hur äter du helst?</h1>
             <div className="mt-6"><DietaryPreferences profile={p} onChange={set} /></div>
-            <label className="mt-8 flex min-h-12 items-center gap-3 rounded-2xl bg-card p-4">
+            <label className="mt-8 flex min-h-12 items-center gap-3 rounded-lg bg-card p-4">
               <input type="checkbox" className="h-5 w-5 accent-[var(--primary)]" checked={p.hideCalories} onChange={(e) => set({ hideCalories: e.target.checked })} />
               <span>Dölj kalorier i appen</span>
             </label>
@@ -150,7 +150,7 @@ export function Onboarding() {
       </div>
 
       <div className="mt-8 flex flex-col gap-2">
-        <Button size="lg" className="h-14 rounded-full text-base" onClick={next}>
+        <Button size="lg" className="h-14 rounded-md text-base" onClick={next}>
           {last ? "Skapa min plan" : "Fortsätt"}
         </Button>
         {(step === 0 || step === 2 || step === 5) && (

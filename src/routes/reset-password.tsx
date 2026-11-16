@@ -38,7 +38,7 @@ function ResetPassword() {
       <h1 className="text-2xl font-semibold">Välj nytt lösenord</h1>
       <form onSubmit={save} className="space-y-3">
         <Input type="password" autoComplete="new-password" placeholder="Nytt lösenord" value={pw} onChange={(e) => setPw(e.target.value)} className="h-12" />
-        <Button type="submit" disabled={busy} className="h-12 w-full rounded-full">Spara lösenord</Button>
+        <Button type="submit" disabled={busy} className="h-12 w-full rounded-md">Spara lösenord</Button>
       </form>
     </main>
   );

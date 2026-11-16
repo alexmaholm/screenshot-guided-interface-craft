@@ -14,9 +14,9 @@ function Stepper({ label, value, onChange, step = 1, min = 1, max = 99, suffix }
     <div className="flex flex-col items-center gap-1">
       <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
       <div className="flex items-center gap-1">
-        <button type="button" aria-label={`Minska ${label}`} className="grid h-8 w-8 place-items-center rounded-full border border-border" onClick={() => set(value - step)}><Minus className="h-3.5 w-3.5" /></button>
+        <button type="button" aria-label={`Minska ${label}`} className="grid h-8 w-8 place-items-center rounded-md border border-border" onClick={() => set(value - step)}><Minus className="h-3.5 w-3.5" /></button>
         <span className="min-w-10 text-center text-sm font-semibold tabular-nums">{value}{suffix}</span>
-        <button type="button" aria-label={`Öka ${label}`} className="grid h-8 w-8 place-items-center rounded-full border border-border" onClick={() => set(value + step)}><Plus className="h-3.5 w-3.5" /></button>
+        <button type="button" aria-label={`Öka ${label}`} className="grid h-8 w-8 place-items-center rounded-md border border-border" onClick={() => set(value + step)}><Plus className="h-3.5 w-3.5" /></button>
       </div>
     </div>
   );
@@ -56,7 +56,7 @@ export function TemplateBuilder({ open, onOpenChange, initial }: { open: boolean
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-3xl">
+        <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-xl">
           <DialogHeader><DialogTitle className="font-display text-2xl">{initial?.custom ? "Redigera mall" : "Ny mall"}</DialogTitle></DialogHeader>
           <Input aria-label="Mallens namn" placeholder="T.ex. Push – tung dag" value={title} onChange={(e) => setTitle(e.target.value)} className="h-12 text-base" />
           <div className="flex flex-wrap gap-2">
@@ -85,8 +85,8 @@ export function TemplateBuilder({ open, onOpenChange, initial }: { open: boolean
               </li>
             ))}
           </ul>
-          <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setPicking(true)}><Plus /> Lägg till övning</Button>
-          <Button className="h-12 w-full rounded-full" onClick={save}>Spara mall</Button>
+          <Button variant="outline" className="h-12 w-full rounded-md" onClick={() => setPicking(true)}><Plus /> Lägg till övning</Button>
+          <Button className="h-12 w-full rounded-md" onClick={save}>Spara mall</Button>
         </DialogContent>
       </Dialog>
       <ExercisePicker open={picking} onOpenChange={setPicking} onPick={(ex) => {

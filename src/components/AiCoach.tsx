@@ -83,8 +83,8 @@ export function AiCoach() {
             )}
             {chat.map((m, i) => (
               <div key={i} className="space-y-2">
-                <p className="ml-8 rounded-2xl bg-secondary px-3 py-2 text-sm">{m.q}</p>
-                <div className={`mr-8 space-y-2 rounded-2xl bg-muted px-3 py-2 text-sm leading-relaxed ${m.error ? "text-muted-foreground" : ""}`}>
+                <p className="ml-8 rounded-lg bg-secondary px-3 py-2 text-sm">{m.q}</p>
+                <div className={`mr-8 space-y-2 rounded-lg bg-muted px-3 py-2 text-sm leading-relaxed ${m.error ? "text-muted-foreground" : ""}`}>
                   {m.a.split("\n").map((l) => l.trim()).filter(Boolean).map((line, j) => {
                     const bullet = /^([-*•]|\d+[.)])\s+/.test(line);
                     const text = line.replace(/^([-*•]|\d+[.)])\s+/, "").replace(/^#+\s*/, "");
