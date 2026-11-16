@@ -26,8 +26,8 @@ export function WaterTracker({ date }: { date: string }) {
           {h.water >= goal && <p className="mt-1 text-sm font-medium text-primary">Dagens mål nått – snyggt! 💧</p>}
         </div>
         <div className="flex items-center gap-2">
-          <button aria-label="Ta bort ett glas" onClick={() => set(h.water - 1)} className="grid h-11 w-11 place-items-center rounded-full bg-muted"><Minus className="h-5 w-5" /></button>
-          <button aria-label="Lägg till ett glas (250 ml)" onClick={() => set(h.water + 1)} className="grid h-12 w-12 place-items-center rounded-full bg-primary text-primary-foreground"><Plus className="h-5 w-5" /></button>
+          <button aria-label="Ta bort ett glas" onClick={() => set(h.water - 1)} className="grid h-11 w-11 place-items-center rounded-md bg-muted"><Minus className="h-5 w-5" /></button>
+          <button aria-label="Lägg till ett glas (250 ml)" onClick={() => set(h.water + 1)} className="grid h-12 w-12 place-items-center rounded-md bg-primary text-primary-foreground"><Plus className="h-5 w-5" /></button>
         </div>
       </div>
     </section>

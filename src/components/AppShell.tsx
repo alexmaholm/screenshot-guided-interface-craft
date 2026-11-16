@@ -18,7 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen md:flex">
       <aside className="hidden md:flex md:w-60 md:flex-col md:gap-2 md:border-r md:bg-card md:p-5 md:sticky md:top-0 md:h-screen">
         <div className="mb-6 flex items-center gap-2 font-display text-2xl font-bold text-primary">
-          <Leaf className="h-6 w-6 text-coral" aria-hidden /> Balans
+          <Leaf className="h-6 w-6 text-primary" aria-hidden /> Balans
         </div>
         <nav aria-label="Huvudmeny" className="flex flex-col gap-1">
           {TABS.map(({ to, label, icon: Icon }) => (
@@ -26,7 +26,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               key={to}
               to={to}
               activeOptions={{ exact: true }}
-              className="flex min-h-12 items-center gap-3 rounded-xl px-4 font-medium text-muted-foreground transition hover:bg-muted data-[status=active]:bg-secondary data-[status=active]:text-primary"
+              className="flex min-h-12 items-center gap-3 rounded-md px-4 font-medium text-muted-foreground transition hover:bg-muted data-[status=active]:bg-secondary data-[status=active]:text-primary"
             >
               <Icon className="h-5 w-5" aria-hidden /> {label}
             </Link>
@@ -66,9 +66,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 export function PageLoading() {
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Laddar">
-      <div className="h-8 w-48 animate-pulse rounded-xl bg-muted" />
-      <div className="h-40 animate-pulse rounded-3xl bg-muted" />
-      <div className="h-24 animate-pulse rounded-3xl bg-muted" />
+      <div className="h-8 w-48 animate-pulse rounded-md bg-muted" />
+      <div className="h-40 animate-pulse rounded-xl bg-muted" />
+      <div className="h-24 animate-pulse rounded-xl bg-muted" />
     </div>
   );
 }
@@ -78,7 +78,7 @@ export function NeedsOnboarding() {
     <div className="card-soft p-8 text-center">
       <h1 className="text-2xl font-bold">Välkommen till Balans</h1>
       <p className="mt-2 text-muted-foreground">Svara på några korta frågor så skapar vi din personliga start.</p>
-      <Link to="/" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-primary px-6 font-semibold text-primary-foreground">
+      <Link to="/" className="mt-6 inline-flex min-h-12 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground">
         Kom igång
       </Link>
     </div>

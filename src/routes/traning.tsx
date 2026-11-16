@@ -159,7 +159,7 @@ function Training() {
       </section>
 
       <Dialog open={monthOpen} onOpenChange={setMonthOpen}>
-        <DialogContent className="rounded-3xl">
+        <DialogContent className="rounded-xl">
           <DialogHeader><DialogTitle className="font-display text-2xl">Välj dag</DialogTitle></DialogHeader>
           <Calendar
             mode="single"
@@ -221,7 +221,7 @@ function Training() {
       }} />
 
       <Dialog open={!!moving} onOpenChange={(o) => !o && setMoving(null)}>
-        <DialogContent className="rounded-3xl">
+        <DialogContent className="rounded-xl">
           <DialogHeader><DialogTitle className="font-display text-2xl">Flytta pass</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-2">
             {Array.from({ length: 8 }, (_, i) => addDays(today, i)).map((d) => (
@@ -259,7 +259,7 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
     <>
     <TemplateBuilder open={building !== false} onOpenChange={(o) => !o && setBuilding(false)} initial={building || null} />
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-3xl">
+      <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-xl">
         <DialogHeader><DialogTitle className="font-display text-2xl">Skapa pass</DialogTitle></DialogHeader>
         <p className="text-sm font-medium">Typ</p>
         <div className="flex flex-wrap gap-2">
@@ -284,7 +284,7 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
             <p className="text-sm font-medium">Hur vill du börja?</p>
             <div className="grid grid-cols-3 gap-2">
               {([["forslag", "Förslag", "Valt åt dig"], ["mall", "Mall", "Färdigt upplägg"], ["blankt", "Blankt", "Välj själv"]] as const).map(([m, t, d]) => (
-                <button key={m} className="chip flex-col items-start rounded-2xl! py-3! text-left" aria-pressed={mode === m} onClick={() => { setMode(m); setBlank(m === "blankt"); }}>
+                <button key={m} className="chip flex-col items-start rounded-lg! py-3! text-left" aria-pressed={mode === m} onClick={() => { setMode(m); setBlank(m === "blankt"); }}>
                   <span className="font-semibold">{t}</span><span className="text-xs opacity-80">{d}</span>
                 </button>
               ))}
@@ -293,7 +293,7 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
         )}
         {kind !== "vila" && mode === "mall" ? (
           <div className="space-y-2">
-            <Button variant="outline" className="h-12 w-full rounded-full" onClick={() => setBuilding(null)}><Plus /> Skapa ny mall</Button>
+            <Button variant="outline" className="h-12 w-full rounded-md" onClick={() => setBuilding(null)}><Plus /> Skapa ny mall</Button>
             {mine.length > 0 && <p className="text-xs font-semibold uppercase text-muted-foreground">Mina mallar</p>}
             {mine.map((t) => (
               <div key={t.id} className="flex items-center gap-2">
@@ -314,7 +314,7 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
         ) : (
           <>
         <p className="text-xs text-muted-foreground">{blank ? "Du får smarta förslag efter ditt fokus när du lägger till övningar." : `Anpassas efter din nivå och utrustning: ${p.equipment.join(", ")}.`}</p>
-        <Button className="h-12 rounded-full" onClick={create}>
+        <Button className="h-12 rounded-md" onClick={create}>
           {blank && kind !== "vila" ? "Skapa och välj övningar" : "Skapa pass"}
         </Button>
           </>
@@ -464,9 +464,9 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
             <div className="mt-3 flex items-center justify-between">
               <span className="label-xs">Antal set</span>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="h-10 w-10 rounded-full" aria-label="Ta bort set" disabled={rows.length <= 1} onClick={() => patchEx(i, (x) => changeSetCount(x, -1))}><Minus className="h-4 w-4" /></Button>
+                <Button variant="outline" size="icon" className="h-10 w-10 rounded-md" aria-label="Ta bort set" disabled={rows.length <= 1} onClick={() => patchEx(i, (x) => changeSetCount(x, -1))}><Minus className="h-4 w-4" /></Button>
                 <span className="telemetry w-6 text-center text-lg font-semibold" aria-live="polite">{rows.length}</span>
-                <Button variant="outline" size="icon" className="h-10 w-10 rounded-full" aria-label="Lägg till set" onClick={() => patchEx(i, (x) => changeSetCount(x, 1))}><Plus className="h-4 w-4" /></Button>
+                <Button variant="outline" size="icon" className="h-10 w-10 rounded-md" aria-label="Lägg till set" onClick={() => patchEx(i, (x) => changeSetCount(x, 1))}><Plus className="h-4 w-4" /></Button>
               </div>
             </div>
             <ol className="mt-3 space-y-2">
@@ -506,7 +506,7 @@ function ActiveWorkout({ w, onBack, onPatch }: { w: Workout; onBack: () => void;
       <Button variant="outline" className="h-12 w-full rounded-md" onClick={() => setPicking(true)}><Plus /> Lägg till övning</Button>
       <Button variant="ghost" className="h-11 w-full rounded-md" disabled={!w.exercises.length} onClick={saveTemplate}><Bookmark /> Spara som mall</Button>
       <Dialog open={!!demoEx} onOpenChange={(o) => !o && setDemo(null)}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl">
+        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-xl">
           {demoEx && (
             <>
               <DialogHeader><DialogTitle className="font-display text-2xl">{demoEx.name}</DialogTitle></DialogHeader>
@@ -546,12 +546,12 @@ function MinutesInput({ value, onChange }: { value: number; onChange: (m: number
   const set = (n: number) => onChange(Math.max(1, Math.min(600, Math.round(n))));
   return (
     <div className="flex items-center gap-2">
-      <Button type="button" variant="outline" size="icon" className="h-11 w-11 rounded-full" aria-label="Minska tid" onClick={() => set(value - 5)}><Minus className="h-4 w-4" /></Button>
+      <Button type="button" variant="outline" size="icon" className="h-11 w-11 rounded-md" aria-label="Minska tid" onClick={() => set(value - 5)}><Minus className="h-4 w-4" /></Button>
       <Input aria-label="Tid i minuter" type="number" inputMode="numeric" min={1} max={600} className="h-11 w-20 text-center text-lg font-semibold" value={value || ""}
         onChange={(e) => { const n = Number(e.target.value); if (e.target.value === "") onChange(0); else if (Number.isFinite(n)) set(n); }}
         onBlur={() => { if (!value) set(1); }} />
       <span className="text-sm text-muted-foreground">min</span>
-      <Button type="button" variant="outline" size="icon" className="h-11 w-11 rounded-full" aria-label="Öka tid" onClick={() => set(value + 5)}><Plus className="h-4 w-4" /></Button>
+      <Button type="button" variant="outline" size="icon" className="h-11 w-11 rounded-md" aria-label="Öka tid" onClick={() => set(value + 5)}><Plus className="h-4 w-4" /></Button>
     </div>
   );
 }

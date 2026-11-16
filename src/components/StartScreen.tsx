@@ -35,7 +35,7 @@ export function StartScreen() {
         <>
           <div className="flex flex-1 flex-col justify-center">
             <div className="flex items-center gap-2 font-display text-3xl font-bold text-primary">
-              <Leaf className="h-8 w-8 text-coral" aria-hidden /> Balans
+              <Leaf className="h-8 w-8 text-primary" aria-hidden /> Balans
             </div>
             <h1 className="mt-8 text-4xl font-bold leading-tight">Mat, träning och vila – i balans.</h1>
             <p className="mt-3 text-lg text-muted-foreground">Enkelt, i din takt och utan pekpinnar.</p>
@@ -48,8 +48,8 @@ export function StartScreen() {
             </ul>
           </div>
           <div className="mt-10 flex flex-col gap-2">
-            <Button size="lg" className="h-14 rounded-full text-base" onClick={() => setView("onboarding")}>Kom igång</Button>
-            <Button variant="ghost" className="h-12 rounded-full" onClick={() => setView("login")}>Har du redan ett konto? Logga in</Button>
+            <Button size="lg" className="h-14 rounded-md text-base" onClick={() => setView("onboarding")}>Kom igång</Button>
+            <Button variant="ghost" className="h-12 rounded-md" onClick={() => setView("login")}>Har du redan ett konto? Logga in</Button>
           </div>
         </>
       )}

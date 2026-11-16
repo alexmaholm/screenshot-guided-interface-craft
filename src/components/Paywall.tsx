@@ -19,7 +19,7 @@ export function Paywall({ open, onOpenChange }: { open: boolean; onOpenChange: (
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl"><Sparkles className="h-5 w-5 text-primary" /> Balans PRO</DialogTitle>
           <DialogDescription>Prova allt gratis i {TRIAL_DAYS} dagar. Ingen bindningstid.</DialogDescription>
@@ -30,13 +30,13 @@ export function Paywall({ open, onOpenChange }: { open: boolean; onOpenChange: (
         <div className="space-y-2" role="radiogroup" aria-label="Välj period">
           {PLANS.map((p) => (
             <button key={p.id} type="button" role="radio" aria-checked={plan === p.id} onClick={() => setPlan(p.id)}
-              className="flex w-full items-center justify-between rounded-2xl border p-4 text-left aria-checked:border-primary aria-checked:bg-secondary">
+              className="flex w-full items-center justify-between rounded-lg border p-4 text-left aria-checked:border-primary aria-checked:bg-secondary">
               <span><span className="block font-semibold">{p.label}</span><span className="text-xs text-muted-foreground">{p.tag}{savingPct(p) > 0 ? ` · spara ${savingPct(p)} %` : ""}</span></span>
               <span className="text-right"><span className="block font-semibold">{p.price} kr</span>{p.months > 1 && <span className="text-xs text-muted-foreground">ca {perMonth(p)} kr/mån</span>}</span>
             </button>
           ))}
         </div>
-        <Button className="h-12 w-full rounded-full" onClick={buy}>Starta {TRIAL_DAYS} dagar gratis</Button>
+        <Button className="h-12 w-full rounded-md" onClick={buy}>Starta {TRIAL_DAYS} dagar gratis</Button>
         <p className="text-center text-xs text-muted-foreground">Avsluta när du vill. Debiteras först efter provperioden och förnyas automatiskt tills du avslutar.</p>
         <p className="text-center text-xs text-muted-foreground">
           <Link to="/villkor" className="underline" onClick={() => onOpenChange(false)}>Användarvillkor</Link> · <Link to="/integritet" className="underline" onClick={() => onOpenChange(false)}>Integritetspolicy</Link>

@@ -93,15 +93,15 @@ function Mat() {
         <div className="flex items-end justify-between gap-3">
           <h1 className="text-4xl font-semibold tracking-tight">Mat</h1>
           <div className="flex items-center gap-1">
-            <button aria-label="Föregående dag" className="grid h-10 w-10 place-items-center rounded-full border border-border hover:bg-muted" onClick={() => setDate(addDays(date, -1))}><ChevronLeft className="h-4 w-4" /></button>
-            <button aria-label="Nästa dag" className="grid h-10 w-10 place-items-center rounded-full border border-border hover:bg-muted disabled:opacity-30" disabled={isToday} onClick={() => setDate(addDays(date, 1))}><ChevronRight className="h-4 w-4" /></button>
+            <button aria-label="Föregående dag" className="grid h-10 w-10 place-items-center rounded-md border border-border hover:bg-muted" onClick={() => setDate(addDays(date, -1))}><ChevronLeft className="h-4 w-4" /></button>
+            <button aria-label="Nästa dag" className="grid h-10 w-10 place-items-center rounded-md border border-border hover:bg-muted disabled:opacity-30" disabled={isToday} onClick={() => setDate(addDays(date, 1))}><ChevronRight className="h-4 w-4" /></button>
           </div>
         </div>
       </header>
 
       <button
         onClick={() => { setType(guessType()); setOpen(true); }}
-        className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-semibold text-primary-foreground active:scale-[0.99] transition"
+        className="flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-primary text-base font-semibold text-primary-foreground active:scale-[0.99] transition"
       >
         <Plus className="h-5 w-5" /> Logga måltid
       </button>
@@ -121,7 +121,7 @@ function Mat() {
         <p className="text-xs text-muted-foreground">{NUTRITION_FOCUS.find((f) => f.value === nutritionFocusOf(p))?.label} · Vägledande uppskattning, inte medicinsk rådgivning.</p>
         <MacroSummary eaten={eaten} target={target} showKcal={showKcal} />
         {(["protein", "carbs", "fat"] as const).map((k) => { const t = macroFeedback(k, eaten[k], target[k]); return t ? <p key={k} className="text-sm text-primary">{t}</p> : null; })}
-        <details className="group rounded-2xl bg-muted px-4 py-2">
+        <details className="group rounded-lg bg-muted px-4 py-2">
           <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-sm font-medium">
             Fler näringsämnen <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
           </summary>
@@ -143,7 +143,7 @@ function Mat() {
           <section key={t} className="panel p-5">
             <div className="flex items-center justify-between">
               <h2 className="label-xs text-muted-foreground">{MEAL_LABEL[t]}</h2>
-              <button aria-label={`Lägg till ${MEAL_LABEL[t]}`} onClick={() => { setType(t); setOpen(true); }} className="grid h-11 w-11 place-items-center rounded-full border border-border text-primary hover:bg-muted">
+              <button aria-label={`Lägg till ${MEAL_LABEL[t]}`} onClick={() => { setType(t); setOpen(true); }} className="grid h-11 w-11 place-items-center rounded-md border border-border text-primary hover:bg-muted">
                 <Plus className="h-5 w-5" />
               </button>
             </div>
@@ -161,10 +161,10 @@ function Mat() {
                           {[m.amount, m.protein ? `${m.protein} g P` : "", m.carbs ? `${m.carbs} g K` : "", m.fat ? `${m.fat} g F` : "", showKcal && m.kcal ? `${m.kcal} kcal` : ""].filter(Boolean).join(" · ")}
                         </p>
                       </div>
-                      <button aria-label={fav ? "Ta bort favorit" : "Spara som favorit"} aria-pressed={fav} onClick={() => toggleFav(m)} className="grid h-11 w-11 place-items-center rounded-full hover:bg-muted">
+                      <button aria-label={fav ? "Ta bort favorit" : "Spara som favorit"} aria-pressed={fav} onClick={() => toggleFav(m)} className="grid h-11 w-11 place-items-center rounded-md hover:bg-muted">
                         <Star className={`h-5 w-5 ${fav ? "fill-coral text-coral" : ""}`} />
                       </button>
-                      <button aria-label={`Ta bort ${m.name}`} onClick={() => remove(m.id)} className="grid h-11 w-11 place-items-center rounded-full hover:bg-muted">
+                      <button aria-label={`Ta bort ${m.name}`} onClick={() => remove(m.id)} className="grid h-11 w-11 place-items-center rounded-md hover:bg-muted">
                         <Trash2 className="h-5 w-5" />
                       </button>
                     </li>
@@ -240,7 +240,7 @@ function AddMealDialog({
       <ul className="max-h-72 space-y-2 overflow-y-auto">
         {items.map((i) => (
           <li key={i.name}>
-            <button onClick={() => onAdd({ type, name: i.name, amount: i.amount, kcal: i.kcal, protein: i.protein, carbs: i.carbs, fat: i.fat })} className="flex min-h-14 w-full items-center justify-between gap-2 rounded-2xl bg-muted px-4 py-2 text-left hover:bg-secondary">
+            <button onClick={() => onAdd({ type, name: i.name, amount: i.amount, kcal: i.kcal, protein: i.protein, carbs: i.carbs, fat: i.fat })} className="flex min-h-14 w-full items-center justify-between gap-2 rounded-lg bg-muted px-4 py-2 text-left hover:bg-secondary">
               <span>
                 <span className="block font-medium">{i.name}</span>
                 <span className="text-sm text-muted-foreground">{i.amount}{showKcal && i.kcal ? ` · ${i.kcal} kcal` : ""}</span>
@@ -254,7 +254,7 @@ function AddMealDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85dvh] overflow-y-auto overscroll-contain rounded-3xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+      <DialogContent className="max-h-[85dvh] overflow-y-auto overscroll-contain rounded-xl pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <DialogHeader><DialogTitle className="text-2xl font-semibold tracking-tight">Logga måltid</DialogTitle></DialogHeader>
         <div className="grid grid-cols-4 gap-1.5">
           {MEAL_TYPES.map((t) => (
@@ -271,7 +271,7 @@ function AddMealDialog({
               ["favoriter", Star, "Favoriter", `${s.favorites.length} sparade`],
               ["tidigare", History, "Senaste", "Logga igen med ett tryck"],
             ] as const).map(([k, Icon, title, sub]) => (
-              <button key={k} onClick={() => setTab(k)} className="flex min-h-16 items-center gap-4 rounded-2xl border border-border bg-card px-4 text-left hover:bg-muted">
+              <button key={k} onClick={() => setTab(k)} className="flex min-h-16 items-center gap-4 rounded-lg border border-border bg-card px-4 text-left hover:bg-muted">
                 <Icon className="h-5 w-5 text-primary" />
                 <span className="flex-1"><span className="block font-medium">{title}</span><span className="text-xs text-muted-foreground">{sub}</span></span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -286,45 +286,45 @@ function AddMealDialog({
         {tab === "sök" && <FoodSearch showKcal={showKcal} onPick={(f) => onAdd({ type, ...f })} />}
         {tab === "egen" && (
           <form onSubmit={submit} className="space-y-3">
-            <div className="space-y-2 rounded-2xl bg-secondary/60 p-3">
+            <div className="space-y-2 rounded-lg bg-secondary/60 p-3">
               <label htmlFor="ait" className="text-sm font-medium">Beskriv måltiden</label>
-              <Textarea id="ait" rows={2} className="rounded-xl" value={aiText} onChange={(e) => setAiText(e.target.value)} placeholder="T.ex. 2 kokta ägg och en knäckemacka med ost" />
-              <Button type="button" variant="outline" className="h-11 w-full rounded-full" disabled={aiBusy || aiText.trim().length < 2} onClick={runAi}>
+              <Textarea id="ait" rows={2} className="rounded-md" value={aiText} onChange={(e) => setAiText(e.target.value)} placeholder="T.ex. 2 kokta ägg och en knäckemacka med ost" />
+              <Button type="button" variant="outline" className="h-11 w-full rounded-md" disabled={aiBusy || aiText.trim().length < 2} onClick={runAi}>
                 {aiBusy ? <Loader2 className="animate-spin" /> : <Sparkles />} Beräkna med AI
               </Button>
               {micros && <p className="text-xs text-muted-foreground">Fibrer {micros.fiber} g · Socker {micros.sugar} g · Mättat fett {micros.satFat} g · Salt {micros.salt} g</p>}
             </div>
             <div>
               <label htmlFor="mn" className="text-sm font-medium">Maträtt</label>
-              <Input id="mn" className="mt-1 h-12 rounded-xl" value={name} onChange={(e) => { setName(e.target.value); setErr(""); }} placeholder="T.ex. Pasta med pesto" aria-invalid={!!err} />
+              <Input id="mn" className="mt-1 h-12 rounded-md" value={name} onChange={(e) => { setName(e.target.value); setErr(""); }} placeholder="T.ex. Pasta med pesto" aria-invalid={!!err} />
               {err && <p className="mt-1 text-sm text-destructive">{err}</p>}
             </div>
             <div>
               <label htmlFor="ma" className="text-sm font-medium">Ungefärlig mängd</label>
-              <Input id="ma" className="mt-1 h-12 rounded-xl" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="T.ex. 1 tallrik" />
+              <Input id="ma" className="mt-1 h-12 rounded-md" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="T.ex. 1 tallrik" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="mp" className="text-sm font-medium">Protein (g, valfritt)</label>
-                <Input id="mp" inputMode="decimal" className="mt-1 h-12 rounded-xl" value={protein} onChange={(e) => setProtein(e.target.value)} />
+                <Input id="mp" inputMode="decimal" className="mt-1 h-12 rounded-md" value={protein} onChange={(e) => setProtein(e.target.value)} />
               </div>
               <div>
                 <label htmlFor="mc" className="text-sm font-medium">Kolhydrater (g, valfritt)</label>
-                <Input id="mc" inputMode="decimal" className="mt-1 h-12 rounded-xl" value={carbs} onChange={(e) => setCarbs(e.target.value)} />
+                <Input id="mc" inputMode="decimal" className="mt-1 h-12 rounded-md" value={carbs} onChange={(e) => setCarbs(e.target.value)} />
               </div>
               <div>
                 <label htmlFor="mf" className="text-sm font-medium">Fett (g, valfritt)</label>
-                <Input id="mf" inputMode="decimal" className="mt-1 h-12 rounded-xl" value={fat} onChange={(e) => setFat(e.target.value)} />
+                <Input id="mf" inputMode="decimal" className="mt-1 h-12 rounded-md" value={fat} onChange={(e) => setFat(e.target.value)} />
               </div>
               {showKcal && (
                 <div>
                   <label htmlFor="mk" className="text-sm font-medium">Kalorier (valfritt)</label>
-                  <Input id="mk" inputMode="decimal" className="mt-1 h-12 rounded-xl" value={kcal} onChange={(e) => setKcal(e.target.value)} />
+                  <Input id="mk" inputMode="decimal" className="mt-1 h-12 rounded-md" value={kcal} onChange={(e) => setKcal(e.target.value)} />
                 </div>
               )}
             </div>
             <p className="text-xs text-muted-foreground">Näringsvärden för hela mängden du loggar.</p>
-            <Button type="submit" className="h-12 w-full rounded-full">Spara måltid</Button>
+            <Button type="submit" className="h-12 w-full rounded-md">Spara måltid</Button>
           </form>
         )}
         {tab === "favoriter" && <Pick items={s.favorites} />}

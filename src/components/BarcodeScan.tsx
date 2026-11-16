@@ -85,7 +85,7 @@ export function BarcodeScan({ showKcal, onSave }: { showKcal: boolean; onSave: (
     const pick = (u: Measure) => { setUnit(u); setQty(u === "g" ? Math.round(product.servingG ?? 100) : 1); };
     return (
       <div className="space-y-4">
-        <div className="rounded-2xl bg-muted p-4">
+        <div className="rounded-lg bg-muted p-4">
           <p className="font-semibold">{product.name}</p>
           <p className="text-sm text-muted-foreground">Per 100 g: {showKcal ? `${product.kcal} kcal · ` : ""}{product.protein} g P · {product.carbs} g K · {product.fat} g F</p>
         </div>
@@ -93,37 +93,37 @@ export function BarcodeScan({ showKcal, onSave }: { showKcal: boolean; onSave: (
           {units.map((u) => <button key={u} className="chip" aria-pressed={unit === u} onClick={() => pick(u)}>{u}</button>)}
         </div>
         <div className="flex items-center justify-between gap-2">
-          <Button variant="secondary" size="icon" className="h-12 w-12 rounded-full" aria-label={`Minska ${step} ${unit}`} onClick={() => setQty((q) => Math.max(0, +(q - step).toFixed(1)))}><Minus /></Button>
+          <Button variant="secondary" size="icon" className="h-12 w-12 rounded-md" aria-label={`Minska ${step} ${unit}`} onClick={() => setQty((q) => Math.max(0, +(q - step).toFixed(1)))}><Minus /></Button>
           <label className="flex items-center gap-2">
-            <DecimalInput key={unit} className="h-12 w-24 rounded-xl text-center text-lg" value={qty} onValue={(n) => setQty(n ?? 0)} aria-label="Mängd" />
+            <DecimalInput key={unit} className="h-12 w-24 rounded-md text-center text-lg" value={qty} onValue={(n) => setQty(n ?? 0)} aria-label="Mängd" />
             <span>{unit}</span>
           </label>
-          <Button variant="secondary" size="icon" className="h-12 w-12 rounded-full" aria-label={`Öka ${step} ${unit}`} onClick={() => setQty((q) => +(q + step).toFixed(1))}><Plus /></Button>
+          <Button variant="secondary" size="icon" className="h-12 w-12 rounded-md" aria-label={`Öka ${step} ${unit}`} onClick={() => setQty((q) => +(q + step).toFixed(1))}><Plus /></Button>
         </div>
         {unit !== "g" && <p className="text-center text-xs text-muted-foreground">≈ {g} g</p>}
         <p className="text-center text-sm">{showKcal ? `${m.kcal} kcal · ` : ""}{m.protein} g protein · {m.carbs} g kolhydrater · {m.fat} g fett</p>
-        <Button className="h-12 w-full rounded-full" disabled={g <= 0} onClick={() => onSave({ name: product.name, amount: label, ...m })}>Lägg till</Button>
-        <Button variant="ghost" className="h-11 w-full rounded-full" onClick={() => setProduct(null)}>Skanna en annan</Button>
+        <Button className="h-12 w-full rounded-md" disabled={g <= 0} onClick={() => onSave({ name: product.name, amount: label, ...m })}>Lägg till</Button>
+        <Button variant="ghost" className="h-11 w-full rounded-md" onClick={() => setProduct(null)}>Skanna en annan</Button>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className={`relative overflow-hidden rounded-2xl bg-muted ${scanning ? "aspect-[4/3]" : "hidden"}`}>
+      <div className={`relative overflow-hidden rounded-lg bg-muted ${scanning ? "aspect-[4/3]" : "hidden"}`}>
         <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
-        <div className="pointer-events-none absolute inset-x-8 top-1/2 h-24 -translate-y-1/2 rounded-xl border-2 border-primary" />
+        <div className="pointer-events-none absolute inset-x-8 top-1/2 h-24 -translate-y-1/2 rounded-md border-2 border-primary" />
       </div>
       {scanning ? (
-        <Button variant="secondary" className="h-12 w-full rounded-full" onClick={stop}>Avbryt</Button>
+        <Button variant="secondary" className="h-12 w-full rounded-md" onClick={stop}>Avbryt</Button>
       ) : (
-        <Button className="h-14 w-full rounded-full" onClick={start} disabled={busy}>
+        <Button className="h-14 w-full rounded-md" onClick={start} disabled={busy}>
           {busy ? <Loader2 className="animate-spin" /> : <ScanBarcode />} Skanna streckkod
         </Button>
       )}
       <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); void find(manual); }}>
-        <Input inputMode="numeric" className="h-12 rounded-xl" placeholder="Eller skriv koden" value={manual} onChange={(e) => setManual(e.target.value.replace(/\D/g, ""))} />
-        <Button type="submit" variant="secondary" className="h-12 rounded-xl" disabled={busy}>Sök</Button>
+        <Input inputMode="numeric" className="h-12 rounded-md" placeholder="Eller skriv koden" value={manual} onChange={(e) => setManual(e.target.value.replace(/\D/g, ""))} />
+        <Button type="submit" variant="secondary" className="h-12 rounded-md" disabled={busy}>Sök</Button>
       </form>
       {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
     </div>

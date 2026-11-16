@@ -24,7 +24,7 @@ export function RecoveryMeals({ profile, workout, date }: { profile: Profile; wo
           <h2 className="text-xl font-semibold">Vad kroppen behöver nu</h2>
           <p className="mt-1 text-sm text-muted-foreground">{KIND_LABEL[workout.kind]} · {workout.durationMin} min · {workout.title}</p>
         </div>
-        <Button variant="outline" size="icon" className="h-11 w-11 shrink-0 rounded-full" aria-label="Nya förslag på källor" title="Nya förslag" onClick={() => setShuffle((n) => n + 1)}>
+        <Button variant="outline" size="icon" className="h-11 w-11 shrink-0 rounded-md" aria-label="Nya förslag på källor" title="Nya förslag" onClick={() => setShuffle((n) => n + 1)}>
           <RefreshCw className="h-5 w-5" />
         </Button>
       </div>

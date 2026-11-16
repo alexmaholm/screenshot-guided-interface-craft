@@ -45,23 +45,23 @@ export function ExercisePicker({ open, onOpenChange, onPick }: {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] flex-col overflow-y-auto rounded-3xl">
+      <DialogContent className="flex max-h-[90vh] flex-col overflow-y-auto rounded-xl">
         <DialogHeader><DialogTitle className="font-display text-2xl">Välj övning</DialogTitle></DialogHeader>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input className="h-12 rounded-2xl pl-9" placeholder="Sök bland 100+ övningar…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Sök övning" />
+          <Input className="h-12 rounded-lg pl-9" placeholder="Sök bland 100+ övningar…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Sök övning" />
         </div>
         <div className="flex gap-2">
           <button className="chip flex-1 justify-center" aria-pressed={smart} onClick={() => setSmart(true)}>Passar dig</button>
           <button className="chip flex-1 justify-center" aria-pressed={!smart} onClick={() => setSmart(false)}>Alla övningar</button>
         </div>
         {smart && (
-          <div className="space-y-2 rounded-2xl bg-secondary p-3">
+          <div className="space-y-2 rounded-lg bg-secondary p-3">
             <p className="text-sm font-semibold text-primary">Vad vill du uppnå?</p>
             <div className="flex flex-wrap gap-2">
               {FOCUSES.map((f) => <button key={f.value} className="chip" aria-pressed={p.trainingFocus === f.value} onClick={() => setFocus(f.value)}>{f.label}</button>)}
             </div>
-            <Input className="h-11 rounded-2xl bg-background" placeholder="Egna önskemål, t.ex. rygg och axlar, skonsamt för knäna" value={wishes} onChange={(e) => setWishes(e.target.value)} onBlur={saveWishes} aria-label="Egna önskemål" />
+            <Input className="h-11 rounded-lg bg-background" placeholder="Egna önskemål, t.ex. rygg och axlar, skonsamt för knäna" value={wishes} onChange={(e) => setWishes(e.target.value)} onBlur={saveWishes} aria-label="Egna önskemål" />
             <p className="text-xs text-muted-foreground">Vi väljer övningar efter ditt fokus, dina önskemål, din utrustning och vilka muskler som är utvilade.</p>
           </div>
         )}
@@ -71,7 +71,7 @@ export function ExercisePicker({ open, onOpenChange, onPick }: {
             <button key={m.value} className="chip" aria-pressed={muscle === m.value} onClick={() => setMuscle(muscle === m.value ? undefined : m.value)}>{m.label}</button>
           ))}
         </div>
-        <Button variant="outline" className="h-11 rounded-full" onClick={() => setCreating(true)}><Plus /> Skapa egen övning</Button>
+        <Button variant="outline" className="h-11 rounded-md" onClick={() => setCreating(true)}><Plus /> Skapa egen övning</Button>
         <ul className="-mx-1 space-y-2 px-1" aria-label="Övningslista">
           {results.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">Inga övningar matchar – prova ett annat sökord eller skapa en egen.</li>}
           {results.map((e) => (
@@ -89,7 +89,7 @@ export function ExercisePicker({ open, onOpenChange, onPick }: {
         </ul>
 
         <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl">
+          <DialogContent className="max-h-[90vh] overflow-y-auto rounded-xl">
             <DialogHeader><DialogTitle className="font-display text-2xl">{detail?.name}</DialogTitle></DialogHeader>
             {detail && (
               <div className="space-y-3">
@@ -100,7 +100,7 @@ export function ExercisePicker({ open, onOpenChange, onPick }: {
                     {detail.tips.length > 0 && <ul className="list-inside list-disc text-sm">{detail.tips.map((t) => <li key={t}>{t}</li>)}</ul>}
                   </>
                 ) : <TechniqueCoach ex={detail} />}
-                <Button className="h-12 w-full rounded-full" onClick={() => { onPick(detail); setDetail(null); onOpenChange(false); }}>Lägg till i passet</Button>
+                <Button className="h-12 w-full rounded-md" onClick={() => { onPick(detail); setDetail(null); onOpenChange(false); }}>Lägg till i passet</Button>
               </div>
             )}
           </DialogContent>
@@ -128,9 +128,9 @@ function CustomExerciseDialog({ open, onOpenChange }: { open: boolean; onOpenCha
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl">
+      <DialogContent className="rounded-xl">
         <DialogHeader><DialogTitle className="font-display text-2xl">Egen övning</DialogTitle></DialogHeader>
-        <Input className="h-12 rounded-2xl" placeholder="Namn, t.ex. Min favoritövning" value={name} onChange={(e) => setName(e.target.value)} aria-label="Övningens namn" />
+        <Input className="h-12 rounded-lg" placeholder="Namn, t.ex. Min favoritövning" value={name} onChange={(e) => setName(e.target.value)} aria-label="Övningens namn" />
         <p className="text-sm font-medium">Muskelgrupp</p>
         <div className="flex flex-wrap gap-2">
           {MUSCLES.map((m) => <button key={m.value} className="chip" aria-pressed={muscle === m.value} onClick={() => setMuscle(m.value)}>{m.label}</button>)}
@@ -143,8 +143,8 @@ function CustomExerciseDialog({ open, onOpenChange }: { open: boolean; onOpenCha
         <div className="flex flex-wrap gap-2">
           {(Object.keys(TRACK_LABEL) as TrackType[]).map((t) => <button key={t} className="chip" aria-pressed={track === t} onClick={() => setTrack(t)}>{TRACK_LABEL[t]}</button>)}
         </div>
-        <Input className="h-12 rounded-2xl" placeholder="Anteckning / tips (valfritt)" value={note} onChange={(e) => setNote(e.target.value)} aria-label="Anteckning" />
-        <Button className="h-12 rounded-full" onClick={save}>Spara övning</Button>
+        <Input className="h-12 rounded-lg" placeholder="Anteckning / tips (valfritt)" value={note} onChange={(e) => setNote(e.target.value)} aria-label="Anteckning" />
+        <Button className="h-12 rounded-md" onClick={save}>Spara övning</Button>
       </DialogContent>
     </Dialog>
   );

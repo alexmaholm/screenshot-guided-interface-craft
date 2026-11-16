@@ -95,7 +95,7 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
   return (
     <>
       {on && (
-        <div className="fixed bottom-40 left-4 z-40 max-w-[70vw] rounded-2xl bg-card px-4 py-2 text-sm shadow-lg" aria-live="polite">
+        <div className="fixed bottom-40 left-4 z-40 max-w-[70vw] rounded-lg bg-card px-4 py-2 text-sm shadow-lg" aria-live="polite">
           {live || <span className="text-muted-foreground">Lyssnar…</span>}
         </div>
       )}
