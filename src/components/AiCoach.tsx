@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles, Send, Loader2 } from "lucide-react";
+import { Sparkles, Send, Loader2, Check, Plus } from "lucide-react";
+import { applyAction, type CoachAction } from "@/lib/coachActions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { askCoach } from "@/lib/coach.functions";
-import { dateKey, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, useBalans, type State } from "@/lib/balans";
+import { dateKey, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, useBalans, type State, update } from "@/lib/balans";
 import { Paywall } from "@/components/Paywall";
 import { isPro } from "@/lib/tiers";
 
@@ -43,7 +44,7 @@ export function AiCoach() {
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
   const [suggest, setSuggest] = useState<string[]>(QUICK);
-  const [chat, setChat] = useState<{ q: string; a: string; error?: boolean }[]>([]);
+  const [chat, setChat] = useState<{ q: string; a: string; error?: boolean; actions?: CoachAction[]; done?: number[] }[]>([]);
   const [pay, setPay] = useState(false);
   if (!s?.profile) return null;
 
@@ -54,13 +55,18 @@ export function AiCoach() {
     try {
       const r = await ask({ data: { question, context: coachContext(s) } });
       if (r.ok && r.followUps.length) setSuggest(r.followUps);
-      setChat((c) => [...c, r.ok ? { q: question, a: r.answer } : { q: question, a: r.error, error: true }]);
+      setChat((c) => [...c, r.ok ? { q: question, a: r.answer, actions: r.actions, done: [] } : { q: question, a: r.error, error: true }]);
     } catch {
       setChat((c) => [...c, { q: question, a: "Coachen kunde inte svara just nu. Försök igen.", error: true }]);
     } finally {
       setBusy(false);
     }
   }
+
+  const confirm = (i: number, j: number, a: CoachAction) => {
+    update((st) => applyAction(st, a));
+    setChat((c) => c.map((m, k) => (k === i ? { ...m, done: [...(m.done ?? []), j] } : m)));
+  };
 
   return (
     <>
@@ -95,6 +101,23 @@ export function AiCoach() {
                       : <p key={j}>{parts}</p>;
                   })}
                 </div>
+                {m.actions?.map((a, j) => {
+                  const done = m.done?.includes(j);
+                  return (
+                    <div key={j} className="panel mr-8 flex items-center gap-3 p-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="label-xs text-muted-foreground">{a.kind === "log_meal" ? a.type : "Vatten"}</p>
+                        <p className="truncate text-sm font-medium">{a.kind === "log_meal" ? a.name : `${a.ml} ml`}</p>
+                        {a.kind === "log_meal" && (
+                          <p className="telemetry text-[11px] text-muted-foreground">{a.kcal} KCAL · P {a.protein} · K {a.carbs} · F {a.fat}</p>
+                        )}
+                      </div>
+                      <Button size="sm" variant={done ? "outline" : "default"} disabled={done} onClick={() => confirm(i, j, a)}>
+                        {done ? <><Check className="h-4 w-4" aria-hidden /> Loggad</> : <><Plus className="h-4 w-4" aria-hidden /> Logga</>}
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
             ))}
             {busy && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Coachen tänker…</p>}
