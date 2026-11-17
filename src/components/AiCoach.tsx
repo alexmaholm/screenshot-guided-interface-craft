@@ -67,13 +67,13 @@ export function AiCoach() {
       <button
         onClick={() => (isPro(s) ? setOpen(true) : setPay(true))}
         aria-label="Öppna AI-coach"
-        className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg md:bottom-6"
+        className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-11 items-center gap-2 rounded-lg border border-border bg-background/85 px-3.5 text-foreground backdrop-blur-xl transition-colors active:bg-muted md:bottom-6"
       >
-        <Sparkles className="h-6 w-6" aria-hidden />
+        <Sparkles className="h-4 w-4 text-primary" strokeWidth={1.5} aria-hidden /><span className="label-xs text-foreground">Coach</span>
       </button>
       <Paywall open={pay} onOpenChange={setPay} />
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-h-[85dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" aria-hidden /> Din coach</DialogTitle>
           </DialogHeader>

@@ -162,7 +162,7 @@ function Mat() {
                         </p>
                       </div>
                       <button aria-label={fav ? "Ta bort favorit" : "Spara som favorit"} aria-pressed={fav} onClick={() => toggleFav(m)} className="grid h-11 w-11 place-items-center rounded-md hover:bg-muted">
-                        <Star className={`h-5 w-5 ${fav ? "fill-coral text-coral" : ""}`} />
+                        <Star className={`h-5 w-5 ${fav ? "fill-primary text-primary" : ""}`} />
                       </button>
                       <button aria-label={`Ta bort ${m.name}`} onClick={() => remove(m.id)} className="grid h-11 w-11 place-items-center rounded-md hover:bg-muted">
                         <Trash2 className="h-5 w-5" />

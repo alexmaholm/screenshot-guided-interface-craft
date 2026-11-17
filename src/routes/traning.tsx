@@ -58,7 +58,7 @@ const SET_TYPE_CLASS: Record<SetType, string> = {
   normal: "bg-secondary text-foreground",
   warmup: "bg-amber text-coral-foreground",
   drop: "bg-primary text-primary-foreground",
-  failure: "bg-coral text-coral-foreground",
+  failure: "bg-destructive text-destructive-foreground",
 };
 
 function Training() {
