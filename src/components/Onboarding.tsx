@@ -60,7 +60,7 @@ export function Onboarding() {
         </span>
       </div>
       <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={steps.length}>
-        <div className="h-full rounded-full bg-coral transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
+        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
       </div>
 
       <div className="mt-10 flex-1">

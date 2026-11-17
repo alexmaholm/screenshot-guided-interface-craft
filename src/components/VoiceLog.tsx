@@ -95,13 +95,13 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
   return (
     <>
       {on && (
-        <div className="fixed bottom-40 left-4 z-40 max-w-[70vw] rounded-lg bg-card px-4 py-2 text-sm shadow-lg" aria-live="polite">
+        <div className="fixed bottom-[calc(8rem+env(safe-area-inset-bottom))] left-4 z-40 max-w-[70vw] rounded-lg bg-card px-4 py-2 text-sm shadow-lg" aria-live="polite">
           {live || <span className="text-muted-foreground">Lyssnar…</span>}
         </div>
       )}
       <button onClick={toggle} aria-label={on ? "Sluta lyssna" : "Logga med rösten"} aria-pressed={on}
-        className={`fixed bottom-20 left-4 z-40 grid h-14 w-14 md:bottom-6 place-items-center rounded-full shadow-lg transition ${on ? "animate-pulse bg-coral text-primary-foreground" : "bg-primary text-primary-foreground"}`}>
-        <Mic className="h-6 w-6" />
+        className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-4 z-40 grid h-11 w-11 md:bottom-6 place-items-center rounded-lg border backdrop-blur-xl transition ${on ? "animate-pulse border-primary bg-primary text-primary-foreground" : "border-border bg-background/85 text-foreground"}`}>
+        <Mic className="h-4 w-4" strokeWidth={1.5} />
       </button>
     </>
   );

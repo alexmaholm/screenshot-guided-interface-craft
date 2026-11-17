@@ -19,7 +19,7 @@ export function RecoveryMeals({ profile, workout, date }: { profile: Profile; wo
   return (
     <section className="space-y-4 border-y py-5" aria-label="Återhämtning efter träningen">
       <div className="flex items-start gap-3">
-        <Sparkles className="mt-1 h-5 w-5 shrink-0 text-coral" aria-hidden />
+        <Sparkles className="mt-1 h-5 w-5 shrink-0 text-primary" aria-hidden />
         <div className="flex-1">
           <h2 className="text-xl font-semibold">Vad kroppen behöver nu</h2>
           <p className="mt-1 text-sm text-muted-foreground">{KIND_LABEL[workout.kind]} · {workout.durationMin} min · {workout.title}</p>

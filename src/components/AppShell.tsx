@@ -76,7 +76,7 @@ export function PageLoading() {
 export function NeedsOnboarding() {
   return (
     <div className="panel p-8 text-center">
-      <h1 className="text-[2rem] font-semibold tracking-[-0.03em]">Välkommen till Balans</h1>
+      <h1 className="text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em]">Välkommen till Balans</h1>
       <p className="mt-2 text-muted-foreground">Svara på några korta frågor så skapar vi din personliga start.</p>
       <Link to="/" className="mt-6 inline-flex min-h-12 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground">
         Kom igång
