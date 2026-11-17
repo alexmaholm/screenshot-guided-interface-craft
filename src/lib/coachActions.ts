@@ -17,7 +17,7 @@ export function sanitizeActions(raw: unknown): CoachAction[] {
   const out: CoachAction[] = [];
   for (const a of raw.slice(0, 4)) {
     if (!a || typeof a !== "object") continue;
-    const r = a as Record<string, unknown>;
+    const r = a as Partial<Record<"kind" | "ml" | "name" | "type" | "amount" | "kcal" | "protein" | "carbs" | "fat", unknown>>;
     if (r.kind === "log_water") {
       const ml = num(r.ml, 3000);
       if (ml && ml >= 50) out.push({ kind: "log_water", ml: Math.round(ml) });
