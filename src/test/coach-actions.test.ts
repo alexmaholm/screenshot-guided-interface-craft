@@ -20,3 +20,27 @@ describe("coach actions", () => {
     expect(s.habits["2026-01-01"]?.water).toBe(1);
   });
 });
+
+describe("coach workout & weight actions", () => {
+  it("loggar ett klart pass med set och matchar biblioteksnamn", () => {
+    const [w] = sanitizeActions([{ kind: "log_workout", status: "klart", title: "Rygg", workoutKind: "styrka",
+      exercises: [{ name: "lat pulldown", sets: [{ reps: 10, kg: 65 }, { reps: 10, kg: 65 }, { reps: 8, kg: 70 }] }] }]);
+    expect(w?.kind).toBe("log_workout");
+    const s = applyAction(normalizeState({}), w!, "2026-01-02");
+    const ex = s.workouts[0]!.exercises[0]!;
+    expect(s.workouts[0]!.status).toBe("klart");
+    expect(ex.sets).toBe(3);
+    expect(ex.weightKg).toBe(70);
+    expect(ex.name).not.toBe("lat pulldown");
+  });
+  it("avvisar pass utan giltiga set", () => {
+    expect(sanitizeActions([{ kind: "log_workout", exercises: [{ name: "Bänkpress", sets: [{ reps: -3 }] }] }])).toEqual([]);
+  });
+  it("loggar vikt och ersätter samma dag", () => {
+    let s = normalizeState({});
+    s = applyAction(s, { kind: "log_weight", kg: 82 }, "2026-01-03");
+    s = applyAction(s, { kind: "log_weight", kg: 81.4 }, "2026-01-03");
+    expect(s.body).toEqual([{ date: "2026-01-03", weight: 81.4 }]);
+    expect(sanitizeActions([{ kind: "log_weight", kg: 5 }])).toEqual([]);
+  });
+});

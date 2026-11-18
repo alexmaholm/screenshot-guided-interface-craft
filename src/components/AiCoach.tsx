@@ -9,6 +9,7 @@ import { askCoach } from "@/lib/coach.functions";
 import { dateKey, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, useBalans, type State, update } from "@/lib/balans";
 import { Paywall } from "@/components/Paywall";
 import { isPro } from "@/lib/tiers";
+import { toast } from "sonner";
 
 const QUICK = [
   "Vad passar bra att äta nu för att nå mitt mål?",
@@ -34,7 +35,25 @@ export function coachContext(s: State): string {
     p.hideCalories ? "Användaren vill inte se kalorier – nämn inte kcal." : "",
     last ? `Senaste pass: ${last.title} (${last.kind}) ${last.date}` : "Inga loggade pass ännu.",
     `Utrustning: ${p.equipment.join(", ") || "ingen"}`,
+    weight ? `Senaste vikt: ${weight} kg` : "",
+    `Klockan: ${new Date().toTimeString().slice(0, 5)}`,
+    `Vatten idag: ${(s.habits[today]?.water ?? 0) * 250} ml`,
+    `Idag loggat: ${s.meals.filter((m) => m.date === today).map((m) => `${m.type}: ${m.name}`).join("; ") || "inget"}`,
+    `Senaste pass i detalj: ${s.workouts.filter((w) => w.status === "klart").slice(-3).map((w) => `${w.date} ${w.title} [${w.exercises.map((e) => `${e.name} ${e.sets ?? ""}x${e.reps ?? ""}${e.weightKg ? `@${e.weightKg}` : ""}`).join(", ")}]`).join(" | ") || "inga"}`,
   ].filter(Boolean).join("\n");
+}
+
+function cardLabel(a: CoachAction): string {
+  if (a.kind === "log_meal") return a.type;
+  if (a.kind === "log_water") return "Vatten";
+  if (a.kind === "log_weight") return "Vikt";
+  return a.status === "klart" ? "Genomfört pass" : "Planerat pass";
+}
+function cardTitle(a: CoachAction): string {
+  if (a.kind === "log_meal") return a.name;
+  if (a.kind === "log_water") return `${a.ml} ml`;
+  if (a.kind === "log_weight") return `${a.kg} kg`;
+  return `${a.title} · ${a.durationMin} min`;
 }
 
 export function AiCoach() {
@@ -65,6 +84,7 @@ export function AiCoach() {
 
   const confirm = (i: number, j: number, a: CoachAction) => {
     update((st) => applyAction(st, a));
+    toast.success(a.kind === "log_workout" ? (a.status === "klart" ? "Passet är sparat" : "Passet ligger i Träning") : "Loggat");
     setChat((c) => c.map((m, k) => (k === i ? { ...m, done: [...(m.done ?? []), j] } : m)));
   };
 
@@ -104,12 +124,22 @@ export function AiCoach() {
                 {m.actions?.map((a, j) => {
                   const done = m.done?.includes(j);
                   return (
-                    <div key={j} className="panel mr-8 flex items-center gap-3 p-3">
+                    <div key={j} className="panel mr-8 flex items-start gap-3 p-3">
                       <div className="min-w-0 flex-1">
-                        <p className="label-xs text-muted-foreground">{a.kind === "log_meal" ? a.type : "Vatten"}</p>
-                        <p className="truncate text-sm font-medium">{a.kind === "log_meal" ? a.name : `${a.ml} ml`}</p>
+                        <p className="label-xs text-muted-foreground">{cardLabel(a)}</p>
+                        <p className="truncate text-sm font-medium">{cardTitle(a)}</p>
                         {a.kind === "log_meal" && (
                           <p className="telemetry text-[11px] text-muted-foreground">{a.kcal} KCAL · P {a.protein} · K {a.carbs} · F {a.fat}</p>
+                        )}
+                        {a.kind === "log_workout" && (
+                          <ul className="mt-1 space-y-0.5">
+                            {a.exercises.map((e, k) => (
+                              <li key={k} className="telemetry flex justify-between gap-2 text-[11px] text-muted-foreground">
+                                <span className="truncate">{e.name}</span>
+                                <span className="shrink-0">{e.sets.map((x) => x.timeSec ? `${x.timeSec}s` : `${x.reps ?? ""}${x.kg ? `×${x.kg}` : ""}`).join(" · ")}</span>
+                              </li>
+                            ))}
+                          </ul>
                         )}
                       </div>
                       <Button size="sm" variant={done ? "outline" : "default"} disabled={done} onClick={() => confirm(i, j, a)}>
@@ -127,7 +157,7 @@ export function AiCoach() {
               ))}
             </div>
             <div className="flex gap-2">
-              <Textarea value={q} onChange={(e) => setQ(e.target.value)} placeholder="Skriv din fråga…" maxLength={500} rows={2} />
+              <Textarea value={q} onChange={(e) => setQ(e.target.value)} placeholder="Skriv vad som helst – mat, vatten, vikt eller ditt pass…" maxLength={1500} rows={2} />
               <Button size="icon" className="h-auto" disabled={busy || q.trim().length < 2} onClick={() => send(q)} aria-label="Skicka">
                 <Send className="h-5 w-5" aria-hidden />
               </Button>

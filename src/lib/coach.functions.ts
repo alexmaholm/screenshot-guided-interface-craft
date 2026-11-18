@@ -6,12 +6,21 @@ const schema = z.object({
   answer: z.string(),
   followUps: z.array(z.string()),
   actions: z.array(z.object({
-    kind: z.enum(["log_meal", "log_water"]),
+    kind: z.enum(["log_meal", "log_water", "log_weight", "log_workout"]),
     type: z.enum(["frukost", "lunch", "middag", "mellanmål"]).optional(),
     name: z.string().optional(),
     amount: z.string().optional(),
     kcal: z.number().optional(), protein: z.number().optional(), carbs: z.number().optional(), fat: z.number().optional(),
     ml: z.number().optional(),
+    kg: z.number().optional(),
+    status: z.enum(["klart", "planerat"]).optional(),
+    title: z.string().optional(),
+    workoutKind: z.enum(["styrka", "kondition", "rörlighet"]).optional(),
+    durationMin: z.number().optional(),
+    exercises: z.array(z.object({
+      name: z.string(),
+      sets: z.array(z.object({ reps: z.number().optional(), kg: z.number().optional(), timeSec: z.number().optional() })),
+    })).optional(),
   })),
 });
 
@@ -24,13 +33,19 @@ Regler:
 - Aldrig dömande, ingen kaloriskam, inga medicinska löften eller diagnoser. Vid smärta, skada, sjukdom eller graviditet: rekommendera att prata med vården.
 - Vila och återhämtning räknas som framsteg.
 - Ge i "followUps" exakt 3 korta naturliga följdfrågor (max ca 60 tecken) som användaren själv kan vilja ställa härnäst, skrivna i jag-form och kopplade till ditt svar.
-- "actions": När användaren berättar att hen ätit/druckit något eller ber dig logga, lägg till ett förslag: log_meal (type, name, amount, kcal, protein, carbs, fat – rimliga uppskattningar) eller log_water (ml). Annars tom lista. Säg i svaret att användaren kan bekräfta kortet.`;
+- Förstå fritt vardagsspråk, slang, stavfel, svengelska och förkortningar (t.ex. "käkade", "slängde i mig", "4x10@80", "3x8 på 70", "PR", "halvliter", "en stor flaska"). Tolka hellre generöst än att be om förtydligande; fråga bara om något är helt omöjligt att uppskatta.
+- "actions": Skapa ett kort för VARJE sak användaren berättar att hen gjort eller ber dig logga/skapa. Ett meddelande kan ge flera kort. Annars tom lista.
+  - log_meal: en per måltid (type = frukost/lunch/middag/mellanmål, gissa utifrån tid/ord), name kort och tydligt, amount (t.ex. "1 tallrik", "3 st"), kcal/protein/carbs/fat som realistiska uppskattningar för svenska portioner och produkter. Summera hela måltiden inklusive tillbehör och dryck med kalorier.
+  - log_water: ml (glas 250, flaska 500, stor flaska 750–1000). Räkna även kaffe/te/kolsyrat vatten utan socker.
+  - log_weight: kg när användaren anger sin kroppsvikt.
+  - log_workout: status "klart" för pass som gjorts, "planerat" när användaren ber dig skapa/föreslå ett pass. title, workoutKind (styrka/kondition/rörlighet), durationMin, exercises med vanliga svenska övningsnamn och ett objekt per set (reps, kg; timeSec för tidsövningar). "4x10 på 65" = fyra set à 10 reps 65 kg. Planerade pass ska passa användarens utrustning, fokus och muskelåterhämtning och undvika smärtande områden.
+- Säg kort i svaret vad korten innehåller och att användaren bekräftar med Logga.`;
 
 export const askCoach = createServerFn({ method: "POST" })
   .inputValidator((input: { question: string; context: string }) => {
     const question = typeof input?.question === "string" ? input.question.trim() : "";
-    const context = typeof input?.context === "string" ? input.context.slice(0, 2000) : "";
-    if (question.length < 2 || question.length > 500) throw new Error("Skriv en kort fråga (max 500 tecken).");
+    const context = typeof input?.context === "string" ? input.context.slice(0, 4000) : "";
+    if (question.length < 2 || question.length > 1500) throw new Error("Skriv max 1500 tecken.");
     return { question, context };
   })
   .handler(async ({ data }): Promise<{ ok: true; answer: string; followUps: string[]; actions: CoachAction[] } | { ok: false; error: string }> => {
