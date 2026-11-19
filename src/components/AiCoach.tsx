@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles, Send, Loader2, Check, Plus } from "lucide-react";
+import { Sparkles, Send, Loader2, Check, Plus, Mic } from "lucide-react";
 import { applyAction, type CoachAction } from "@/lib/coachActions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,7 @@ import { dateKey, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, us
 import { Paywall } from "@/components/Paywall";
 import { isPro } from "@/lib/tiers";
 import { toast } from "sonner";
+import { bestLifts, historyFor, recoveryLine } from "@/lib/coachTelemetry";
 
 const QUICK = [
   "Vad passar bra att äta nu för att nå mitt mål?",
@@ -40,8 +41,54 @@ export function coachContext(s: State): string {
     `Vatten idag: ${(s.habits[today]?.water ?? 0) * 250} ml`,
     `Idag loggat: ${s.meals.filter((m) => m.date === today).map((m) => `${m.type}: ${m.name}`).join("; ") || "inget"}`,
     `Senaste pass i detalj: ${s.workouts.filter((w) => w.status === "klart").slice(-3).map((w) => `${w.date} ${w.title} [${w.exercises.map((e) => `${e.name} ${e.sets ?? ""}x${e.reps ?? ""}${e.weightKg ? `@${e.weightKg}` : ""}`).join(", ")}]`).join(" | ") || "inga"}`,
+    `Muskelstatus: ${recoveryLine(s.workouts, today)}`,
+    `Bästa lyft: ${bestLifts(s.workouts, 8).map((b) => `${b.name} ${b.kg} kg x ${b.reps}`).join("; ") || "inga ännu"}`,
   ].filter(Boolean).join("\n");
 }
+
+type Rec = { lang: string; interimResults: boolean; continuous: boolean; start: () => void; stop: () => void; abort: () => void;
+  onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null;
+  onend: (() => void) | null; onerror: ((e: { error?: string }) => void) | null };
+
+/** Dictation into a text field: appends final speech to `base`, shows interim text live. */
+function useDictation(onText: (t: string) => void) {
+  const [on, setOn] = useState(false);
+  const rec = useRef<Rec | null>(null);
+  const stop = () => { const r = rec.current; rec.current = null; if (r) { r.onresult = null; r.onend = null; try { r.abort(); } catch { /* stopped */ } } setOn(false); };
+  useEffect(() => {
+    const hide = () => { if (document.hidden) stop(); };
+    document.addEventListener("visibilitychange", hide);
+    return () => { document.removeEventListener("visibilitychange", hide); stop(); };
+  }, []);
+  const toggle = (base: string) => {
+    if (on) return stop();
+    const W = window as unknown as { SpeechRecognition?: new () => Rec; webkitSpeechRecognition?: new () => Rec };
+    const Ctor = W.SpeechRecognition ?? W.webkitSpeechRecognition;
+    if (!Ctor) return void toast.error("Röstinmatning stöds inte på den här enheten.");
+    const r = new Ctor();
+    r.lang = "sv-SE"; r.interimResults = true; r.continuous = true;
+    let final = base.trim();
+    r.onresult = (e) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const res = e.results[i]!; const t = res[0].transcript.trim();
+        if (res.isFinal) final = [final, t].filter(Boolean).join(" "); else interim += ` ${t}`;
+      }
+      onText([final, interim.trim()].filter(Boolean).join(" ").slice(0, 1500));
+    };
+    r.onerror = (e) => { if (e?.error === "not-allowed") toast.error("Tillåt mikrofonen för att prata in."); };
+    r.onend = () => { if (rec.current === r) { rec.current = null; setOn(false); onText(final); } };
+    rec.current = r;
+    try { r.start(); setOn(true); navigator.vibrate?.(20); } catch { rec.current = null; }
+  };
+  return { on, toggle, stop };
+}
+
+const num = (v: string) => { const n = Number(v.replace(",", ".")); return Number.isFinite(n) && n >= 0 ? n : 0; };
+const Num = ({ value, onChange, label, w = "w-12" }: { value: number | undefined; onChange: (n: number) => void; label: string; w?: string }) => (
+  <input inputMode="decimal" aria-label={label} defaultValue={value ?? ""} onBlur={(e) => onChange(num(e.target.value))}
+    className={`telemetry ${w} rounded-sm border border-border bg-background px-1 py-0.5 text-[11px] text-foreground focus:border-primary focus:outline-none`} />
+);
 
 function cardLabel(a: CoachAction): string {
   if (a.kind === "log_meal") return a.type;
@@ -65,14 +112,20 @@ export function AiCoach() {
   const [suggest, setSuggest] = useState<string[]>(QUICK);
   const [chat, setChat] = useState<{ q: string; a: string; error?: boolean; actions?: CoachAction[]; done?: number[] }[]>([]);
   const [pay, setPay] = useState(false);
+  const mic = useDictation(setQ);
+  useEffect(() => { if (!open) mic.stop(); }, [open]);
   if (!s?.profile) return null;
+
+  const edit = (i: number, j: number, fn: (a: CoachAction) => CoachAction) =>
+    setChat((c) => c.map((m, k) => (k === i && m.actions ? { ...m, actions: m.actions.map((a, x) => (x === j ? fn(a) : a)) } : m)));
 
   async function send(question: string) {
     if (!s || busy || question.trim().length < 2) return;
+    mic.stop();
     setBusy(true);
     setQ("");
     try {
-      const r = await ask({ data: { question, context: coachContext(s) } });
+      const r = await ask({ data: { question, context: coachContext(s), history: historyFor(chat) } });
       if (r.ok && r.followUps.length) setSuggest(r.followUps);
       setChat((c) => [...c, r.ok ? { q: question, a: r.answer, actions: r.actions, done: [] } : { q: question, a: r.error, error: true }]);
     } catch {
@@ -129,14 +182,25 @@ export function AiCoach() {
                         <p className="label-xs text-muted-foreground">{cardLabel(a)}</p>
                         <p className="truncate text-sm font-medium">{cardTitle(a)}</p>
                         {a.kind === "log_meal" && (
-                          <p className="telemetry text-[11px] text-muted-foreground">{a.kcal} KCAL · P {a.protein} · K {a.carbs} · F {a.fat}</p>
+                          done ? <p className="telemetry text-[11px] text-muted-foreground">{a.kcal} KCAL · P {a.protein} · K {a.carbs} · F {a.fat}</p>
+                          : <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-muted-foreground">
+                              {(["kcal", "protein", "carbs", "fat"] as const).map((f) => (
+                                <label key={f} className="flex items-center gap-1"><span className="label-xs">{f === "kcal" ? "KCAL" : f === "protein" ? "P" : f === "carbs" ? "K" : "F"}</span>
+                                  <Num label={f} value={a[f]} w={f === "kcal" ? "w-14" : "w-10"} onChange={(n) => edit(i, j, (x) => (x.kind === "log_meal" ? { ...x, [f]: Math.round(n) } : x))} /></label>
+                              ))}
+                            </div>
                         )}
                         {a.kind === "log_workout" && (
                           <ul className="mt-1 space-y-0.5">
                             {a.exercises.map((e, k) => (
                               <li key={k} className="telemetry flex justify-between gap-2 text-[11px] text-muted-foreground">
                                 <span className="truncate">{e.name}</span>
-                                <span className="shrink-0">{e.sets.map((x) => x.timeSec ? `${x.timeSec}s` : `${x.reps ?? ""}${x.kg ? `×${x.kg}` : ""}`).join(" · ")}</span>
+                                {done ? <span className="shrink-0">{e.sets.map((x) => x.timeSec ? `${x.timeSec}s` : `${x.reps ?? ""}${x.kg ? `×${x.kg}` : ""}`).join(" · ")}</span>
+                                  : <span className="flex shrink-0 flex-wrap justify-end gap-1">{e.sets.map((x, si) => x.timeSec ? <span key={si}>{x.timeSec}s</span> : (
+                                    <span key={si} className="flex items-center gap-0.5">
+                                      <Num label={`${e.name} set ${si + 1} reps`} value={x.reps} w="w-8" onChange={(n) => edit(i, j, (w) => w.kind === "log_workout" ? { ...w, exercises: w.exercises.map((ee, ek) => ek === k ? { ...ee, sets: ee.sets.map((ss, sk) => sk === si ? { ...ss, reps: Math.round(n) || undefined } : ss) } : ee) } : w)} />×
+                                      <Num label={`${e.name} set ${si + 1} kg`} value={x.kg} w="w-10" onChange={(n) => edit(i, j, (w) => w.kind === "log_workout" ? { ...w, exercises: w.exercises.map((ee, ek) => ek === k ? { ...ee, sets: ee.sets.map((ss, sk) => sk === si ? { ...ss, kg: n || undefined } : ss) } : ee) } : w)} />
+                                    </span>))}</span>}
                               </li>
                             ))}
                           </ul>
@@ -157,7 +221,11 @@ export function AiCoach() {
               ))}
             </div>
             <div className="flex gap-2">
-              <Textarea value={q} onChange={(e) => setQ(e.target.value)} placeholder="Skriv vad som helst – mat, vatten, vikt eller ditt pass…" maxLength={1500} rows={2} />
+              <Textarea value={q} onChange={(e) => setQ(e.target.value)} placeholder={mic.on ? "Lyssnar… prata nu" : "Skriv eller prata – mat, vatten, vikt eller ditt pass…"} maxLength={1500} rows={2} />
+              <Button type="button" size="icon" variant={mic.on ? "default" : "outline"} className={`h-auto ${mic.on ? "animate-pulse" : ""}`} disabled={busy}
+                onClick={() => mic.toggle(q)} aria-label={mic.on ? "Sluta lyssna" : "Prata in meddelande"} aria-pressed={mic.on}>
+                <Mic className="h-5 w-5" strokeWidth={1.5} aria-hidden />
+              </Button>
               <Button size="icon" className="h-auto" disabled={busy || q.trim().length < 2} onClick={() => send(q)} aria-label="Skicka">
                 <Send className="h-5 w-5" aria-hidden />
               </Button>
