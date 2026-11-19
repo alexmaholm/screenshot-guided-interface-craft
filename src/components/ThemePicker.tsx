@@ -6,8 +6,8 @@ export function ThemePicker() {
   const [theme, setT] = useState<Theme>("stealth");
   useEffect(() => setT(getTheme()), []);
   return (
-    <section aria-label="Tema" className="panel space-y-3 p-5">
-      <h2 className="label-xs text-muted-foreground">Tema</h2>
+    <section aria-label="Utseende" className="panel space-y-3 p-5">
+      <h2 className="label-xs text-muted-foreground">Utseende</h2>
       <div className="grid grid-cols-2 gap-3">
         {THEMES.map((t) => (
           <button key={t.id} aria-pressed={theme === t.id} onClick={() => { setTheme(t.id); setT(t.id); }}
