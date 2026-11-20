@@ -629,7 +629,7 @@ export function setupFor(ex: Pick<ExercisePreset, "name" | "muscle"> & { eq?: st
   const base = SCENES[pat].gear;
   let gear: Gear = base;
   const banded = /gummiband|med band|\bband/.test(n) && !/löpband/.test(n);
-  const cable = !banded && /kabel|cable|crossover|kryssdrag|face pull|pushdown|latsdrag|pulldown|sittande rodd|med rep|pallof|vedhugg|woodchop|katana|bayesian/.test(n) || (["crossover", "seatedrow", "facepull", "cablepress", "pallof", "chop", "straightarm"] as Pattern[]).includes(pat) && !banded;
+  const cable = !banded && /kabel|cable|crossover|kryssdrag|face pull|pushdown|latsdrag|pulldown|sittande rodd|med rep|pallof|vedhugg|woodchop|katana|bayesian|cuff/.test(n) || (["crossover", "seatedrow", "facepull", "cablepress", "pallof", "chop", "straightarm"] as Pattern[]).includes(pat) && !banded;
   const eq = ex.eq ?? [];
   if (cable) gear = "cable";
   else if (/kettlebell|sving|swing|goblet/.test(n)) gear = "kettlebell";

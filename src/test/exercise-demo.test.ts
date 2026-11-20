@@ -55,3 +55,13 @@ describe("revision: varje övning har rätt animation", () => {
     for (const e of EXERCISES) if (e.muscle !== "kondition" && e.muscle !== "helkropp") expect(patternFor(e), e.name).not.toBe("cardio");
   });
 });
+
+describe("moderna kabelövningar", () => {
+  it.each([
+    ["Katana extensions i kabel", "overheadtri"], ["Bayesian curl i kabel", "curl"],
+    ["Sidolyft i kabel bakom ryggen", "lateral"], ["Y-lyft i kabel", "lateral"], ["Rear delt cuff flyes", "reardelt"],
+  ])("%s → %s med synlig kabel", (name, pat) => {
+    expect(p(name)).toBe(pat);
+    expect(s(name).gear).toBe("cable");
+  });
+});

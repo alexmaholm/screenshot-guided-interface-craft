@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { estimateText } from "@/lib/textlog.functions";
+import { isOffline, OFFLINE_MSG } from "@/lib/online";
 import {
   addDays, dateKey, macroFeedback, macroTargets, nutritionFocusOf, NUTRITION_FOCUS, sumMacros, sumMicros, MEAL_LABEL, MEAL_TYPES, prettyDate, uid, update, useBalans,
   type Meal, type MealType, type Micros,
@@ -213,6 +214,7 @@ function AddMealDialog({
   const recent = Array.from(new Map([...s.meals].reverse().map((m) => [m.name, m])).values()).slice(0, 8);
 
   const runAi = async () => {
+    if (isOffline()) { toast.error(OFFLINE_MSG); return; }
     setAiBusy(true);
     try {
       const r = await estimate({ data: { text: aiText } });

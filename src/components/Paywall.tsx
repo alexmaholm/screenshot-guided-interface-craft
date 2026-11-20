@@ -7,15 +7,21 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { update, useBalans } from "@/lib/balans";
 import { isPro, perMonth, PLANS, savingPct, startTrial, TRIAL_DAYS, type PlanId } from "@/lib/tiers";
 
-const PERKS = ["AI-fotologg av tallriken", "AI-coach med personliga råd", "Töm kylen – recept av det du har", "Röstloggning i gymmet", "Muskelåterhämtningskarta", "Mikronäring: fibrer, socker, salt"];
+const PERKS = ["AI-fotologg av tallriken", "AI-coach med personliga råd", "Smarta träningsmallar & progressionsdata", "Röstloggning i gymmet", "Muskelåterhämtningskarta", "Mikronäring: fibrer, socker, salt"];
 
 export function Paywall({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  const s = useBalans();
   const [plan, setPlan] = useState<PlanId>("month");
   const buy = () => {
     // Native app: replace with StoreKit / Play Billing purchase (RevenueCat).
     update((st) => ({ ...st, subscription: startTrial(plan) }));
     toast.success(`Provperioden har startat – ${TRIAL_DAYS} dagar gratis`);
     onOpenChange(false);
+  };
+  const restore = () => {
+    // Native app: replace with RevenueCat Purchases.restorePurchases().
+    if (isPro(s)) { toast.success("Ditt PRO-medlemskap är aktivt"); onOpenChange(false); }
+    else toast("Inga tidigare köp hittades på det här kontot");
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -37,6 +43,7 @@ export function Paywall({ open, onOpenChange }: { open: boolean; onOpenChange: (
           ))}
         </div>
         <Button className="h-12 w-full rounded-md" onClick={buy}>Starta {TRIAL_DAYS} dagar gratis</Button>
+        <Button variant="ghost" className="h-10 w-full rounded-md text-sm text-muted-foreground" onClick={restore}>Återställ köp</Button>
         <p className="text-center text-xs text-muted-foreground">Avsluta när du vill. Debiteras först efter provperioden och förnyas automatiskt tills du avslutar.</p>
         <p className="text-center text-xs text-muted-foreground">
           <Link to="/villkor" className="underline" onClick={() => onOpenChange(false)}>Användarvillkor</Link> · <Link to="/integritet" className="underline" onClick={() => onOpenChange(false)}>Integritetspolicy</Link>

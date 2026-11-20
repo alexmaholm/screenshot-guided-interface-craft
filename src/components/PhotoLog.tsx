@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { analyzePlate } from "@/lib/photo.functions";
 import { plateMicros, plateTotals, scaleItem, type PlateItem, type PlateQuestion } from "@/lib/photolog";
+import { isOffline, OFFLINE_MSG } from "@/lib/online";
 
 type Saved = { name: string; amount: string; kcal: number; protein: number; carbs: number; fat: number; fiber?: number; sugar?: number; satFat?: number; salt?: number };
 
@@ -36,6 +37,7 @@ export function PhotoLog({ diet, showKcal, onSave }: { diet?: string | undefined
   const [newName, setNewName] = useState("");
 
   const run = async (img: string, prev: { question: string; answer: string }[]) => {
+    if (isOffline()) { setError(OFFLINE_MSG); return; }
     setBusy(true); setError("");
     try {
       const r = await analyze({ data: { image: img, answers: prev, diet } });
