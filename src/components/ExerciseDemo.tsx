@@ -27,7 +27,9 @@ interface Scene {
   a: Pose; b: Pose; gear: Gear; gearAt?: J; labels: [string, string]; work: Seg[];
   bench?: "high" | "low" | "seat"; bar?: boolean; mat?: boolean; dipbars?: boolean; sled?: boolean;
   /** Var kabeln går ut ur trissan (annars på tornet till höger). */
-  cableAt?: P; dualCable?: boolean; legpress?: boolean; backrest?: boolean;
+  cableAt?: P; dualCable?: boolean;
+  /** Korsade vajrar: höger trissa till vänster hand och tvärtom (omvända flyes, Y-lyft i kabel). */
+  cross?: boolean; legpress?: boolean; backrest?: boolean;
   ergo?: boolean; hyper?: boolean; wall?: number; bike?: boolean; rope?: boolean; rings?: boolean; ball?: boolean;
 }
 
@@ -253,7 +255,7 @@ const SCENES: Record<Pattern, Scene> = {
     b: F({ hip: [50, 60], kn: [58, 64], ft: [58, 88], kn2: [42, 64], ft2: [42, 88], el: [66, 30], ha: [80, 30], el2: [34, 30], ha2: [20, 30] }),
   },
   revfly: {
-    gear: "cable", dualCable: true, cableAt: [92, 30], work: ["upper"], labels: ["Händerna korsade framför", "Dra isär till T, armar raka"],
+    gear: "cable", dualCable: true, cross: true, cableAt: [92, 30], work: ["upper"], labels: ["Händerna korsade framför", "Dra isär till T, armar raka"],
     a: F({ el: [56, 32], ha: [44, 31], el2: [44, 32], ha2: [56, 31] }),
     b: F({ el: [66, 29], ha: [80, 29], el2: [34, 29], ha2: [20, 29] }),
   },
@@ -704,6 +706,32 @@ export const PRIMARY: Record<Pattern, string> = {
 const seatedPull: Pick<Pose, "head" | "sh" | "hip" | "kn" | "ft"> = { head: [50, 26], sh: [50, 37], hip: [48, 62], kn: [66, 62], ft: [68, 86] };
 export const VARIANTS: [RegExp, string, Partial<Scene>][] = [
   // ── Precisionsvarianter: övningar som rör sig annorlunda än sin grundrörelse ──
+  // Moderna kabelövningar – framifrån eller från sidan med exakt trissposition.
+  [/katana/, "katana", {
+    cableAt: [10, 72], work: ["upper"], labels: ["Handen vid motsatt öra, armbågen högt", "Sträck armen diagonalt upp och ut"],
+    a: F({ el: [59, 15], ha: [45, 21] }),
+    b: F({ el: [63, 11], ha: [72, 0] }),
+  }],
+  [/bayesian/, "bayesian", {
+    cableAt: [10, 66], work: ["upper", "fore"], labels: ["Armen bakom kroppen, full stretch", "Curla upp, armbågen stannar bak"],
+    a: S({ kn2: [44, 74], ft2: [36, 91], el: [44, 42], ha: [37, 55], el2: [50, 41], ha2: [51, 55] }),
+    b: S({ kn2: [44, 74], ft2: [36, 91], el: [45, 42], ha: [53, 31], el2: [50, 41], ha2: [51, 55] }),
+  }],
+  [/sidolyft i kabel bakom ryggen/, "btblateral", {
+    cableAt: [10, 86], labels: ["Handtaget vid höften, vajern bakom ryggen", "Lyft ut till axelhöjd"],
+    a: F({ el: [56, 42], ha: [55, 56] }),
+    b: F({ el: [64, 30], ha: [76, 29] }),
+  }],
+  [/y-lyft i kabel/, "cableylift", {
+    dualCable: true, cross: true, cableAt: [92, 86], labels: ["Korsade handtag framför höften", "Lyft i ett Y snett uppåt"],
+    a: F({ el: [53, 44], ha: [45, 58], el2: [47, 44], ha2: [55, 58] }),
+    b: F({ el: [60, 22], ha: [68, 8], el2: [40, 22], ha2: [32, 8] }),
+  }],
+  [/cuff fly/, "cuffly", {
+    dualCable: true, cross: true, cableAt: [92, 30], labels: ["Manschetter på handlederna, armarna korsade", "Dra isär till T, leda med armbågarna"],
+    a: F({ el: [56, 32], ha: [44, 31], el2: [44, 32], ha2: [56, 31] }),
+    b: F({ el: [66, 29], ha: [80, 29], el2: [34, 29], ha2: [20, 29] }),
+  }],
   [/omvända wrist curls|wrist curls/, "wrist", {
     bench: "seat", work: ["fore"], labels: ["Underarmen vilar på låret", "Rulla vikten upp med handleden"],
     a: full({ ...seatSide, el: [46, 58], ha: [58, 62] }),
@@ -1199,10 +1227,10 @@ export function ExerciseDemo({ ex, className = "" }: { ex: Pick<ExercisePreset, 
               {sc.dualCable && tower(4, "t2")}
               {Math.abs(anchor[0] - (tx + 4)) > 6 && <path d={`M${tx + 4} 5 L${anchor[0]} 5 L${anchor[0]} ${anchor[1]}`} fill="none" strokeWidth="0.6" className="stroke-foreground/50" />}
               <circle cx={anchor[0]} cy={anchor[1]} r="2" className="fill-card stroke-foreground/80" strokeWidth="0.8" />
-              <line x1={anchor[0]} y1={anchor[1]} x2={hand[0]} y2={hand[1]} strokeWidth="0.7" className="stroke-foreground/80" />
+              <line x1={anchor[0]} y1={anchor[1]} x2={sc.dualCable && sc.cross ? a.ha2[0] : hand[0]} y2={sc.dualCable && sc.cross ? a.ha2[1] : hand[1]} strokeWidth="0.7" className="stroke-foreground/80" />
               {sc.dualCable && <>
                 <circle cx="8" cy={anchor[1]} r="2" className="fill-card stroke-foreground/80" strokeWidth="0.8" />
-                <line x1="8" y1={anchor[1]} x2={a.ha2[0]} y2={a.ha2[1]} strokeWidth="0.7" className="stroke-foreground/80" />
+                <line x1="8" y1={anchor[1]} x2={sc.cross ? a.ha[0] : a.ha2[0]} y2={sc.cross ? a.ha[1] : a.ha2[1]} strokeWidth="0.7" className="stroke-foreground/80" />
               </>}
             </g>
           );

@@ -65,3 +65,11 @@ describe("moderna kabelövningar", () => {
     expect(s(name).gear).toBe("cable");
   });
 });
+
+describe("kabelövningar har egen rörelsebana", () => {
+  it.each([
+    ["Katana extensions i kabel", "katana"], ["Bayesian curl i kabel", "bayesian"],
+    ["Sidolyft i kabel bakom ryggen", "btblateral"], ["Y-lyft i kabel", "cableylift"], ["Rear delt cuff flyes", "cuffly"],
+  ])("%s → %s", (name, v) => expect(variantFor({ name })).toBe(v));
+  it("hantel-Y-lyft behåller sin egen variant", () => expect(variantFor({ name: "Y-lyft" })).toBe("ylift"));
+});
