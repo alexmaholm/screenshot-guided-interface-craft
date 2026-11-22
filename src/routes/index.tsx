@@ -10,9 +10,9 @@ import { dateKey, GLASS_ML, KIND_LABEL, macroTargets, prettyDate, sumMacros, upd
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Balans – mat, träning och återhämtning" },
+      { title: "Aequiv – mat, träning och återhämtning" },
       { name: "description", content: "Planera och följ mat, träning och vila på ett ställe – enkelt och utan pekpinnar." },
-      { property: "og:title", content: "Balans – mat, träning och återhämtning" },
+      { property: "og:title", content: "Aequiv – mat, träning och återhämtning" },
       { property: "og:description", content: "Din dag med mat, träning och vila samlat på ett ställe." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

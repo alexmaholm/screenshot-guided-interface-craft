@@ -27,7 +27,7 @@ export function Paywall({ open, onOpenChange }: { open: boolean; onOpenChange: (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl"><Sparkles className="h-5 w-5 text-primary" /> Balans PRO</DialogTitle>
+          <DialogTitle className="flex items-center gap-2 text-2xl"><Sparkles className="h-5 w-5 text-primary" /> Aequiv PRO</DialogTitle>
           <DialogDescription>Prova allt gratis i {TRIAL_DAYS} dagar. Ingen bindningstid.</DialogDescription>
         </DialogHeader>
         <ul className="space-y-2">
@@ -61,7 +61,7 @@ export function ProGate({ title, children }: { title: string; children: ReactNod
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className="card-soft flex w-full items-center justify-between p-5 text-left">
-        <span><span className="block font-semibold">{title}</span><span className="text-sm text-muted-foreground">Ingår i Balans PRO – prova gratis</span></span>
+        <span><span className="block font-semibold">{title}</span><span className="text-sm text-muted-foreground">Ingår i Aequiv PRO – prova gratis</span></span>
         <Lock className="h-5 w-5 text-muted-foreground" aria-hidden />
       </button>
       <Paywall open={open} onOpenChange={setOpen} />

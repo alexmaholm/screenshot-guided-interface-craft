@@ -25,7 +25,7 @@ export function SundayReport({ workouts, days, restDays, streak, waterAvg, mealD
   ];
   const s = slides[i]!;
   const share = async () => {
-    const text = `Min vecka med Balans: ${r.workouts} pass, ${r.volumeKg} kg lyft, ${streak} dagar i rad`;
+    const text = `Min vecka med Aequiv: ${r.workouts} pass, ${r.volumeKg} kg lyft, ${streak} dagar i rad`;
     try {
       if (navigator.share) await navigator.share({ text });
       else { await navigator.clipboard.writeText(text); toast.success("Kopierat – klistra in var du vill"); }

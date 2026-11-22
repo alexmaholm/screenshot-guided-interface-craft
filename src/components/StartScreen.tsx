@@ -1,5 +1,6 @@
+import { AequivLogo } from "@/components/AequivLogo";
 import { useState } from "react";
-import { Leaf, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SignInOptions, useAuthUser } from "@/components/AccountCard";
 import { Onboarding } from "@/components/Onboarding";
@@ -35,7 +36,7 @@ export function StartScreen() {
         <>
           <div className="flex flex-1 flex-col justify-center">
             <div className="flex items-center gap-2 font-display text-3xl font-bold text-primary">
-              <Leaf className="h-8 w-8 text-primary" aria-hidden /> Balans
+              <AequivLogo className="h-8 w-8" /> Aequiv
             </div>
             <h1 className="mt-8 text-4xl font-bold leading-tight">Mat, träning och vila – i balans.</h1>
             <p className="mt-3 text-lg text-muted-foreground">Enkelt, i din takt och utan pekpinnar.</p>

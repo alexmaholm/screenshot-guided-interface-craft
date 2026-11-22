@@ -1,4 +1,4 @@
-/** Balans PRO: plans, 7-day trial and membership status. Purchases are simulated until native StoreKit/Play Billing is wired in. */
+/** Aequiv PRO: plans, 7-day trial and membership status. Purchases are simulated until native StoreKit/Play Billing is wired in. */
 import type { State } from "@/lib/balans";
 
 export type PlanId = "month" | "quarter" | "year";

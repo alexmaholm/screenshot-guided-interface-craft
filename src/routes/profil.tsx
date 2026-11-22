@@ -39,10 +39,10 @@ function WeightTrendChart({ body }: { body: { date: string; weight: number }[] }
 export const Route = createFileRoute("/profil")({
   head: () => ({
     meta: [
-      { title: "Profil – Balans" },
-      { name: "description", content: "Ditt namn, din profilbild och din resa i Balans." },
-      { property: "og:title", content: "Profil – Balans" },
-      { property: "og:description", content: "Din personliga profil i Balans." },
+      { title: "Profil – Aequiv" },
+      { name: "description", content: "Ditt namn, din profilbild och din resa i Aequiv." },
+      { property: "og:title", content: "Profil – Aequiv" },
+      { property: "og:description", content: "Din personliga profil i Aequiv." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

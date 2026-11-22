@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Nytt lösenord – Balans" },
-      { name: "description", content: "Välj ett nytt lösenord för ditt Balans-konto." },
-      { property: "og:title", content: "Nytt lösenord – Balans" },
-      { property: "og:description", content: "Välj ett nytt lösenord för ditt Balans-konto." },
+      { title: "Nytt lösenord – Aequiv" },
+      { name: "description", content: "Välj ett nytt lösenord för ditt Aequiv-konto." },
+      { property: "og:title", content: "Nytt lösenord – Aequiv" },
+      { property: "og:description", content: "Välj ett nytt lösenord för ditt Aequiv-konto." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

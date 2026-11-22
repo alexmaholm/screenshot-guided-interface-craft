@@ -1,5 +1,6 @@
+import { AequivLogo } from "@/components/AequivLogo";
 import { useState } from "react";
-import { Leaf, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DietaryPreferences } from "@/components/DietaryPreferences";
 import { Input } from "@/components/ui/input";
@@ -52,7 +53,7 @@ export function Onboarding() {
           </Button>
         ) : (
           <div className="flex items-center gap-2 font-display text-xl font-bold text-primary">
-            <Leaf className="h-5 w-5 text-primary" aria-hidden /> Balans
+            <AequivLogo className="h-5 w-5" /> Aequiv
           </div>
         )}
         <span className="text-sm text-muted-foreground">
@@ -67,7 +68,7 @@ export function Onboarding() {
         {step === 0 && (
           <section>
             <h1 className="text-4xl font-bold">Hej! Vad vill du att vi kallar dig?</h1>
-            <p className="mt-3 text-muted-foreground">Balans hjälper dig planera mat, träning och vila – i din takt.</p>
+            <p className="mt-3 text-muted-foreground">Aequiv hjälper dig planera mat, träning och vila – i din takt.</p>
             <label className="mt-8 block text-sm font-medium" htmlFor="name">Förnamn eller smeknamn</label>
             <Input id="name" className="mt-2 h-14 rounded-lg text-lg" value={p.name} onChange={(e) => set({ name: e.target.value })} placeholder="T.ex. Alex" />
           </section>

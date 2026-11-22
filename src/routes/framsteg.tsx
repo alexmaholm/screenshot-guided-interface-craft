@@ -14,9 +14,9 @@ import { streakInfo } from "@/lib/habits";
 export const Route = createFileRoute("/framsteg")({
   head: () => ({
     meta: [
-      { title: "Framsteg – Balans" },
+      { title: "Framsteg – Aequiv" },
       { name: "description", content: "Veckosammanfattning av pass, måltider och vanor – med fokus på kontinuitet." },
-      { property: "og:title", content: "Framsteg – Balans" },
+      { property: "og:title", content: "Framsteg – Aequiv" },
       { property: "og:description", content: "Se din vecka med träning, mat och vanor." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

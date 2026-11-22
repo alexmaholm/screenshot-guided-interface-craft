@@ -1,5 +1,6 @@
+import { AequivLogo } from "@/components/AequivLogo";
 import { Link } from "@tanstack/react-router";
-import { Home, Utensils, Dumbbell, LineChart, Leaf, User } from "lucide-react";
+import { Home, Utensils, Dumbbell, LineChart, User } from "lucide-react";
 import type { ReactNode } from "react";
 import { AiCoach } from "@/components/AiCoach";
 import { AppTour } from "@/components/AppTour";
@@ -18,7 +19,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen md:flex">
       <aside className="hidden md:flex md:w-60 md:flex-col md:gap-2 md:border-r md:bg-card md:p-5 md:sticky md:top-0 md:h-screen">
         <div className="mb-6 flex items-center gap-2 font-display text-2xl font-bold text-primary">
-          <Leaf className="h-6 w-6 text-primary" aria-hidden /> Balans
+          <AequivLogo className="h-6 w-6" /> Aequiv
         </div>
         <nav aria-label="Huvudmeny" className="flex flex-col gap-1">
           {TABS.map(({ to, label, icon: Icon }) => (
@@ -33,7 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <p className="mt-auto text-xs text-muted-foreground">
-          Balans ger generell inspiration och ersätter inte vård eller individuell kostrådgivning.
+          Aequiv ger generell inspiration och ersätter inte vård eller individuell kostrådgivning.
         </p>
       </aside>
       <main className="mx-auto w-full max-w-3xl px-4 pb-[calc(9rem+env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] md:px-8 md:pb-12">{children}</main>
@@ -76,7 +77,7 @@ export function PageLoading() {
 export function NeedsOnboarding() {
   return (
     <div className="panel p-8 text-center">
-      <h1 className="text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em]">Välkommen till Balans</h1>
+      <h1 className="text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em]">Välkommen till Aequiv</h1>
       <p className="mt-2 text-muted-foreground">Svara på några korta frågor så skapar vi din personliga start.</p>
       <Link to="/" className="mt-6 inline-flex min-h-12 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground">
         Kom igång

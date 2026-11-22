@@ -4,9 +4,9 @@ import { LegalPage, LegalSection } from "@/components/LegalPage";
 export const Route = createFileRoute("/integritet")({
   head: () => ({
     meta: [
-      { title: "Integritetspolicy – Balans" },
-      { name: "description", content: "Kort och ärligt: vilken data Balans sparar, hur AI-analysen fungerar och hur du raderar allt." },
-      { property: "og:title", content: "Integritetspolicy – Balans" },
+      { title: "Integritetspolicy – Aequiv" },
+      { name: "description", content: "Kort och ärligt: vilken data Aequiv sparar, hur AI-analysen fungerar och hur du raderar allt." },
+      { property: "og:title", content: "Integritetspolicy – Aequiv" },
       { property: "og:description", content: "Din data stannar hos dig. Inga annonsnätverk." },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
@@ -40,7 +40,7 @@ function Privacy() {
         <p>Du har rätt att klaga hos Integritetsskyddsmyndigheten (IMY).</p>
       </LegalSection>
       <LegalSection title="Kontakt">
-        <p>Frågor om din data: kontakt@balans.app</p>
+        <p>Frågor om din data: kontakt@aequiv.app</p>
       </LegalSection>
     </LegalPage>
   );

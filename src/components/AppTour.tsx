@@ -6,7 +6,7 @@ import { update, useBalans } from "@/lib/balans";
 const SLIDES = [
   { icon: "📸", title: "Logga mat på sekunder", text: "Fota tallriken, blippa streckkoden eller skriv vad du åt – AI:n räknar ut näringen åt dig." },
   { icon: "🎙️", title: "Röststyrd gymlogg", text: "Säg ditt set, dina reps och din vikt handsfree. Du ser direkt när du slår förra passet." },
-  { icon: "🌿", title: "Vila är också framsteg", text: "Markera vilodagar – de bryter aldrig din svit. Balans peppar, aldrig skäms." },
+  { icon: "🌿", title: "Vila är också framsteg", text: "Markera vilodagar – de bryter aldrig din svit. Aequiv peppar, aldrig skäms." },
   { icon: "✨", title: "Din personliga AI-coach", text: "Tryck på stjärnknappen och fråga vad du vill – svaren anpassas efter ditt fokus och dina kostval." },
 ];
 

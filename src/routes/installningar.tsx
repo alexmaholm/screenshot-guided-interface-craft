@@ -27,10 +27,10 @@ async function deleteEverything() {
 export const Route = createFileRoute("/installningar")({
   head: () => ({
     meta: [
-      { title: "Inställningar – Balans" },
-      { name: "description", content: "Ändra fokus, vikt, kostval, träningsdagar och villkor i Balans." },
-      { property: "og:title", content: "Inställningar – Balans" },
-      { property: "og:description", content: "Anpassa Balans efter dig." },
+      { title: "Inställningar – Aequiv" },
+      { name: "description", content: "Ändra fokus, vikt, kostval, träningsdagar och villkor i Aequiv." },
+      { property: "og:title", content: "Inställningar – Aequiv" },
+      { property: "og:description", content: "Anpassa Aequiv efter dig." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -112,7 +112,7 @@ function Settings() {
       </Section>
 
       <Section title="Hälso-synk">
-        <p className="text-sm text-muted-foreground">Synka med {healthSourceName()} så hamnar förbränning, steg och vikt automatiskt i Balans.</p>
+        <p className="text-sm text-muted-foreground">Synka med {healthSourceName()} så hamnar förbränning, steg och vikt automatiskt i Aequiv.</p>
         {([["calories", "Aktiva kalorier"], ["steps", "Steg"], ["weight", "Kroppsvikt"]] as const).map(([k, label]) => {
           const hs = p.healthSync ?? { calories: false, steps: false, weight: false };
           return (
@@ -132,7 +132,7 @@ function Settings() {
       </Section>
 
       <Section title="Villkor & integritet">
-        <p className="text-sm text-muted-foreground">Balans är inspiration för vardag och träning – inte medicinsk rådgivning.</p>
+        <p className="text-sm text-muted-foreground">Aequiv är inspiration för vardag och träning – inte medicinsk rådgivning.</p>
         <div className="flex flex-col">
           <Link to="/integritet" className="flex min-h-11 items-center text-sm font-medium underline-offset-4 hover:underline">Integritetspolicy</Link>
           <Link to="/villkor" className="flex min-h-11 items-center text-sm font-medium underline-offset-4 hover:underline">Användarvillkor</Link>

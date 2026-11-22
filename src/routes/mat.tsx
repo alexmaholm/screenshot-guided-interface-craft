@@ -31,9 +31,9 @@ export const Route = createFileRoute("/mat")({
   }),
   head: () => ({
     meta: [
-      { title: "Mat – Balans" },
+      { title: "Mat – Aequiv" },
       { name: "description", content: "Logga måltider med foto, streckkod eller egen text och spara favoriter." },
-      { property: "og:title", content: "Mat – Balans" },
+      { property: "og:title", content: "Mat – Aequiv" },
       { property: "og:description", content: "Enkel måltidslogg med foto, streckkod och favoriter." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -36,9 +36,9 @@ export const Route = createFileRoute("/traning")({
   }),
   head: () => ({
     meta: [
-      { title: "Träning – Balans" },
+      { title: "Träning – Aequiv" },
       { name: "description", content: "Personliga pass för styrka, kondition och rörlighet – flytta, byt och bocka av." },
-      { property: "og:title", content: "Träning – Balans" },
+      { property: "og:title", content: "Träning – Aequiv" },
       { property: "og:description", content: "Träningspass anpassade efter mål, nivå och utrustning." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
