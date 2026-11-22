@@ -1,14 +1,11 @@
-/** Official Aequiv Æ monogram: titanium ligature cut by the volt equilibrium line. */
+/** Official Aequiv Æ monogram, vectorised from the owner's sketch: 45° A leg sharing a stem with E, one volt line through A and E. */
 export function AequivLogo({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 100 100" className={className} role="img" aria-label="Aequiv">
-      <g transform="translate(12 0) skewX(-14)" fill="currentColor">
-        <polygon points="4,82 19,82 50,18 35,18" />
-        <rect x="42" y="18" width="12" height="64" />
-        <rect x="42" y="18" width="48" height="11" />
-        <rect x="42" y="71" width="48" height="11" />
-        <rect x="17" y="45" width="66" height="10" fill="#D4FF00" />
-      </g>
+    <svg viewBox="-4 -88 292 292" className={className} role="img" aria-label="Aequiv">
+      <polygon points="114,0 284,0 262,26 128,26 40,115 0,115" fill="currentColor"/>
+<rect x="122" y="0" width="32" height="115" fill="currentColor"/>
+<polygon points="122,91 282,91 265,115 122,115" fill="currentColor"/>
+<polygon points="105,49 242,49 230,65 89,65" fill="#D4FF00"/>
     </svg>
   );
 }
