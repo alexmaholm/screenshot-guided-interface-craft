@@ -461,6 +461,11 @@ export function recoveryGuide({ profile, workout, eaten, target, hour, waterGlas
   });
 }
 
+/** Zero-friction start: strong defaults so new users reach the app in one tap; everything is editable in Settings. */
+export function quickStartProfile(name = ""): Profile {
+  return { name: name.trim(), goal: "styrka", level: "van", equipment: ["gym"], days: [0, 2, 4], sessionMin: 40, hideCalories: false, waterGoal: 8, diet: "allt", restrictions: [] };
+}
+
 /* ---------------- Onboarding: skapa plan + exempeldata ---------------- */
 
 /** New users start with no history: only upcoming planned workouts from today, no meals, habits or favorites. */

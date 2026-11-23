@@ -9,9 +9,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { isNativeHealthAvailable, healthSourceName, readHealthToday, mergeHealth, type HealthSyncPrefs } from "@/lib/health";
-import { dateKey, NUTRITION_FOCUS, nutritionFocusOf, resetAll, update, useBalans, WEEKDAYS, type Profile } from "@/lib/balans";
+import { dateKey, getState, NUTRITION_FOCUS, nutritionFocusOf, resetAll, update, useBalans, WEEKDAYS, type Profile } from "@/lib/balans";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyAccount } from "@/lib/account.functions";
+import { exportFilename, exportPayload } from "@/lib/export";
+
+async function exportData() {
+  const blob = new Blob([JSON.stringify(exportPayload(getState()), null, 2)], { type: "application/json" });
+  const name = exportFilename();
+  const file = new File([blob], name, { type: blob.type });
+  if (matchMedia("(pointer: coarse)").matches && navigator.canShare?.({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: name }); return; }
+    catch (e) { if ((e as DOMException).name === "AbortError") return; }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30_000);
+  toast.success("Din data är exporterad");
+}
 
 async function deleteEverything() {
   if (!confirm("Radera konto och all data? Detta går inte att ångra.")) return;
@@ -129,6 +145,11 @@ function Settings() {
 
       <Section title="Konto">
         <AccountCard />
+      </Section>
+
+      <Section title="Din data">
+        <p className="text-sm text-muted-foreground">Ladda ner alla pass, lyft, måltider, vanor och vikt som en fil.</p>
+        <Button variant="outline" className="h-12 w-full rounded-md" onClick={() => void exportData()}>Exportera all data</Button>
       </Section>
 
       <Section title="Villkor & integritet">

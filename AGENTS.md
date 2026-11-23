@@ -19,3 +19,4 @@
 
 - Cloud sync mirrors the whole local state as one JSON row per user (`user_state`) via `src/lib/cloudsync.ts`; local storage stays the source of truth so the app works offline.
 - Keep PRO plans, trial and membership status in `src/lib/tiers.ts` and gate PRO features with `ProGate`/`Paywall` so locks and prices stay consistent; purchases are simulated until native billing is added.
+- New users start via one-screen quick start (`quickStartProfile` in `src/lib/balans.ts`) with editable defaults; detailed preferences live in Settings, not a multi-step wizard, to minimise time-to-app.
