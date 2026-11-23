@@ -58,7 +58,7 @@ function Progress() {
         <p className="label-xs">Aktiva dagar i rad</p>
         <p className="telemetry mt-2 text-6xl font-semibold leading-none tracking-[-0.04em]">{streak}<span className="ml-2 text-base font-normal text-muted-foreground">{streak === 1 ? "dag" : "dagar"}</span></p>
         <div className="mt-4 h-px w-full bg-border"><div className="glow-primary h-px bg-primary" style={{ width: `${Math.min(100, (streak / 7) * 100)}%` }} /></div>
-        <p className="mt-3 text-sm text-muted-foreground">{streak >= 3 ? "Rutinen sitter." : "Varje dag är en ny start."}{restDays ? ` ${restDays} vilodag${restDays > 1 ? "ar" : ""} ingår – vila räknas.` : ""}</p>
+        <p className="mt-3 text-sm text-muted-foreground">{streak >= 3 ? "Rutinen sitter." : "Bygg sviten dag för dag."}{restDays ? ` ${restDays} vilodag${restDays > 1 ? "ar" : ""} ingår i sviten.` : ""}</p>
       </section>
 
       <section className="panel grid grid-cols-4 divide-x divide-border">

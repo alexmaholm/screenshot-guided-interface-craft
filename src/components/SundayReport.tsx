@@ -21,7 +21,7 @@ export function SundayReport({ workouts, days, restDays, streak, waterAvg, mealD
     { k: "Din vecka", big: `${r.workouts}`, unit: r.workouts === 1 ? "pass" : "pass", sub: `${r.minutes} minuters rörelse` },
     { k: "Total lyft volym", big: r.volumeKg >= 1000 ? (r.volumeKg / 1000).toLocaleString("sv-SE", { maximumFractionDigits: 1 }) : `${r.volumeKg}`, unit: r.volumeKg >= 1000 ? "ton" : "kg", sub: compare(r.volumeKg) },
     { k: "Veckans tyngsta lyft", big: r.topLift ? `${r.topLift.kg}` : "–", unit: r.topLift ? "kg" : "", sub: r.topLift?.name ?? "Logga vikter så dyker ditt toppyft upp här" },
-    { k: "Kontinuitet", big: `${streak}`, unit: "dagar i rad", sub: restDays ? `${restDays} vilodag${restDays > 1 ? "ar" : ""} – vila räknas` : `Mat loggad ${mealDays}/7 dagar · ${waterAvg.toFixed(1)} glas vatten/dag` },
+    { k: "Kontinuitet", big: `${streak}`, unit: "dagar i rad", sub: restDays ? `${restDays} vilodag${restDays > 1 ? "ar" : ""} i sviten` : `Mat loggad ${mealDays}/7 dagar · ${waterAvg.toFixed(1)} glas vatten/dag` },
   ];
   const s = slides[i]!;
   const share = async () => {

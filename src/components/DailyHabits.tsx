@@ -33,12 +33,12 @@ export function DailyHabits({ date }: { date: string }) {
           <p className="label-xs">Loggscore</p>
         </div>
       </div>
-      <p className="text-sm text-muted-foreground">{score === 100 ? "Alla dagens riktmärken nådda. Fint jobbat!" : score >= 50 ? "Du har gett dagen en fin grund. Varje liten vana räknas." : "En ny dag, i din takt. Det du gör räknas – inte det som saknas."}</p>
+      <p className="text-sm text-muted-foreground">{score === 100 ? "Alla dagens mål nådda. 100 %." : score >= 50 ? "Över halvvägs. Fortsätt logga." : "Ny dag. Börja logga för att bygga dagens poäng."}</p>
       <div className="flex items-center gap-3 rounded-md border border-border p-4">
         <Flame className="h-5 w-5 shrink-0 text-primary" aria-hidden />
         <div className="min-w-0 flex-1">
           <p className="font-semibold">{streak} {streak === 1 ? "dag" : "dagar"} i rad</p>
-          <p className="text-xs text-muted-foreground">{habits.restDay ? "Vila räknas. Sviten lever." : restDays ? `Inklusive ${restDays} vilodag${restDays > 1 ? "ar" : ""} – vila räknas.` : "Logga mat, vanor eller träning – eller välj vila."}</p>
+          <p className="text-xs text-muted-foreground">{habits.restDay ? "Återhämtning registrerad. Sviten intakt." : restDays ? `Inklusive ${restDays} vilodag${restDays > 1 ? "ar" : ""} i sviten.` : "Logga mat, vanor eller träning – eller välj vila."}</p>
         </div>
         <Button size="sm" variant={habits.restDay ? "default" : "secondary"} className="shrink-0" aria-pressed={!!habits.restDay} onClick={() => setHabit({ restDay: !habits.restDay })}>
           <Leaf className="h-4 w-4" /> {habits.restDay ? "Vilodag" : "Vila idag"}

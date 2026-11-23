@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Aequiv – mat, träning och återhämtning" },
-      { name: "description", content: "Planera och följ mat, träning och vila på ett ställe – enkelt och utan pekpinnar." },
+      { name: "description", content: "Planera och följ träning, nutrition och återhämtning på ett ställe – kalibrerat efter dig." },
       { property: "og:title", content: "Aequiv – mat, träning och återhämtning" },
       { property: "og:description", content: "Din dag med mat, träning och vila samlat på ett ställe." },
       { property: "og:type", content: "website" },
