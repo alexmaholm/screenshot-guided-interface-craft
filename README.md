@@ -1,6 +1,6 @@
-# Träning- och kostapp
+# AEQUIV
 
-Implement exactly the screenshot and nothing else
+Träning, nutrition och återhämtning i jämvikt. Lokal-först mobilapp byggd med TanStack Start, React och Tailwind.
 
 This project was built with [Lovable](https://lovable.dev).
 
