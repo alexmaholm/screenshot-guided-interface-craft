@@ -641,10 +641,11 @@ function RestTimer({
       });
     }, 1000);
   };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Runs only when `trigger` changes. `start` is recreated on every render,
+  // so listing it as a dependency would restart the rest timer on each render.
   useEffect(() => {
     if (trigger > 0) start();
-  }, [trigger]);
+  }, [trigger]); // eslint-disable-line react-hooks/exhaustive-deps
   const adjust = (d: number) => {
     onChange(clampRest(seconds + d));
     if (left !== null) setLeft((v) => (v === null ? v : Math.max(1, v + d)));

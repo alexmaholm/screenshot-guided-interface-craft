@@ -217,9 +217,11 @@ export function AiCoach() {
   >([]);
   const [pay, setPay] = useState(false);
   const mic = useDictation(setQ);
+  // `mic` is a new object each render, but stop() only touches a ref and a stable
+  // state setter, so running the effect on `open` alone is intentional.
   useEffect(() => {
     if (!open) mic.stop();
-  }, [open]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!s?.profile) return null;
 
   const edit = (i: number, j: number, fn: (a: CoachAction) => CoachAction) =>
