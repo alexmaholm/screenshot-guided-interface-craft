@@ -13,11 +13,21 @@ describe("set types", () => {
   });
 
   it("numbers only working sets", () => {
-    expect(setLabels([{ done: false, type: "warmup" }, { done: false }, { done: false }, { done: false, type: "drop" }])).toEqual(["W", "1", "2", "D"]);
+    expect(
+      setLabels([
+        { done: false, type: "warmup" },
+        { done: false },
+        { done: false },
+        { done: false, type: "drop" },
+      ]),
+    ).toEqual(["W", "1", "2", "D"]);
   });
 
   it("ignores warm-up weight for heaviest lift", () => {
-    const e = withRows(ex, [{ kg: 100, done: true, type: "warmup" }, { kg: 60, done: true }]);
+    const e = withRows(ex, [
+      { kg: 100, done: true, type: "warmup" },
+      { kg: 60, done: true },
+    ]);
     expect(e.weightKg).toBe(60);
   });
 });

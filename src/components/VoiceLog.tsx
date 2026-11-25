@@ -5,10 +5,16 @@ import { parseVoice, type VoiceCommand } from "@/lib/voice";
 
 type Result = { isFinal: boolean; 0: { transcript: string } };
 type Rec = {
-  lang: string; interimResults: boolean; continuous: boolean; maxAlternatives: number;
-  start: () => void; stop: () => void; abort: () => void;
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  maxAlternatives: number;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
   onresult: ((e: { resultIndex: number; results: ArrayLike<Result> }) => void) | null;
-  onend: (() => void) | null; onerror: (() => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
 };
 
 /** Mikrofonknapp: lyssnar kontinuerligt, visar texten live och loggar direkt när ett kommando känns igen. */
@@ -22,7 +28,13 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
   cb.current = onCommand;
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  useEffect(() => () => { want.current = false; kill(); }, []);
+  useEffect(
+    () => () => {
+      want.current = false;
+      kill();
+    },
+    [],
+  );
 
   const run = (text: string, key: number) => {
     if (handled.current.has(key)) return true;
@@ -39,7 +51,16 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
     clearTimeout(timer.current);
     const old = rec.current;
     rec.current = null;
-    if (old) { old.onresult = null; old.onend = null; old.onerror = null; try { old.abort(); } catch { /* redan stoppad */ } }
+    if (old) {
+      old.onresult = null;
+      old.onend = null;
+      old.onerror = null;
+      try {
+        old.abort();
+      } catch {
+        /* redan stoppad */
+      }
+    }
   };
 
   // Ny igenkännare varje gång: iOS/WebKit vägrar ofta starta om samma instans, och resultatindex börjar om från 0.
@@ -62,14 +83,30 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
           if (!run(text, i)) toast(`"${text}" – säg t.ex. "10 på 20" eller "klar"`);
           timer.current = setTimeout(() => setLive(""), 1500);
         } else if (/\b(klar|nästa|kilo|kg|reps?|på)\b/i.test(text)) {
-          timer.current = setTimeout(() => { if (rec.current === r) run(text, i); }, 450);
+          timer.current = setTimeout(() => {
+            if (rec.current === r) run(text, i);
+          }, 450);
         }
       }
     };
     r.onend = () => {
       if (rec.current !== r) return;
-      if (want.current) setTimeout(() => { if (want.current && rec.current === r) { try { begin(Ctor); } catch { want.current = false; setOn(false); } } }, 250);
-      else { rec.current = null; setOn(false); setLive(""); }
+      if (want.current)
+        setTimeout(() => {
+          if (want.current && rec.current === r) {
+            try {
+              begin(Ctor);
+            } catch {
+              want.current = false;
+              setOn(false);
+            }
+          }
+        }, 250);
+      else {
+        rec.current = null;
+        setOn(false);
+        setLive("");
+      }
     };
     r.onerror = () => {};
     rec.current = r;
@@ -77,17 +114,38 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
   };
 
   const toggle = () => {
-    const W = window as unknown as { SpeechRecognition?: new () => Rec; webkitSpeechRecognition?: new () => Rec };
+    const W = window as unknown as {
+      SpeechRecognition?: new () => Rec;
+      webkitSpeechRecognition?: new () => Rec;
+    };
     const Ctor = W.SpeechRecognition ?? W.webkitSpeechRecognition;
     if (!Ctor) return void toast.error("Röststyrning stöds inte på den här enheten än.");
-    if (on) { want.current = false; kill(); setOn(false); setLive(""); return; }
+    if (on) {
+      want.current = false;
+      kill();
+      setOn(false);
+      setLive("");
+      return;
+    }
     want.current = true;
     setOn(true);
-    try { begin(Ctor); } catch { want.current = false; setOn(false); }
+    try {
+      begin(Ctor);
+    } catch {
+      want.current = false;
+      setOn(false);
+    }
   };
 
   useEffect(() => {
-    const onHide = () => { if (document.hidden) { want.current = false; kill(); setOn(false); setLive(""); } };
+    const onHide = () => {
+      if (document.hidden) {
+        want.current = false;
+        kill();
+        setOn(false);
+        setLive("");
+      }
+    };
     document.addEventListener("visibilitychange", onHide);
     return () => document.removeEventListener("visibilitychange", onHide);
   }, []);
@@ -95,12 +153,19 @@ export function VoiceLog({ onCommand }: { onCommand: (c: VoiceCommand) => string
   return (
     <>
       {on && (
-        <div className="fixed bottom-[calc(8rem+env(safe-area-inset-bottom))] left-4 z-40 max-w-[70vw] rounded-lg bg-card px-4 py-2 text-sm shadow-lg" aria-live="polite">
+        <div
+          className="fixed bottom-[calc(8rem+env(safe-area-inset-bottom))] left-4 z-40 max-w-[70vw] rounded-lg bg-card px-4 py-2 text-sm shadow-lg"
+          aria-live="polite"
+        >
           {live || <span className="text-muted-foreground">Lyssnar…</span>}
         </div>
       )}
-      <button onClick={toggle} aria-label={on ? "Sluta lyssna" : "Logga med rösten"} aria-pressed={on}
-        className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-4 z-40 grid h-11 w-11 md:bottom-6 place-items-center rounded-lg border backdrop-blur-xl transition ${on ? "animate-pulse border-primary bg-primary text-primary-foreground" : "border-border bg-background/85 text-foreground"}`}>
+      <button
+        onClick={toggle}
+        aria-label={on ? "Sluta lyssna" : "Logga med rösten"}
+        aria-pressed={on}
+        className={`fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-4 z-40 grid h-11 w-11 md:bottom-6 place-items-center rounded-lg border backdrop-blur-xl transition ${on ? "animate-pulse border-primary bg-primary text-primary-foreground" : "border-border bg-background/85 text-foreground"}`}
+      >
         <Mic className="h-4 w-4" strokeWidth={1.5} />
       </button>
     </>

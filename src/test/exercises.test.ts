@@ -3,7 +3,12 @@ import { EXERCISES, muscleRecovery, recoveryStatus, searchExercises } from "@/li
 import type { Workout } from "@/lib/balans";
 
 const w = (date: string, names: string[]): Workout => ({
-  id: date, date, title: "Pass", kind: "styrka", durationMin: 30, status: "klart",
+  id: date,
+  date,
+  title: "Pass",
+  kind: "styrka",
+  durationMin: 30,
+  status: "klart",
   exercises: names.map((name) => ({ name, restSec: 60, done: true })),
 });
 

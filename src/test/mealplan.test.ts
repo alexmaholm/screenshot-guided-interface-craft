@@ -8,7 +8,17 @@ describe("veckoplan", () => {
     expect(w[6]).toBe("2026-11-01");
   });
   it("träningspass gör dagen till träningsdag, vald vila till vilodag", () => {
-    const w = [{ id: "1", date: "2026-10-29", title: "", kind: "styrka" as const, durationMin: 30, exercises: [], status: "planerat" as const }];
+    const w = [
+      {
+        id: "1",
+        date: "2026-10-29",
+        title: "",
+        kind: "styrka" as const,
+        durationMin: 30,
+        exercises: [],
+        status: "planerat" as const,
+      },
+    ];
     expect(dayKind(w, undefined, "2026-10-29")).toBe("träning");
     expect(dayKind([], { water: 0, restDay: true }, "2026-10-29")).toBe("vila");
     expect(dayKind([], undefined, "2026-10-29")).toBe("fri");
@@ -18,6 +28,8 @@ describe("veckoplan", () => {
       { id: "2", date: "2026-10-28", type: "middag" as const, name: "Kycklingwok" },
       { id: "1", date: "2026-10-27", type: "lunch" as const, name: "Matlåda" },
     ];
-    expect(planText(plan, ["2026-10-27", "2026-10-28"], ["Tis", "Ons"])).toBe("- Tis: Matlåda\n- Ons: Kycklingwok");
+    expect(planText(plan, ["2026-10-27", "2026-10-28"], ["Tis", "Ons"])).toBe(
+      "- Tis: Matlåda\n- Ons: Kycklingwok",
+    );
   });
 });

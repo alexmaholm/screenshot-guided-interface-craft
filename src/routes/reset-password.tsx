@@ -25,11 +25,17 @@ function ResetPassword() {
   const navigate = useNavigate();
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    if (pw.length < 6) { toast.error("Lösenordet måste ha minst 6 tecken."); return; }
+    if (pw.length < 6) {
+      toast.error("Lösenordet måste ha minst 6 tecken.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pw });
     setBusy(false);
-    if (error) { toast.error("Länken har gått ut. Begär en ny."); return; }
+    if (error) {
+      toast.error("Länken har gått ut. Begär en ny.");
+      return;
+    }
     toast.success("Ditt lösenord är uppdaterat");
     navigate({ to: "/", replace: true });
   }
@@ -37,8 +43,17 @@ function ResetPassword() {
     <main className="mx-auto max-w-sm space-y-4 px-6 py-16">
       <h1 className="text-2xl font-semibold">Välj nytt lösenord</h1>
       <form onSubmit={save} className="space-y-3">
-        <Input type="password" autoComplete="new-password" placeholder="Nytt lösenord" value={pw} onChange={(e) => setPw(e.target.value)} className="h-12" />
-        <Button type="submit" disabled={busy} className="h-12 w-full rounded-md">Spara lösenord</Button>
+        <Input
+          type="password"
+          autoComplete="new-password"
+          placeholder="Nytt lösenord"
+          value={pw}
+          onChange={(e) => setPw(e.target.value)}
+          className="h-12"
+        />
+        <Button type="submit" disabled={busy} className="h-12 w-full rounded-md">
+          Spara lösenord
+        </Button>
       </form>
     </main>
   );

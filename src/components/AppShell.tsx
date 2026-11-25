@@ -37,7 +37,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           Aequiv ger generell inspiration och ersätter inte vård eller individuell kostrådgivning.
         </p>
       </aside>
-      <main className="mx-auto w-full max-w-3xl px-4 pb-[calc(9rem+env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] md:px-8 md:pb-12">{children}</main>
+      <main className="mx-auto w-full max-w-3xl px-4 pb-[calc(9rem+env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] md:px-8 md:pb-12">
+        {children}
+      </main>
       <AiCoach />
       <AppTour />
       <WelcomeAccount />
@@ -77,9 +79,16 @@ export function PageLoading() {
 export function NeedsOnboarding() {
   return (
     <div className="panel p-8 text-center">
-      <h1 className="text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em]">Välkommen till Aequiv</h1>
-      <p className="mt-2 text-muted-foreground">Svara på några korta frågor så skapar vi din personliga start.</p>
-      <Link to="/" className="mt-6 inline-flex min-h-12 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground">
+      <h1 className="text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em]">
+        Välkommen till Aequiv
+      </h1>
+      <p className="mt-2 text-muted-foreground">
+        Svara på några korta frågor så skapar vi din personliga start.
+      </p>
+      <Link
+        to="/"
+        className="mt-6 inline-flex min-h-12 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground"
+      >
         Kom igång
       </Link>
     </div>

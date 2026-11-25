@@ -1,4 +1,10 @@
-import { addDays, weekdayIndex, type DayHabits, type PlannedMeal, type Workout } from "@/lib/balans";
+import {
+  addDays,
+  weekdayIndex,
+  type DayHabits,
+  type PlannedMeal,
+  type Workout,
+} from "@/lib/balans";
 
 /** Monday–Sunday date keys for the week containing `key`. */
 export function weekDates(key: string): string[] {
@@ -23,5 +29,9 @@ export const DAY_HINT: Record<DayKind, string> = {
 
 /** Planned meals for the given dates as shareable text, one line per meal in date order. */
 export function planText(plan: PlannedMeal[], dates: string[], dayLabels: string[]): string {
-  return dates.flatMap((d, i) => plan.filter((pm) => pm.date === d && pm.name).map((pm) => `- ${dayLabels[i]}: ${pm.name}`)).join("\n");
+  return dates
+    .flatMap((d, i) =>
+      plan.filter((pm) => pm.date === d && pm.name).map((pm) => `- ${dayLabels[i]}: ${pm.name}`),
+    )
+    .join("\n");
 }

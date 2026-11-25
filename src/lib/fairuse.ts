@@ -17,7 +17,8 @@ export function normalize(u: PhotoUsage | null, now: number): PhotoUsage {
   return u;
 }
 
-export type PhotoCheck = { ok: true; left: number } | { ok: false; reason: "limit" | "cooldown"; waitS?: number };
+export type PhotoCheck =
+  { ok: true; left: number } | { ok: false; reason: "limit" | "cooldown"; waitS?: number };
 
 export function checkPhoto(u: PhotoUsage | null, now: number): PhotoCheck {
   const n = normalize(u, now);
@@ -37,8 +38,16 @@ export function photosLeft(u: PhotoUsage | null, now: number) {
 }
 
 export function loadUsage(): PhotoUsage | null {
-  try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch { return null; }
+  try {
+    return JSON.parse(localStorage.getItem(KEY) || "null");
+  } catch {
+    return null;
+  }
 }
 export function saveUsage(u: PhotoUsage) {
-  try { localStorage.setItem(KEY, JSON.stringify(u)); } catch { /* ignore */ }
+  try {
+    localStorage.setItem(KEY, JSON.stringify(u));
+  } catch {
+    /* ignore */
+  }
 }

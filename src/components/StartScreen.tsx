@@ -22,12 +22,24 @@ export function StartScreen() {
   if (view === "login") {
     return (
       <div className="mx-auto flex min-h-screen max-w-lg flex-col px-6 py-10">
-        <Button variant="ghost" size="icon" className="h-12 w-12" onClick={() => setView("start")} aria-label="Tillbaka"><ArrowLeft /></Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-12 w-12"
+          onClick={() => setView("start")}
+          aria-label="Tillbaka"
+        >
+          <ArrowLeft />
+        </Button>
         <div className="mt-6 flex-1">
           <p className="label-xs telemetry">Återställ profil</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">Välkommen tillbaka.</h1>
-          <p className="mt-2 text-muted-foreground">Logga in så synkas dina pass, måltider och din svit.</p>
-          <div className="mt-8"><SignInOptions /></div>
+          <p className="mt-2 text-muted-foreground">
+            Logga in så synkas dina pass, måltider och din svit.
+          </p>
+          <div className="mt-8">
+            <SignInOptions />
+          </div>
         </div>
       </div>
     );
@@ -41,9 +53,13 @@ export function StartScreen() {
       </div>
       <div className="flex flex-1 flex-col justify-center py-10">
         <h1 className="text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.04em]">
-          Träning. Nutrition. Återhämtning.<br /><span className="text-primary">I jämvikt.</span>
+          Träning. Nutrition. Återhämtning.
+          <br />
+          <span className="text-primary">I jämvikt.</span>
         </h1>
-        <p className="mt-4 text-base text-muted-foreground">Precision för din kropp – utan friktion.</p>
+        <p className="mt-4 text-base text-muted-foreground">
+          Precision för din kropp – utan friktion.
+        </p>
         <ul className="mt-8 divide-y divide-border border-y">
           {POINTS.map(({ icon: Icon, label, text }) => (
             <li key={label} className="flex items-center gap-4 py-3.5">
@@ -54,12 +70,42 @@ export function StartScreen() {
           ))}
         </ul>
       </div>
-      <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); start(); }}>
-        <label htmlFor="name" className="sr-only">Ditt namn</label>
-        <Input id="name" autoComplete="given-name" className="h-14 rounded-md text-base" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ditt namn (valfritt)" />
-        <Button type="submit" size="lg" className="h-14 rounded-md text-base font-semibold glow-primary">Starta Aequiv <ArrowRight className="h-4 w-4" aria-hidden /></Button>
-        <Button type="button" variant="ghost" className="h-12 rounded-md text-muted-foreground" onClick={() => setView("login")}>Har du redan ett konto? Logga in</Button>
-        <p className="mt-1 text-center text-xs text-muted-foreground">Mål, utrustning och kost finjusterar du när du vill i Inställningar.</p>
+      <form
+        className="flex flex-col gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          start();
+        }}
+      >
+        <label htmlFor="name" className="sr-only">
+          Ditt namn
+        </label>
+        <Input
+          id="name"
+          autoComplete="given-name"
+          className="h-14 rounded-md text-base"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Ditt namn (valfritt)"
+        />
+        <Button
+          type="submit"
+          size="lg"
+          className="h-14 rounded-md text-base font-semibold glow-primary"
+        >
+          Starta Aequiv <ArrowRight className="h-4 w-4" aria-hidden />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-12 rounded-md text-muted-foreground"
+          onClick={() => setView("login")}
+        >
+          Har du redan ett konto? Logga in
+        </Button>
+        <p className="mt-1 text-center text-xs text-muted-foreground">
+          Mål, utrustning och kost finjusterar du när du vill i Inställningar.
+        </p>
       </form>
     </div>
   );

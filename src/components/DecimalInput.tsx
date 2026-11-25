@@ -10,7 +10,14 @@ export function parseDecimal(text: string): number | undefined {
 }
 
 /** Number field that keeps what the user types (e.g. "1,") so commas aren't swallowed. */
-export function DecimalInput({ value, onValue, ...rest }: Omit<ComponentProps<typeof Input>, "value" | "onChange" | "type"> & { value: number | undefined; onValue: (n: number | undefined) => void }) {
+export function DecimalInput({
+  value,
+  onValue,
+  ...rest
+}: Omit<ComponentProps<typeof Input>, "value" | "onChange" | "type"> & {
+  value: number | undefined;
+  onValue: (n: number | undefined) => void;
+}) {
   const [draft, setDraft] = useState<string | null>(null);
   const shown = draft ?? (value === undefined ? "" : String(value).replace(".", ","));
   return (
@@ -25,7 +32,10 @@ export function DecimalInput({ value, onValue, ...rest }: Omit<ComponentProps<ty
         setDraft(e.target.value);
         onValue(n);
       }}
-      onBlur={(e) => { setDraft(null); rest.onBlur?.(e); }}
+      onBlur={(e) => {
+        setDraft(null);
+        rest.onBlur?.(e);
+      }}
     />
   );
 }

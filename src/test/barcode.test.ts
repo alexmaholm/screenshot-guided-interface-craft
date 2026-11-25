@@ -8,7 +8,9 @@ describe("streckkod", () => {
     expect(isValidBarcode("12345")).toBe(false);
   });
   it("räknar om kJ till kcal när kcal saknas", () => {
-    const p = parseOffProduct("73108650", { product: { product_name: "Kvarg", nutriments: { energy_100g: 418.4, proteins_100g: 11 } } });
+    const p = parseOffProduct("73108650", {
+      product: { product_name: "Kvarg", nutriments: { energy_100g: 418.4, proteins_100g: 11 } },
+    });
     expect(p?.kcal).toBe(100);
   });
   it("saknad produkt ger null", () => {
@@ -30,11 +32,24 @@ describe("measureGrams", () => {
 
 describe("streckkod mikronäring", () => {
   it("läser fiber, socker, mättat fett och salt per 100 g och skalar per portion", () => {
-    const p = parseOffProduct("73108650", { product: { product_name: "Müsli", nutriments: { "energy-kcal_100g": 400, fiber_100g: 8, sugars_100g: 20, "saturated-fat_100g": 2, salt_100g: 0.5 } } })!;
+    const p = parseOffProduct("73108650", {
+      product: {
+        product_name: "Müsli",
+        nutriments: {
+          "energy-kcal_100g": 400,
+          fiber_100g: 8,
+          sugars_100g: 20,
+          "saturated-fat_100g": 2,
+          salt_100g: 0.5,
+        },
+      },
+    })!;
     expect(portionFor(p, 50)).toMatchObject({ fiber: 4, sugar: 10, satFat: 1, salt: 0.25 });
   });
   it("räknar salt från natrium när salt saknas", () => {
-    const p = parseOffProduct("73108650", { product: { product_name: "x", nutriments: { "energy-kcal_100g": 100, sodium_100g: 0.4 } } });
+    const p = parseOffProduct("73108650", {
+      product: { product_name: "x", nutriments: { "energy-kcal_100g": 100, sodium_100g: 0.4 } },
+    });
     expect(p?.salt).toBe(1);
   });
 });

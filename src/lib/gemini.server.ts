@@ -2,7 +2,11 @@
 // Uses Gemini's OpenAI-compatible endpoint with the project's GEMINI_API_KEY.
 // Fast "lite" models answer in ~1 s. When one is overloaded (503) or retired (404),
 // the next one in the list is tried automatically so users never see a silent failure.
-export const GEMINI_MODELS = ["gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.1-flash-lite"];
+export const GEMINI_MODELS = [
+  "gemini-3.5-flash-lite",
+  "gemini-flash-lite-latest",
+  "gemini-3.1-flash-lite",
+];
 export const GEMINI_MODEL = GEMINI_MODELS[0]!;
 
 export async function geminiModel() {
@@ -20,10 +24,21 @@ export async function geminiModel() {
     (async (opts: Parameters<M[K]>[0]) => {
       let last: unknown;
       for (const m of models) {
-        try { return await (m[k] as (o: typeof opts) => ReturnType<M[K]>)(opts); }
-        catch (e) { last = e; }
+        try {
+          return await (m[k] as (o: typeof opts) => ReturnType<M[K]>)(opts);
+        } catch (e) {
+          last = e;
+        }
       }
       throw last;
     }) as M[K];
-  return { ...primary, specificationVersion: primary.specificationVersion, provider: primary.provider, modelId: primary.modelId, supportedUrls: primary.supportedUrls, doGenerate: withFallback("doGenerate"), doStream: withFallback("doStream") } as M;
+  return {
+    ...primary,
+    specificationVersion: primary.specificationVersion,
+    provider: primary.provider,
+    modelId: primary.modelId,
+    supportedUrls: primary.supportedUrls,
+    doGenerate: withFallback("doGenerate"),
+    doStream: withFallback("doStream"),
+  } as M;
 }
