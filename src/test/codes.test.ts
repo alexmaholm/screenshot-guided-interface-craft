@@ -6,5 +6,7 @@ describe("kampanjkoder", () => {
     expect(sub?.lifetime).toBe(true);
     expect(status(sub!, Date.now() + 10 * 365 * 86_400_000)).toBe("pro");
   });
-  it("ogiltig kod avvisas", async () => { expect(await redeemCode("GRATIS")).toBeNull(); });
+  it("ogiltig kod avvisas", async () => {
+    expect(await redeemCode("GRATIS")).toBeNull();
+  });
 });

@@ -6,14 +6,32 @@ import { foodsFor, portion, UNIT_LABEL, useBalans, type Food, type Unit } from "
 import type { BarcodeProduct } from "@/lib/barcode";
 import { searchBrandFoods } from "@/lib/foodsearch.functions";
 
-export interface FoodPick { name: string; amount: string; kcal: number; protein: number; carbs: number; fat: number }
+export interface FoodPick {
+  name: string;
+  amount: string;
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
 
 const toFood = (p: BarcodeProduct): Food => ({
-  name: p.name, kcal: p.kcal, protein: p.protein, carbs: p.carbs, fat: p.fat,
-  units: p.servingG ? { g: 1, st: p.servingG } : { g: 1 }, contains: [],
+  name: p.name,
+  kcal: p.kcal,
+  protein: p.protein,
+  carbs: p.carbs,
+  fat: p.fat,
+  units: p.servingG ? { g: 1, st: p.servingG } : { g: 1 },
+  contains: [],
 });
 
-export function FoodSearch({ onPick, showKcal }: { onPick: (p: FoodPick) => void; showKcal: boolean }) {
+export function FoodSearch({
+  onPick,
+  showKcal,
+}: {
+  onPick: (p: FoodPick) => void;
+  showKcal: boolean;
+}) {
   const s = useBalans();
   const [q, setQ] = useState("");
   const [sel, setSel] = useState<Food | null>(null);
@@ -27,16 +45,32 @@ export function FoodSearch({ onPick, showKcal }: { onPick: (p: FoodPick) => void
   useEffect(() => {
     const term = q.trim();
     setFailed(false);
-    if (term.length < 2) { setBrands([]); setLoading(false); return; }
+    if (term.length < 2) {
+      setBrands([]);
+      setLoading(false);
+      return;
+    }
     const ctrl = new AbortController();
     setLoading(true);
     const t = setTimeout(() => {
       searchBrandFoods({ data: { q: term } })
-        .then((r) => { if (!ctrl.signal.aborted) setBrands(r); })
-        .catch(() => { if (!ctrl.signal.aborted) { setBrands([]); setFailed(true); } })
-        .finally(() => { if (!ctrl.signal.aborted) setLoading(false); });
+        .then((r) => {
+          if (!ctrl.signal.aborted) setBrands(r);
+        })
+        .catch(() => {
+          if (!ctrl.signal.aborted) {
+            setBrands([]);
+            setFailed(true);
+          }
+        })
+        .finally(() => {
+          if (!ctrl.signal.aborted) setLoading(false);
+        });
     }, 400);
-    return () => { clearTimeout(t); ctrl.abort(); };
+    return () => {
+      clearTimeout(t);
+      ctrl.abort();
+    };
   }, [q]);
 
   const choose = (f: Food) => {
@@ -54,21 +88,50 @@ export function FoodSearch({ onPick, showKcal }: { onPick: (p: FoodPick) => void
       <div className="space-y-3">
         <p className="font-semibold">{sel.name}</p>
         <div className="flex gap-2">
-          <Input aria-label="Mängd" inputMode="decimal" className="h-12 w-24 rounded-md" value={qty} onChange={(e) => setQty(e.target.value)} />
+          <Input
+            aria-label="Mängd"
+            inputMode="decimal"
+            className="h-12 w-24 rounded-md"
+            value={qty}
+            onChange={(e) => setQty(e.target.value)}
+          />
           <div className="flex flex-wrap gap-2">
             {(Object.keys(sel.units) as Unit[]).map((u) => (
-              <button key={u} className="chip" aria-pressed={unit === u} onClick={() => setUnit(u)}>{UNIT_LABEL[u]}</button>
+              <button key={u} className="chip" aria-pressed={unit === u} onClick={() => setUnit(u)}>
+                {UNIT_LABEL[u]}
+              </button>
             ))}
           </div>
         </div>
         {p ? (
           <p className="rounded-lg bg-muted p-3 text-sm">
-            ca {Math.round(p.grams)} g · {p.protein} g protein · {p.carbs} g kolhydrater · {p.fat} g fett{showKcal ? ` · ${p.kcal} kcal` : ""}
+            ca {Math.round(p.grams)} g · {p.protein} g protein · {p.carbs} g kolhydrater · {p.fat} g
+            fett{showKcal ? ` · ${p.kcal} kcal` : ""}
           </p>
-        ) : <p className="text-sm text-destructive">Ange en mängd större än 0.</p>}
+        ) : (
+          <p className="text-sm text-destructive">Ange en mängd större än 0.</p>
+        )}
         <div className="grid grid-cols-2 gap-2">
-          <Button variant="secondary" className="h-12 rounded-md" onClick={() => setSel(null)}>Tillbaka</Button>
-          <Button className="h-12 rounded-md" disabled={!p} onClick={() => p && onPick({ name: sel.name, amount: `${qty} ${UNIT_LABEL[unit]}`, kcal: p.kcal, protein: p.protein, carbs: p.carbs, fat: p.fat })}>Lägg till</Button>
+          <Button variant="secondary" className="h-12 rounded-md" onClick={() => setSel(null)}>
+            Tillbaka
+          </Button>
+          <Button
+            className="h-12 rounded-md"
+            disabled={!p}
+            onClick={() =>
+              p &&
+              onPick({
+                name: sel.name,
+                amount: `${qty} ${UNIT_LABEL[unit]}`,
+                kcal: p.kcal,
+                protein: p.protein,
+                carbs: p.carbs,
+                fat: p.fat,
+              })
+            }
+          >
+            Lägg till
+          </Button>
         </div>
       </div>
     );
@@ -76,9 +139,14 @@ export function FoodSearch({ onPick, showKcal }: { onPick: (p: FoodPick) => void
 
   const row = (key: string, name: string, f: Food) => (
     <li key={key}>
-      <button onClick={() => choose(f)} className="flex min-h-12 w-full items-center justify-between gap-3 rounded-lg bg-muted px-4 py-2 text-left hover:bg-secondary">
+      <button
+        onClick={() => choose(f)}
+        className="flex min-h-12 w-full items-center justify-between gap-3 rounded-lg bg-muted px-4 py-2 text-left hover:bg-secondary"
+      >
         <span className="font-medium">{name}</span>
-        <span className="shrink-0 text-xs text-muted-foreground">{f.protein} g prot{showKcal ? ` · ${f.kcal} kcal` : ""} /100 g</span>
+        <span className="shrink-0 text-xs text-muted-foreground">
+          {f.protein} g prot{showKcal ? ` · ${f.kcal} kcal` : ""} /100 g
+        </span>
       </button>
     </li>
   );
@@ -87,7 +155,13 @@ export function FoodSearch({ onPick, showKcal }: { onPick: (p: FoodPick) => void
     <div className="space-y-3">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input aria-label="Sök livsmedel" placeholder="Sök t.ex. havregryn, Nocco, Barebells…" className="h-12 rounded-md pl-9" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Input
+          aria-label="Sök livsmedel"
+          placeholder="Sök t.ex. havregryn, Nocco, Barebells…"
+          className="h-12 rounded-md pl-9"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
       </div>
       <ul className="max-h-80 space-y-2 overflow-y-auto">
         {list.map((f) => row(f.name, f.name, f))}
@@ -98,9 +172,15 @@ export function FoodSearch({ onPick, showKcal }: { onPick: (p: FoodPick) => void
         )}
         {brands.map((b) => row(`off-${b.code}`, b.name, toFood(b)))}
         {q.trim().length >= 2 && !loading && brands.length === 0 && (
-          <li className="py-2 text-center text-sm text-muted-foreground">{failed ? "Kunde inte söka märkesvaror just nu." : "Inga märkesvaror hittades."}</li>
+          <li className="py-2 text-center text-sm text-muted-foreground">
+            {failed ? "Kunde inte söka märkesvaror just nu." : "Inga märkesvaror hittades."}
+          </li>
         )}
-        {q.trim().length < 2 && list.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">Inga träffar som passar din kost.</li>}
+        {q.trim().length < 2 && list.length === 0 && (
+          <li className="py-6 text-center text-sm text-muted-foreground">
+            Inga träffar som passar din kost.
+          </li>
+        )}
       </ul>
     </div>
   );

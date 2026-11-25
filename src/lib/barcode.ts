@@ -2,9 +2,15 @@
 export interface BarcodeProduct {
   code: string;
   name: string;
-  kcal: number; protein: number; carbs: number; fat: number;
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
   /** Per 100 g, when the product lists them. */
-  fiber?: number | undefined; sugar?: number | undefined; satFat?: number | undefined; salt?: number | undefined;
+  fiber?: number | undefined;
+  sugar?: number | undefined;
+  satFat?: number | undefined;
+  salt?: number | undefined;
   /** Suggested serving in grams, if the product lists one. */
   servingG?: number | undefined;
 }
@@ -14,7 +20,8 @@ export function isValidBarcode(code: string) {
 }
 
 const num = (v: unknown) => {
-  const n = typeof v === "string" ? parseFloat(v.replace(",", ".")) : typeof v === "number" ? v : NaN;
+  const n =
+    typeof v === "string" ? parseFloat(v.replace(",", ".")) : typeof v === "number" ? v : NaN;
   return Number.isFinite(n) && n >= 0 ? n : undefined;
 };
 
@@ -25,19 +32,34 @@ export function parseOffProduct(code: string, json: unknown): BarcodeProduct | n
   const n = (p["nutriments"] ?? {}) as Record<string, unknown>;
   const kj = num(n["energy_100g"]);
   const kcal = num(n["energy-kcal_100g"]) ?? (kj !== undefined ? kj / 4.184 : undefined);
-  const protein = num(n["proteins_100g"]), carbs = num(n["carbohydrates_100g"]), fat = num(n["fat_100g"]);
-  if (kcal === undefined && protein === undefined && carbs === undefined && fat === undefined) return null;
+  const protein = num(n["proteins_100g"]),
+    carbs = num(n["carbohydrates_100g"]),
+    fat = num(n["fat_100g"]);
+  if (kcal === undefined && protein === undefined && carbs === undefined && fat === undefined)
+    return null;
   const sodium = num(n["sodium_100g"]);
   const micros = {
-    fiber: num(n["fiber_100g"]), sugar: num(n["sugars_100g"]), satFat: num(n["saturated-fat_100g"]),
-    salt: num(n["salt_100g"]) ?? (sodium !== undefined ? Math.round(sodium * 2.5 * 100) / 100 : undefined),
+    fiber: num(n["fiber_100g"]),
+    sugar: num(n["sugars_100g"]),
+    satFat: num(n["saturated-fat_100g"]),
+    salt:
+      num(n["salt_100g"]) ??
+      (sodium !== undefined ? Math.round(sodium * 2.5 * 100) / 100 : undefined),
   };
   const name = String(p["product_name_sv"] || p["product_name"] || "").trim();
-  const brand = String(p["brands"] ?? "").split(",")[0]?.trim();
+  const brand = String(p["brands"] ?? "")
+    .split(",")[0]
+    ?.trim();
   return {
     code,
-    name: (brand && name.toLowerCase().includes(brand.toLowerCase()) ? name : [brand, name].filter(Boolean).join(" ")) || `Produkt ${code}`,
-    kcal: Math.round(kcal ?? 0), protein: protein ?? 0, carbs: carbs ?? 0, fat: fat ?? 0,
+    name:
+      (brand && name.toLowerCase().includes(brand.toLowerCase())
+        ? name
+        : [brand, name].filter(Boolean).join(" ")) || `Produkt ${code}`,
+    kcal: Math.round(kcal ?? 0),
+    protein: protein ?? 0,
+    carbs: carbs ?? 0,
+    fat: fat ?? 0,
     servingG: num(p["serving_quantity"]),
     ...Object.fromEntries(Object.entries(micros).filter(([, v]) => v !== undefined)),
   };
@@ -46,8 +68,16 @@ export function parseOffProduct(code: string, json: unknown): BarcodeProduct | n
 export function portionFor(p: BarcodeProduct, grams: number) {
   const k = Math.max(0, grams) / 100;
   const r1 = (n: number) => Math.round(n * k * 10) / 10;
-  const out: { kcal: number; protein: number; carbs: number; fat: number; fiber?: number; sugar?: number; satFat?: number; salt?: number } =
-    { kcal: Math.round(p.kcal * k), protein: r1(p.protein), carbs: r1(p.carbs), fat: r1(p.fat) };
+  const out: {
+    kcal: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber?: number;
+    sugar?: number;
+    satFat?: number;
+    salt?: number;
+  } = { kcal: Math.round(p.kcal * k), protein: r1(p.protein), carbs: r1(p.carbs), fat: r1(p.fat) };
   for (const key of ["fiber", "sugar", "satFat", "salt"] as const) {
     const v = p[key];
     if (v !== undefined) out[key] = key === "salt" ? Math.round(v * k * 100) / 100 : r1(v);
@@ -56,7 +86,9 @@ export function portionFor(p: BarcodeProduct, grams: number) {
 }
 
 export async function lookupBarcode(code: string): Promise<BarcodeProduct | null> {
-  const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,product_name_sv,brands,nutriments,serving_quantity`);
+  const res = await fetch(
+    `https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,product_name_sv,brands,nutriments,serving_quantity`,
+  );
   if (!res.ok) return null;
   return parseOffProduct(code, await res.json());
 }
@@ -69,7 +101,7 @@ export function parseOffSearch(json: unknown): BarcodeProduct[] {
   for (const p of list) {
     const code = String(p["code"] ?? "");
     const prod = parseOffProduct(code, { product: p });
-    if (!prod || !(String(p["product_name_sv"] || p["product_name"] || "").trim())) continue;
+    if (!prod || !String(p["product_name_sv"] || p["product_name"] || "").trim()) continue;
     const key = prod.name.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
@@ -80,7 +112,12 @@ export function parseOffSearch(json: unknown): BarcodeProduct[] {
 
 /** Household measures for packaged goods. Approximate grams per unit; "portion" uses the package serving. */
 export type Measure = "g" | "tsk" | "msk" | "dl" | "portion";
-export const MEASURE_G: Record<Exclude<Measure, "portion">, number> = { g: 1, tsk: 5, msk: 15, dl: 100 };
+export const MEASURE_G: Record<Exclude<Measure, "portion">, number> = {
+  g: 1,
+  tsk: 5,
+  msk: 15,
+  dl: 100,
+};
 export const MEASURE_STEP: Record<Measure, number> = { g: 10, tsk: 1, msk: 1, dl: 0.5, portion: 1 };
 
 export function measureGrams(unit: Measure, qty: number, servingG?: number) {

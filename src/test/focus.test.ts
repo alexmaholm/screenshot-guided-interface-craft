@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { EXERCISES, MUSCLES, recommendExercises, type Muscle } from "@/lib/exercises";
 
-const rested = Object.fromEntries(MUSCLES.map((m) => [m.value, undefined])) as Record<Muscle, number | undefined>;
+const rested = Object.fromEntries(MUSCLES.map((m) => [m.value, undefined])) as Record<
+  Muscle,
+  number | undefined
+>;
 
 describe("Ditt fokus", () => {
   it("flås-fokus lyfter konditionsövningar först", () => {

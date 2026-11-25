@@ -44,7 +44,10 @@ export function startCloudSync() {
   });
   supabase.auth.onAuthStateChange((event, session) => {
     const id = session?.user.id ?? null;
-    if (event === "SIGNED_OUT") { userId = null; return; }
+    if (event === "SIGNED_OUT") {
+      userId = null;
+      return;
+    }
     if (id && id !== userId && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
       userId = id;
       void pullOrSeed(id);

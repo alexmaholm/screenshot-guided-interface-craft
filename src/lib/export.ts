@@ -5,4 +5,5 @@ export function exportPayload(s: State, now = new Date()) {
   return { app: "Aequiv", format: 1, exportedAt: now.toISOString(), data: s };
 }
 
-export const exportFilename = (now = new Date()) => `aequiv-data-${now.toISOString().slice(0, 10)}.json`;
+export const exportFilename = (now = new Date()) =>
+  `aequiv-data-${now.toISOString().slice(0, 10)}.json`;

@@ -61,7 +61,12 @@ export interface Meal {
   salt?: number | undefined;
 }
 
-export interface Micros { fiber: number; sugar: number; satFat: number; salt: number }
+export interface Micros {
+  fiber: number;
+  sugar: number;
+  satFat: number;
+  salt: number;
+}
 /** Sums optional micronutrients; meals without values count as 0. */
 export function sumMicros(meals: Pick<Meal, "fiber" | "sugar" | "satFat" | "salt">[]): Micros {
   const s = (k: keyof Micros) => Math.round(meals.reduce((a, m) => a + (m[k] ?? 0), 0) * 10) / 10;
@@ -147,24 +152,48 @@ export interface State {
   subscription?: import("@/lib/tiers").Subscription | undefined;
 }
 
-export interface PlannedMeal { id: string; date: string; type: MealType; name: string; kcal?: number | undefined; protein?: number | undefined }
+export interface PlannedMeal {
+  id: string;
+  date: string;
+  type: MealType;
+  name: string;
+  kcal?: number | undefined;
+  protein?: number | undefined;
+}
 
 const KEY = "balans:v1";
-const empty: State = { profile: null, meals: [], favorites: [], workouts: [], habits: {}, body: [], customExercises: [], templates: [], mealPlan: [] };
+const empty: State = {
+  profile: null,
+  meals: [],
+  favorites: [],
+  workouts: [],
+  habits: {},
+  body: [],
+  customExercises: [],
+  templates: [],
+  mealPlan: [],
+};
 
 let state: State | null = null;
 const listeners = new Set<() => void>();
 
-const arr = <T,>(v: unknown, d: T[] = []): T[] => (Array.isArray(v) ? (v as T[]) : d);
-const rKcal = (n: number | undefined) => (typeof n === "number" && Number.isFinite(n) ? Math.round(n) : n);
+const arr = <T>(v: unknown, d: T[] = []): T[] => (Array.isArray(v) ? (v as T[]) : d);
+const rKcal = (n: number | undefined) =>
+  typeof n === "number" && Number.isFinite(n) ? Math.round(n) : n;
 const rG = (n: number | undefined) => (typeof n === "number" && Number.isFinite(n) ? round1(n) : n);
 
 /** Rounds every stored nutrition value so float noise (5.000000000000001) never reaches the screen. */
 function roundMeal(m: Meal): Meal {
   return {
     ...m,
-    kcal: rKcal(m.kcal), protein: rG(m.protein), carbs: rG(m.carbs), fat: rG(m.fat),
-    fiber: rG(m.fiber), sugar: rG(m.sugar), satFat: rG(m.satFat), salt: rG(m.salt),
+    kcal: rKcal(m.kcal),
+    protein: rG(m.protein),
+    carbs: rG(m.carbs),
+    fat: rG(m.fat),
+    fiber: rG(m.fiber),
+    sugar: rG(m.sugar),
+    satFat: rG(m.satFat),
+    salt: rG(m.salt),
   };
 }
 function roundFavorite(f: Favorite): Favorite {
@@ -180,21 +209,27 @@ export function normalizeState(raw: Partial<State> | null | undefined): State {
   return {
     ...empty,
     ...r,
-    meals: arr<Meal>(r.meals).map(roundMeal), favorites: arr<Favorite>(r.favorites).map(roundFavorite),
-    workouts: arr(r.workouts), body: arr(r.body),
-    customExercises: arr(r.customExercises), templates: arr(r.templates), mealPlan: arr<PlannedMeal>(r.mealPlan).map(roundPlanned),
+    meals: arr<Meal>(r.meals).map(roundMeal),
+    favorites: arr<Favorite>(r.favorites).map(roundFavorite),
+    workouts: arr(r.workouts),
+    body: arr(r.body),
+    customExercises: arr(r.customExercises),
+    templates: arr(r.templates),
+    mealPlan: arr<PlannedMeal>(r.mealPlan).map(roundPlanned),
     habits: r.habits && typeof r.habits === "object" ? r.habits : {},
-    profile: p ? {
-      ...p,
-      name: p.name ?? "",
-      goal: p.goal ?? ("energi" as Goal),
-      equipment: arr(p.equipment, ["ingen"] as Equipment[]),
-      days: arr(p.days, [0, 2, 4]),
-      restrictions: arr(p.restrictions),
-      sessionMin: Number.isFinite(p.sessionMin) ? p.sessionMin! : 25,
-      hideCalories: !!p.hideCalories,
-      waterGoal: Number.isFinite(p.waterGoal) && p.waterGoal! > 0 ? p.waterGoal! : 8,
-    } as Profile : null,
+    profile: p
+      ? ({
+          ...p,
+          name: p.name ?? "",
+          goal: p.goal ?? ("energi" as Goal),
+          equipment: arr(p.equipment, ["ingen"] as Equipment[]),
+          days: arr(p.days, [0, 2, 4]),
+          restrictions: arr(p.restrictions),
+          sessionMin: Number.isFinite(p.sessionMin) ? p.sessionMin! : 25,
+          hideCalories: !!p.hideCalories,
+          waterGoal: Number.isFinite(p.waterGoal) && p.waterGoal! > 0 ? p.waterGoal! : 8,
+        } as Profile)
+      : null,
   } as State;
 }
 
@@ -237,7 +272,9 @@ export function replaceState(next: Partial<State>) {
 
 export function subscribeState(cb: () => void) {
   listeners.add(cb);
-  return () => { listeners.delete(cb); };
+  return () => {
+    listeners.delete(cb);
+  };
 }
 
 /** Returns null during server render / before hydration. */
@@ -271,7 +308,11 @@ export function weekdayIndex(key: string) {
 export const WEEKDAYS = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
 export function prettyDate(key: string) {
   const [y = 0, m = 1, d = 1] = key.split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString("sv-SE", { weekday: "long", day: "numeric", month: "long" });
+  return new Date(y, m - 1, d).toLocaleDateString("sv-SE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 }
 
 export const MEAL_TYPES: MealType[] = ["frukost", "lunch", "middag", "mellanmål"];
@@ -355,8 +396,20 @@ export function generateWorkout(opts: {
   const lvl = level === "nybörjare" ? 0 : level === "van" ? 1 : 2;
   const exercises: Exercise[] = shuffled.map((e) =>
     e.time || kind !== "styrka"
-      ? { name: e.name, sets: kind === "rörlighet" ? 1 : 2 + lvl, timeSec: kind === "rörlighet" ? 60 : 30 + lvl * 10, restSec: kind === "rörlighet" ? 15 : 30, done: false }
-      : { name: e.name, sets: 2 + lvl, reps: [10, 10, 8][lvl], restSec: 60 + lvl * 15, done: false },
+      ? {
+          name: e.name,
+          sets: kind === "rörlighet" ? 1 : 2 + lvl,
+          timeSec: kind === "rörlighet" ? 60 : 30 + lvl * 10,
+          restSec: kind === "rörlighet" ? 15 : 30,
+          done: false,
+        }
+      : {
+          name: e.name,
+          sets: 2 + lvl,
+          reps: [10, 10, 8][lvl],
+          restSec: 60 + lvl * 15,
+          done: false,
+        },
   );
   const titles: Record<Exclude<WorkoutKind, "vila">, string[]> = {
     styrka: ["Helkropp styrka", "Stark bas", "Styrka & stabilitet"],
@@ -387,23 +440,127 @@ function kindForGoal(goal: Goal, i: number): WorkoutKind {
 }
 
 /** Shared eligibility rule for any dish (suggestions, recipes). */
-export function dishEligible(diets: Diet[], contains: Restriction[] | undefined, diet: Diet | undefined, restrictions: Restriction[] = []) {
-  return contains !== undefined && diets.includes(diet ?? "allt") && restrictions.every((r) => !contains.includes(r));
+export function dishEligible(
+  diets: Diet[],
+  contains: Restriction[] | undefined,
+  diet: Diet | undefined,
+  restrictions: Restriction[] = [],
+) {
+  return (
+    contains !== undefined &&
+    diets.includes(diet ?? "allt") &&
+    restrictions.every((r) => !contains.includes(r))
+  );
 }
 
 /* ---------------- Återhämtningsguide: vad kroppen behöver efter passet ---------------- */
 
-export type NutrientKey = "protein" | "kolhydrater" | "elektrolyter" | "vatska" | "magnesium" | "antioxidanter" | "omega3";
-interface Source { name: string; contains: Restriction[]; animal?: "kott" | "fisk" | "mejeri" | "agg" }
-const mk = (name: string, contains: Restriction[] = [], animal?: Source["animal"]): Source => (animal ? { name, contains, animal } : { name, contains });
+export type NutrientKey =
+  "protein" | "kolhydrater" | "elektrolyter" | "vatska" | "magnesium" | "antioxidanter" | "omega3";
+interface Source {
+  name: string;
+  contains: Restriction[];
+  animal?: "kott" | "fisk" | "mejeri" | "agg";
+}
+const mk = (name: string, contains: Restriction[] = [], animal?: Source["animal"]): Source =>
+  animal ? { name, contains, animal } : { name, contains };
 const NUTRIENT_SOURCES: Record<NutrientKey, { title: string; sources: Source[] }> = {
-  protein: { title: "Protein", sources: [mk("Kvarg", ["mjolk", "laktos"], "mejeri"), mk("Ägg", ["agg"], "agg"), mk("Kyckling", [], "kott"), mk("Lax", [], "fisk"), mk("Tonfisk", [], "fisk"), mk("Tofu", ["soja"]), mk("Linser"), mk("Kikärtor"), mk("Keso", ["mjolk", "laktos"], "mejeri"), mk("Edamamebönor", ["soja"]), mk("Tempeh", ["soja"]), mk("Räkor", [], "fisk"), mk("Laktosfri kvarg", ["mjolk"], "mejeri")] },
-  kolhydrater: { title: "Kolhydrater", sources: [mk("Banan"), mk("Havregryn", ["gluten"]), mk("Ris"), mk("Potatis"), mk("Sötpotatis"), mk("Fullkornspasta", ["gluten"]), mk("Bär"), mk("Quinoa"), mk("Russin"), mk("Rågbröd", ["gluten"]), mk("Glutenfria havregryn")] },
-  elektrolyter: { title: "Vätska & elektrolyter", sources: [mk("Kokosvatten"), mk("Vatten med en nypa salt"), mk("Mineralvatten"), mk("Banan (kalium)"), mk("Buljong"), mk("Apelsin"), mk("Avokado (kalium)"), mk("Sportdryck vid långa pass")] },
-  vatska: { title: "Vätska", sources: [mk("Vatten"), mk("Mineralvatten"), mk("Vattenmelon"), mk("Gurka"), mk("Örtte"), mk("Citronvatten")] },
-  magnesium: { title: "Magnesium för vila & sömn", sources: [mk("Pumpafrön"), mk("Mandlar", ["notter"]), mk("Havregryn", ["gluten"]), mk("Spenat"), mk("Mörk choklad"), mk("Bönor"), mk("Cashewnötter", ["notter"]), mk("Solrosfrön")] },
-  antioxidanter: { title: "Antioxidanter", sources: [mk("Blåbär"), mk("Körsbär"), mk("Spenat"), mk("Paprika"), mk("Broccoli"), mk("Granatäpple"), mk("Grönkål"), mk("Tomat")] },
-  omega3: { title: "Omega-3", sources: [mk("Lax", [], "fisk"), mk("Makrill", [], "fisk"), mk("Chiafrön"), mk("Linfrön"), mk("Valnötter", ["notter"]), mk("Rapsolja"), mk("Sill", [], "fisk")] },
+  protein: {
+    title: "Protein",
+    sources: [
+      mk("Kvarg", ["mjolk", "laktos"], "mejeri"),
+      mk("Ägg", ["agg"], "agg"),
+      mk("Kyckling", [], "kott"),
+      mk("Lax", [], "fisk"),
+      mk("Tonfisk", [], "fisk"),
+      mk("Tofu", ["soja"]),
+      mk("Linser"),
+      mk("Kikärtor"),
+      mk("Keso", ["mjolk", "laktos"], "mejeri"),
+      mk("Edamamebönor", ["soja"]),
+      mk("Tempeh", ["soja"]),
+      mk("Räkor", [], "fisk"),
+      mk("Laktosfri kvarg", ["mjolk"], "mejeri"),
+    ],
+  },
+  kolhydrater: {
+    title: "Kolhydrater",
+    sources: [
+      mk("Banan"),
+      mk("Havregryn", ["gluten"]),
+      mk("Ris"),
+      mk("Potatis"),
+      mk("Sötpotatis"),
+      mk("Fullkornspasta", ["gluten"]),
+      mk("Bär"),
+      mk("Quinoa"),
+      mk("Russin"),
+      mk("Rågbröd", ["gluten"]),
+      mk("Glutenfria havregryn"),
+    ],
+  },
+  elektrolyter: {
+    title: "Vätska & elektrolyter",
+    sources: [
+      mk("Kokosvatten"),
+      mk("Vatten med en nypa salt"),
+      mk("Mineralvatten"),
+      mk("Banan (kalium)"),
+      mk("Buljong"),
+      mk("Apelsin"),
+      mk("Avokado (kalium)"),
+      mk("Sportdryck vid långa pass"),
+    ],
+  },
+  vatska: {
+    title: "Vätska",
+    sources: [
+      mk("Vatten"),
+      mk("Mineralvatten"),
+      mk("Vattenmelon"),
+      mk("Gurka"),
+      mk("Örtte"),
+      mk("Citronvatten"),
+    ],
+  },
+  magnesium: {
+    title: "Magnesium för vila & sömn",
+    sources: [
+      mk("Pumpafrön"),
+      mk("Mandlar", ["notter"]),
+      mk("Havregryn", ["gluten"]),
+      mk("Spenat"),
+      mk("Mörk choklad"),
+      mk("Bönor"),
+      mk("Cashewnötter", ["notter"]),
+      mk("Solrosfrön"),
+    ],
+  },
+  antioxidanter: {
+    title: "Antioxidanter",
+    sources: [
+      mk("Blåbär"),
+      mk("Körsbär"),
+      mk("Spenat"),
+      mk("Paprika"),
+      mk("Broccoli"),
+      mk("Granatäpple"),
+      mk("Grönkål"),
+      mk("Tomat"),
+    ],
+  },
+  omega3: {
+    title: "Omega-3",
+    sources: [
+      mk("Lax", [], "fisk"),
+      mk("Makrill", [], "fisk"),
+      mk("Chiafrön"),
+      mk("Linfrön"),
+      mk("Valnötter", ["notter"]),
+      mk("Rapsolja"),
+      mk("Sill", [], "fisk"),
+    ],
+  },
 };
 
 function sourceEligible(src: Source, diet: Diet | undefined, restrictions: Restriction[]) {
@@ -415,17 +572,33 @@ function sourceEligible(src: Source, diet: Diet | undefined, restrictions: Restr
   return restrictions.every((r) => !src.contains.includes(r));
 }
 
-export interface GuideItem { key: NutrientKey; title: string; why: string; sources: string[] }
+export interface GuideItem {
+  key: NutrientKey;
+  title: string;
+  why: string;
+  sources: string[];
+}
 export interface GuideInput {
-  profile: Profile; workout: Workout | undefined;
-  eaten: MacroTargets; target: MacroTargets;
-  hour: number; waterGlasses: number;
+  profile: Profile;
+  workout: Workout | undefined;
+  eaten: MacroTargets;
+  target: MacroTargets;
+  hour: number;
+  waterGlasses: number;
   /** Changes the rotation of sources ("Nya förslag"). */
   shuffle?: number;
 }
 
 /** Personal post-workout guide: what to prioritise now and good sources, based on workout, today's intake and time of day. */
-export function recoveryGuide({ profile, workout, eaten, target, hour, waterGlasses, shuffle = 0 }: GuideInput): GuideItem[] {
+export function recoveryGuide({
+  profile,
+  workout,
+  eaten,
+  target,
+  hour,
+  waterGlasses,
+  shuffle = 0,
+}: GuideInput): GuideItem[] {
   if (!workout || workout.status !== "klart" || workout.kind === "vila") return [];
   const proteinLeft = Math.max(0, target.protein - eaten.protein);
   const carbsLeft = Math.max(0, target.carbs - eaten.carbs);
@@ -435,35 +608,88 @@ export function recoveryGuide({ profile, workout, eaten, target, hour, waterGlas
   const add = (key: NutrientKey, prio: number, why: string) => items.push({ key, prio, why });
 
   if (workout.kind === "styrka") {
-    if (proteinLeft > 0) add("protein", 10, `Bygger upp musklerna efter passet. Du har ca ${proteinLeft} g kvar till dagens mål.`);
-    else add("antioxidanter", 6, "Proteinmålet är redan nått – färgglada grönsaker och bär stöttar återhämtningen.");
-    add("kolhydrater", carbsLeft > 50 ? 8 : 5, carbsLeft > 50 ? "Fyller på energin i musklerna – du har ätit lite kolhydrater hittills idag." : "Lite kolhydrater tillsammans med proteinet hjälper musklerna att återhämta sig.");
+    if (proteinLeft > 0)
+      add(
+        "protein",
+        10,
+        `Bygger upp musklerna efter passet. Du har ca ${proteinLeft} g kvar till dagens mål.`,
+      );
+    else
+      add(
+        "antioxidanter",
+        6,
+        "Proteinmålet är redan nått – färgglada grönsaker och bär stöttar återhämtningen.",
+      );
+    add(
+      "kolhydrater",
+      carbsLeft > 50 ? 8 : 5,
+      carbsLeft > 50
+        ? "Fyller på energin i musklerna – du har ätit lite kolhydrater hittills idag."
+        : "Lite kolhydrater tillsammans med proteinet hjälper musklerna att återhämta sig.",
+    );
   } else if (workout.kind === "kondition") {
-    add("kolhydrater", carbsLeft > 50 ? 10 : 8, `Fyller på energidepåerna efter ${workout.durationMin} min kondition.`);
-    add("elektrolyter", long ? 9 : 7, long ? "Längre pass = mer svett. Ersätt salt och kalium tillsammans med vätskan." : "Ersätt vätskan och saltet du svettats ut.");
-    if (proteinLeft > 20) add("protein", 5, "En portion protein hjälper även efter konditionsträning.");
+    add(
+      "kolhydrater",
+      carbsLeft > 50 ? 10 : 8,
+      `Fyller på energidepåerna efter ${workout.durationMin} min kondition.`,
+    );
+    add(
+      "elektrolyter",
+      long ? 9 : 7,
+      long
+        ? "Längre pass = mer svett. Ersätt salt och kalium tillsammans med vätskan."
+        : "Ersätt vätskan och saltet du svettats ut.",
+    );
+    if (proteinLeft > 20)
+      add("protein", 5, "En portion protein hjälper även efter konditionsträning.");
   } else {
     add("vatska", 7, "Återfukta kroppen efter rörlighetspasset.");
     add("antioxidanter", 6, "Bär och grönt ger mikronäring som stöttar kroppen.");
   }
-  if (evening) add("magnesium", 7, "Kvällspass – välj något lättsmält. Magnesium kan bidra till avslappning inför natten.");
-  if (waterGlasses < Math.max(3, Math.round(profile.waterGoal / 2)) && !items.some((i) => i.key === "elektrolyter" || i.key === "vatska"))
+  if (evening)
+    add(
+      "magnesium",
+      7,
+      "Kvällspass – välj något lättsmält. Magnesium kan bidra till avslappning inför natten.",
+    );
+  if (
+    waterGlasses < Math.max(3, Math.round(profile.waterGoal / 2)) &&
+    !items.some((i) => i.key === "elektrolyter" || i.key === "vatska")
+  )
     add("vatska", 8, `Du har druckit ${waterGlasses} glas idag – drick lite extra nu.`);
-  if (workout.kind === "styrka" && !evening && proteinLeft === 0) add("omega3", 4, "Fett av god kvalitet kompletterar en bra träningsdag.");
+  if (workout.kind === "styrka" && !evening && proteinLeft === 0)
+    add("omega3", 4, "Fett av god kvalitet kompletterar en bra träningsdag.");
 
-  const seed = [...(workout.id + workout.date)].reduce((a, c) => a + c.charCodeAt(0), 0) + shuffle * 3;
-  return items.sort((a, b) => b.prio - a.prio).slice(0, 3).map((it, idx) => {
-    const n = NUTRIENT_SOURCES[it.key];
-    const ok = n.sources.filter((src) => sourceEligible(src, profile.diet, profile.restrictions ?? [])).map((src) => src.name);
-    const start = ok.length ? (seed + idx * 5) % ok.length : 0;
-    const picked = [...ok.slice(start), ...ok.slice(0, start)].slice(0, 4);
-    return { key: it.key, title: n.title, why: it.why, sources: picked };
-  });
+  const seed =
+    [...(workout.id + workout.date)].reduce((a, c) => a + c.charCodeAt(0), 0) + shuffle * 3;
+  return items
+    .sort((a, b) => b.prio - a.prio)
+    .slice(0, 3)
+    .map((it, idx) => {
+      const n = NUTRIENT_SOURCES[it.key];
+      const ok = n.sources
+        .filter((src) => sourceEligible(src, profile.diet, profile.restrictions ?? []))
+        .map((src) => src.name);
+      const start = ok.length ? (seed + idx * 5) % ok.length : 0;
+      const picked = [...ok.slice(start), ...ok.slice(0, start)].slice(0, 4);
+      return { key: it.key, title: n.title, why: it.why, sources: picked };
+    });
 }
 
 /** Zero-friction start: strong defaults so new users reach the app in one tap; everything is editable in Settings. */
 export function quickStartProfile(name = ""): Profile {
-  return { name: name.trim(), goal: "styrka", level: "van", equipment: ["gym"], days: [0, 2, 4], sessionMin: 40, hideCalories: false, waterGoal: 8, diet: "allt", restrictions: [] };
+  return {
+    name: name.trim(),
+    goal: "styrka",
+    level: "van",
+    equipment: ["gym"],
+    days: [0, 2, 4],
+    sessionMin: 40,
+    hideCalories: false,
+    waterGoal: 8,
+    diet: "allt",
+    restrictions: [],
+  };
 }
 
 /* ---------------- Onboarding: skapa plan + exempeldata ---------------- */
@@ -478,10 +704,28 @@ export function completeOnboarding(p: Profile) {
   for (let off = 0; off <= 7; off++) {
     const date = addDays(today, off);
     if (days.includes(weekdayIndex(date))) {
-      workouts.push(generateWorkout({ kind: kindForGoal(p.goal, n++), level, equipment: p.equipment, minutes: p.sessionMin, date }));
+      workouts.push(
+        generateWorkout({
+          kind: kindForGoal(p.goal, n++),
+          level,
+          equipment: p.equipment,
+          minutes: p.sessionMin,
+          date,
+        }),
+      );
     }
   }
-  update(() => ({ profile: p, meals: [], favorites: [], workouts, habits: {}, body: [], customExercises: [], templates: [], mealPlan: [] }));
+  update(() => ({
+    profile: p,
+    meals: [],
+    favorites: [],
+    workouts,
+    habits: {},
+    body: [],
+    customExercises: [],
+    templates: [],
+    mealPlan: [],
+  }));
 }
 
 /* ---------------- Tips ---------------- */
@@ -504,7 +748,10 @@ export type Unit = "g" | "dl" | "msk" | "st";
 export interface Food {
   name: string;
   /** Per 100 g */
-  kcal: number; protein: number; carbs: number; fat: number;
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
   /** Grams per unit */
   units: Partial<Record<Unit, number>>;
   contains: Restriction[];
@@ -512,45 +759,315 @@ export interface Food {
 }
 
 export const FOODS: Food[] = [
-  { name: "Havregryn", kcal: 370, protein: 13, carbs: 59, fat: 7, units: { g: 1, dl: 35 }, contains: ["gluten"] },
-  { name: "Glutenfria havregryn", kcal: 370, protein: 13, carbs: 59, fat: 7, units: { g: 1, dl: 35 }, contains: [] },
-  { name: "Mellanmjölk", kcal: 46, protein: 3.5, carbs: 4.8, fat: 1.5, units: { g: 1, dl: 100 }, contains: ["mjolk", "laktos"], animal: "mejeri" },
-  { name: "Havredryck", kcal: 45, protein: 1, carbs: 7, fat: 1.5, units: { g: 1, dl: 100 }, contains: [] },
-  { name: "Kvarg naturell", kcal: 63, protein: 11, carbs: 4, fat: 0.2, units: { g: 1, dl: 110 }, contains: ["mjolk", "laktos"], animal: "mejeri" },
-  { name: "Grekisk yoghurt 2 %", kcal: 75, protein: 9, carbs: 4, fat: 2, units: { g: 1, dl: 105 }, contains: ["mjolk", "laktos"], animal: "mejeri" },
-  { name: "Ägg", kcal: 140, protein: 12.5, carbs: 0.5, fat: 10, units: { g: 1, st: 55 }, contains: ["agg"], animal: "agg" },
-  { name: "Banan", kcal: 95, protein: 1.1, carbs: 21, fat: 0.3, units: { g: 1, st: 120 }, contains: [] },
-  { name: "Äpple", kcal: 52, protein: 0.3, carbs: 12, fat: 0.2, units: { g: 1, st: 150 }, contains: [] },
-  { name: "Blåbär", kcal: 50, protein: 0.7, carbs: 10, fat: 0.6, units: { g: 1, dl: 65 }, contains: [] },
-  { name: "Kycklingfilé, tillagad", kcal: 150, protein: 30, carbs: 0, fat: 3, units: { g: 1, st: 130 }, contains: [], animal: "kott" },
-  { name: "Nötfärs 10 %, stekt", kcal: 215, protein: 26, carbs: 0, fat: 12, units: { g: 1 }, contains: [], animal: "kott" },
-  { name: "Lax, ugnsbakad", kcal: 200, protein: 22, carbs: 0, fat: 12, units: { g: 1, st: 125 }, contains: [], animal: "fisk" },
-  { name: "Tonfisk i vatten", kcal: 105, protein: 24, carbs: 0, fat: 1, units: { g: 1, st: 120 }, contains: [], animal: "fisk" },
+  {
+    name: "Havregryn",
+    kcal: 370,
+    protein: 13,
+    carbs: 59,
+    fat: 7,
+    units: { g: 1, dl: 35 },
+    contains: ["gluten"],
+  },
+  {
+    name: "Glutenfria havregryn",
+    kcal: 370,
+    protein: 13,
+    carbs: 59,
+    fat: 7,
+    units: { g: 1, dl: 35 },
+    contains: [],
+  },
+  {
+    name: "Mellanmjölk",
+    kcal: 46,
+    protein: 3.5,
+    carbs: 4.8,
+    fat: 1.5,
+    units: { g: 1, dl: 100 },
+    contains: ["mjolk", "laktos"],
+    animal: "mejeri",
+  },
+  {
+    name: "Havredryck",
+    kcal: 45,
+    protein: 1,
+    carbs: 7,
+    fat: 1.5,
+    units: { g: 1, dl: 100 },
+    contains: [],
+  },
+  {
+    name: "Kvarg naturell",
+    kcal: 63,
+    protein: 11,
+    carbs: 4,
+    fat: 0.2,
+    units: { g: 1, dl: 110 },
+    contains: ["mjolk", "laktos"],
+    animal: "mejeri",
+  },
+  {
+    name: "Grekisk yoghurt 2 %",
+    kcal: 75,
+    protein: 9,
+    carbs: 4,
+    fat: 2,
+    units: { g: 1, dl: 105 },
+    contains: ["mjolk", "laktos"],
+    animal: "mejeri",
+  },
+  {
+    name: "Ägg",
+    kcal: 140,
+    protein: 12.5,
+    carbs: 0.5,
+    fat: 10,
+    units: { g: 1, st: 55 },
+    contains: ["agg"],
+    animal: "agg",
+  },
+  {
+    name: "Banan",
+    kcal: 95,
+    protein: 1.1,
+    carbs: 21,
+    fat: 0.3,
+    units: { g: 1, st: 120 },
+    contains: [],
+  },
+  {
+    name: "Äpple",
+    kcal: 52,
+    protein: 0.3,
+    carbs: 12,
+    fat: 0.2,
+    units: { g: 1, st: 150 },
+    contains: [],
+  },
+  {
+    name: "Blåbär",
+    kcal: 50,
+    protein: 0.7,
+    carbs: 10,
+    fat: 0.6,
+    units: { g: 1, dl: 65 },
+    contains: [],
+  },
+  {
+    name: "Kycklingfilé, tillagad",
+    kcal: 150,
+    protein: 30,
+    carbs: 0,
+    fat: 3,
+    units: { g: 1, st: 130 },
+    contains: [],
+    animal: "kott",
+  },
+  {
+    name: "Nötfärs 10 %, stekt",
+    kcal: 215,
+    protein: 26,
+    carbs: 0,
+    fat: 12,
+    units: { g: 1 },
+    contains: [],
+    animal: "kott",
+  },
+  {
+    name: "Lax, ugnsbakad",
+    kcal: 200,
+    protein: 22,
+    carbs: 0,
+    fat: 12,
+    units: { g: 1, st: 125 },
+    contains: [],
+    animal: "fisk",
+  },
+  {
+    name: "Tonfisk i vatten",
+    kcal: 105,
+    protein: 24,
+    carbs: 0,
+    fat: 1,
+    units: { g: 1, st: 120 },
+    contains: [],
+    animal: "fisk",
+  },
   { name: "Tofu", kcal: 125, protein: 13, carbs: 2, fat: 7, units: { g: 1 }, contains: ["soja"] },
-  { name: "Kikärtor, kokta", kcal: 140, protein: 7, carbs: 18, fat: 2.5, units: { g: 1, dl: 70 }, contains: [] },
-  { name: "Röda linser, kokta", kcal: 115, protein: 9, carbs: 17, fat: 0.4, units: { g: 1, dl: 80 }, contains: [] },
-  { name: "Ris, kokt", kcal: 130, protein: 2.7, carbs: 28, fat: 0.3, units: { g: 1, dl: 65 }, contains: [] },
-  { name: "Pasta, kokt", kcal: 150, protein: 5.5, carbs: 30, fat: 0.9, units: { g: 1, dl: 45 }, contains: ["gluten"] },
-  { name: "Potatis, kokt", kcal: 75, protein: 1.8, carbs: 16, fat: 0.1, units: { g: 1, st: 80 }, contains: [] },
-  { name: "Quinoa, kokt", kcal: 120, protein: 4.4, carbs: 21, fat: 1.9, units: { g: 1, dl: 70 }, contains: [] },
-  { name: "Knäckebröd", kcal: 340, protein: 10, carbs: 60, fat: 2, units: { g: 1, st: 12 }, contains: ["gluten"] },
-  { name: "Fullkornsbröd", kcal: 245, protein: 9, carbs: 42, fat: 3.5, units: { g: 1, st: 35 }, contains: ["gluten"] },
-  { name: "Hårdost 17 %", kcal: 280, protein: 27, carbs: 0, fat: 17, units: { g: 1, st: 10 }, contains: ["mjolk"], animal: "mejeri" },
-  { name: "Smör", kcal: 740, protein: 0.5, carbs: 0.5, fat: 82, units: { g: 1, msk: 12 }, contains: ["mjolk"], animal: "mejeri" },
-  { name: "Rapsolja", kcal: 900, protein: 0, carbs: 0, fat: 100, units: { g: 1, msk: 9 }, contains: [] },
-  { name: "Jordnötssmör", kcal: 600, protein: 25, carbs: 13, fat: 50, units: { g: 1, msk: 16 }, contains: ["notter"] },
-  { name: "Mandlar", kcal: 600, protein: 21, carbs: 7, fat: 52, units: { g: 1, dl: 60 }, contains: ["notter"] },
-  { name: "Avokado", kcal: 160, protein: 2, carbs: 2, fat: 15, units: { g: 1, st: 140 }, contains: [] },
-  { name: "Broccoli", kcal: 35, protein: 3, carbs: 4, fat: 0.4, units: { g: 1, dl: 35 }, contains: [] },
-  { name: "Tomat", kcal: 20, protein: 0.9, carbs: 3, fat: 0.2, units: { g: 1, st: 100 }, contains: [] },
-  { name: "Morot", kcal: 40, protein: 0.9, carbs: 8, fat: 0.2, units: { g: 1, st: 70 }, contains: [] },
-  { name: "Hummus", kcal: 250, protein: 7, carbs: 14, fat: 18, units: { g: 1, msk: 15 }, contains: [] },
+  {
+    name: "Kikärtor, kokta",
+    kcal: 140,
+    protein: 7,
+    carbs: 18,
+    fat: 2.5,
+    units: { g: 1, dl: 70 },
+    contains: [],
+  },
+  {
+    name: "Röda linser, kokta",
+    kcal: 115,
+    protein: 9,
+    carbs: 17,
+    fat: 0.4,
+    units: { g: 1, dl: 80 },
+    contains: [],
+  },
+  {
+    name: "Ris, kokt",
+    kcal: 130,
+    protein: 2.7,
+    carbs: 28,
+    fat: 0.3,
+    units: { g: 1, dl: 65 },
+    contains: [],
+  },
+  {
+    name: "Pasta, kokt",
+    kcal: 150,
+    protein: 5.5,
+    carbs: 30,
+    fat: 0.9,
+    units: { g: 1, dl: 45 },
+    contains: ["gluten"],
+  },
+  {
+    name: "Potatis, kokt",
+    kcal: 75,
+    protein: 1.8,
+    carbs: 16,
+    fat: 0.1,
+    units: { g: 1, st: 80 },
+    contains: [],
+  },
+  {
+    name: "Quinoa, kokt",
+    kcal: 120,
+    protein: 4.4,
+    carbs: 21,
+    fat: 1.9,
+    units: { g: 1, dl: 70 },
+    contains: [],
+  },
+  {
+    name: "Knäckebröd",
+    kcal: 340,
+    protein: 10,
+    carbs: 60,
+    fat: 2,
+    units: { g: 1, st: 12 },
+    contains: ["gluten"],
+  },
+  {
+    name: "Fullkornsbröd",
+    kcal: 245,
+    protein: 9,
+    carbs: 42,
+    fat: 3.5,
+    units: { g: 1, st: 35 },
+    contains: ["gluten"],
+  },
+  {
+    name: "Hårdost 17 %",
+    kcal: 280,
+    protein: 27,
+    carbs: 0,
+    fat: 17,
+    units: { g: 1, st: 10 },
+    contains: ["mjolk"],
+    animal: "mejeri",
+  },
+  {
+    name: "Smör",
+    kcal: 740,
+    protein: 0.5,
+    carbs: 0.5,
+    fat: 82,
+    units: { g: 1, msk: 12 },
+    contains: ["mjolk"],
+    animal: "mejeri",
+  },
+  {
+    name: "Rapsolja",
+    kcal: 900,
+    protein: 0,
+    carbs: 0,
+    fat: 100,
+    units: { g: 1, msk: 9 },
+    contains: [],
+  },
+  {
+    name: "Jordnötssmör",
+    kcal: 600,
+    protein: 25,
+    carbs: 13,
+    fat: 50,
+    units: { g: 1, msk: 16 },
+    contains: ["notter"],
+  },
+  {
+    name: "Mandlar",
+    kcal: 600,
+    protein: 21,
+    carbs: 7,
+    fat: 52,
+    units: { g: 1, dl: 60 },
+    contains: ["notter"],
+  },
+  {
+    name: "Avokado",
+    kcal: 160,
+    protein: 2,
+    carbs: 2,
+    fat: 15,
+    units: { g: 1, st: 140 },
+    contains: [],
+  },
+  {
+    name: "Broccoli",
+    kcal: 35,
+    protein: 3,
+    carbs: 4,
+    fat: 0.4,
+    units: { g: 1, dl: 35 },
+    contains: [],
+  },
+  {
+    name: "Tomat",
+    kcal: 20,
+    protein: 0.9,
+    carbs: 3,
+    fat: 0.2,
+    units: { g: 1, st: 100 },
+    contains: [],
+  },
+  {
+    name: "Morot",
+    kcal: 40,
+    protein: 0.9,
+    carbs: 8,
+    fat: 0.2,
+    units: { g: 1, st: 70 },
+    contains: [],
+  },
+  {
+    name: "Hummus",
+    kcal: 250,
+    protein: 7,
+    carbs: 14,
+    fat: 18,
+    units: { g: 1, msk: 15 },
+    contains: [],
+  },
 ];
 
 export const UNIT_LABEL: Record<Unit, string> = { g: "g", dl: "dl", msk: "msk", st: "st" };
 
 const DIET_EXCLUDES: Record<Diet, NonNullable<Food["animal"]>[]> = {
-  allt: [], glutenfritt: [], vegetariskt: ["kott", "fisk"], pescetariskt: ["kott"], veganskt: ["kott", "fisk", "mejeri", "agg"],
+  allt: [],
+  glutenfritt: [],
+  vegetariskt: ["kott", "fisk"],
+  pescetariskt: ["kott"],
+  veganskt: ["kott", "fisk", "mejeri", "agg"],
 };
 
 /** Foods eligible for the profile's diet and restrictions (same rules as meal suggestions). */
@@ -558,30 +1075,55 @@ export function foodsFor(diet: Diet | undefined, restrictions: Restriction[] = [
   const d = diet ?? "allt";
   const r = d === "glutenfritt" ? [...restrictions, "gluten" as Restriction] : restrictions;
   const q = query.trim().toLowerCase();
-  return FOODS.filter((f) => !(f.animal && DIET_EXCLUDES[d].includes(f.animal))
-    && r.every((x) => !f.contains.includes(x)) && (!q || f.name.toLowerCase().includes(q)));
+  return FOODS.filter(
+    (f) =>
+      !(f.animal && DIET_EXCLUDES[d].includes(f.animal)) &&
+      r.every((x) => !f.contains.includes(x)) &&
+      (!q || f.name.toLowerCase().includes(q)),
+  );
 }
 
 export function portion(food: Food, qty: number, unit: Unit) {
   const grams = qty * (food.units[unit] ?? 1);
   const k = grams / 100;
   const r1 = (n: number) => Math.round(n * k * 10) / 10;
-  return { grams, kcal: Math.round(food.kcal * k), protein: r1(food.protein), carbs: r1(food.carbs), fat: r1(food.fat) };
+  return {
+    grams,
+    kcal: Math.round(food.kcal * k),
+    protein: r1(food.protein),
+    carbs: r1(food.carbs),
+    fat: r1(food.fat),
+  };
 }
 
-export interface MacroTargets { kcal: number; protein: number; carbs: number; fat: number }
+export interface MacroTargets {
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
 export type NutritionFocus = "muskler" | "forma" | "energi" | "balans";
 export const NUTRITION_FOCUS: { value: NutritionFocus; label: string; hint: string }[] = [
   { value: "muskler", label: "Bygga muskler", hint: "Mer protein och lite extra energi" },
-  { value: "forma", label: "Forma kroppen i lugn takt", hint: "Litet, snällt underskott med mycket protein" },
+  {
+    value: "forma",
+    label: "Forma kroppen i lugn takt",
+    hint: "Litet, snällt underskott med mycket protein",
+  },
   { value: "energi", label: "Mer vardagsenergi", hint: "Jämn energi med fokus på kolhydrater" },
   { value: "balans", label: "Goda vanor", hint: "Balanserad grund att må bra på" },
 ];
 /** Focus chosen in Mat, or derived from the onboarding goal. */
 export function nutritionFocusOf(p: Profile): NutritionFocus {
-  return p.nutritionFocus ?? (p.goal === "styrka" ? "muskler" : p.goal === "energi" ? "energi" : "balans");
+  return (
+    p.nutritionFocus ??
+    (p.goal === "styrka" ? "muskler" : p.goal === "energi" ? "energi" : "balans")
+  );
 }
-const FOCUS_RULES: Record<NutritionFocus, { kcalAdj: number; proteinPerKg: number; fatShare: number }> = {
+const FOCUS_RULES: Record<
+  NutritionFocus,
+  { kcalAdj: number; proteinPerKg: number; fatShare: number }
+> = {
   muskler: { kcalAdj: 250, proteinPerKg: 1.8, fatShare: 0.25 },
   forma: { kcalAdj: -300, proteinPerKg: 1.8, fatShare: 0.3 },
   energi: { kcalAdj: 0, proteinPerKg: 1.4, fatShare: 0.25 },
@@ -616,9 +1158,18 @@ export function macroFeedback(key: MacroKey, eaten: number, target: number): str
   if (eaten <= 0 || target <= 0) return null;
   const pct = Math.round((eaten / target) * 100);
   const msg = {
-    protein: ["Proteinmålet nått – grymt för återhämtningen! 💪", "av proteinet nått – fint på väg!"],
-    carbs: ["Kolhydratmålet nått – bra energipåfyllning för dagen! ⚡", "av kolhydraterna – energi på väg in."],
-    fat: ["Fettmålet nått – fint med bra fetter idag! 🥑", "av fettet – gott om utrymme kvar för bra fetter."],
+    protein: [
+      "Proteinmålet nått – grymt för återhämtningen! 💪",
+      "av proteinet nått – fint på väg!",
+    ],
+    carbs: [
+      "Kolhydratmålet nått – bra energipåfyllning för dagen! ⚡",
+      "av kolhydraterna – energi på väg in.",
+    ],
+    fat: [
+      "Fettmålet nått – fint med bra fetter idag! 🥑",
+      "av fettet – gott om utrymme kvar för bra fetter.",
+    ],
   }[key];
   return pct >= 100 ? msg[0]! : `${pct} % ${msg[1]}`;
 }

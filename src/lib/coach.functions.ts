@@ -6,23 +6,38 @@ import type { CoachTurn } from "./coachTelemetry";
 const schema = z.object({
   answer: z.string(),
   followUps: z.array(z.string()),
-  actions: z.array(z.object({
-    kind: z.enum(["log_meal", "log_water", "log_weight", "log_workout"]),
-    type: z.enum(["frukost", "lunch", "middag", "mellanmål"]).optional(),
-    name: z.string().optional(),
-    amount: z.string().optional(),
-    kcal: z.number().optional(), protein: z.number().optional(), carbs: z.number().optional(), fat: z.number().optional(),
-    ml: z.number().optional(),
-    kg: z.number().optional(),
-    status: z.enum(["klart", "planerat"]).optional(),
-    title: z.string().optional(),
-    workoutKind: z.enum(["styrka", "kondition", "rörlighet"]).optional(),
-    durationMin: z.number().optional(),
-    exercises: z.array(z.object({
-      name: z.string(),
-      sets: z.array(z.object({ reps: z.number().optional(), kg: z.number().optional(), timeSec: z.number().optional() })),
-    })).optional(),
-  })),
+  actions: z.array(
+    z.object({
+      kind: z.enum(["log_meal", "log_water", "log_weight", "log_workout"]),
+      type: z.enum(["frukost", "lunch", "middag", "mellanmål"]).optional(),
+      name: z.string().optional(),
+      amount: z.string().optional(),
+      kcal: z.number().optional(),
+      protein: z.number().optional(),
+      carbs: z.number().optional(),
+      fat: z.number().optional(),
+      ml: z.number().optional(),
+      kg: z.number().optional(),
+      status: z.enum(["klart", "planerat"]).optional(),
+      title: z.string().optional(),
+      workoutKind: z.enum(["styrka", "kondition", "rörlighet"]).optional(),
+      durationMin: z.number().optional(),
+      exercises: z
+        .array(
+          z.object({
+            name: z.string(),
+            sets: z.array(
+              z.object({
+                reps: z.number().optional(),
+                kg: z.number().optional(),
+                timeSec: z.number().optional(),
+              }),
+            ),
+          }),
+        )
+        .optional(),
+    }),
+  ),
 });
 
 const SYSTEM = `Du är Balans AI-coach: en varm, stöttande och realistisk svensk livsstilscoach för kost, träning och återhämtning.
@@ -52,34 +67,47 @@ export const askCoach = createServerFn({ method: "POST" })
     const question = typeof input?.question === "string" ? input.question.trim() : "";
     const context = typeof input?.context === "string" ? input.context.slice(0, 4000) : "";
     if (question.length < 2 || question.length > 1500) throw new Error("Skriv max 1500 tecken.");
-    const history = (Array.isArray(input?.history) ? input.history : []).slice(-8)
+    const history = (Array.isArray(input?.history) ? input.history : [])
+      .slice(-8)
       .filter((t) => t && typeof t.q === "string" && typeof t.a === "string")
       .map((t) => ({ q: t.q.slice(0, 600), a: t.a.slice(0, 900) }));
     return { question, context, history };
   })
-  .handler(async ({ data }): Promise<{ ok: true; answer: string; followUps: string[]; actions: CoachAction[] } | { ok: false; error: string }> => {
-    const { geminiModel } = await import("./gemini.server");
-    const model = await geminiModel();
-    if (!model) return { ok: false, error: "AI-coachen är inte konfigurerad." };
-    const { streamText, Output } = await import("ai");
-    try {
-      const result = streamText({
-        model,
-        system: SYSTEM,
-        output: Output.object({ schema }),
-        maxRetries: 0,
-        prompt: `Användarens läge just nu:\n${data.context}\n\n${data.history.length ? `Tidigare i samtalet:\n${data.history.map((t) => `Användare: ${t.q}\nCoach: ${t.a}`).join("\n")}\n\n` : ""}Nytt meddelande: ${data.question}`,
-      });
-      const out = await result.output;
-      const answer = out.answer.trim();
-      if (!answer) return { ok: false, error: "Coachen kunde inte svara på det. Prova en annan fråga." };
-      const followUps = out.followUps.map((f) => f.trim()).filter((f) => f.length > 1).slice(0, 3);
-      return { ok: true, answer, followUps, actions: sanitizeActions(out.actions) };
-    } catch (e) {
-      const status = (e as { statusCode?: number }).statusCode;
-      if (status === 429) return { ok: false, error: "Många frågor just nu – försök igen om en stund." };
-      if (status === 402) return { ok: false, error: "AI-krediterna är slut för tillfället." };
-      console.error("askCoach", e);
-      return { ok: false, error: "Coachen kunde inte svara just nu. Försök igen." };
-    }
-  });
+  .handler(
+    async ({
+      data,
+    }): Promise<
+      | { ok: true; answer: string; followUps: string[]; actions: CoachAction[] }
+      | { ok: false; error: string }
+    > => {
+      const { geminiModel } = await import("./gemini.server");
+      const model = await geminiModel();
+      if (!model) return { ok: false, error: "AI-coachen är inte konfigurerad." };
+      const { streamText, Output } = await import("ai");
+      try {
+        const result = streamText({
+          model,
+          system: SYSTEM,
+          output: Output.object({ schema }),
+          maxRetries: 0,
+          prompt: `Användarens läge just nu:\n${data.context}\n\n${data.history.length ? `Tidigare i samtalet:\n${data.history.map((t) => `Användare: ${t.q}\nCoach: ${t.a}`).join("\n")}\n\n` : ""}Nytt meddelande: ${data.question}`,
+        });
+        const out = await result.output;
+        const answer = out.answer.trim();
+        if (!answer)
+          return { ok: false, error: "Coachen kunde inte svara på det. Prova en annan fråga." };
+        const followUps = out.followUps
+          .map((f) => f.trim())
+          .filter((f) => f.length > 1)
+          .slice(0, 3);
+        return { ok: true, answer, followUps, actions: sanitizeActions(out.actions) };
+      } catch (e) {
+        const status = (e as { statusCode?: number }).statusCode;
+        if (status === 429)
+          return { ok: false, error: "Många frågor just nu – försök igen om en stund." };
+        if (status === 402) return { ok: false, error: "AI-krediterna är slut för tillfället." };
+        console.error("askCoach", e);
+        return { ok: false, error: "Coachen kunde inte svara just nu. Försök igen." };
+      }
+    },
+  );

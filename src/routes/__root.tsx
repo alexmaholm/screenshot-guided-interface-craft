@@ -89,7 +89,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "theme-color", content: "#0A0A0B" },
       { property: "og:title", content: "Aequiv" },
-      { property: "og:description", content: "Träning, nutrition och återhämtning i perfekt jämvikt." },
+      {
+        property: "og:description",
+        content: "Träning, nutrition och återhämtning i perfekt jämvikt.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -113,7 +116,12 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="sv" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: "try{var t=localStorage.getItem('balans-theme');if(t==='warm')document.documentElement.dataset.theme='warm'}catch(e){}" }} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('balans-theme');if(t==='warm')document.documentElement.dataset.theme='warm'}catch(e){}",
+          }}
+        />
         <HeadContent />
       </head>
       <body>
@@ -126,8 +134,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  useEffect(() => { void import("@/lib/cloudsync").then((m) => m.startCloudSync()); }, []);
-
+  useEffect(() => {
+    void import("@/lib/cloudsync").then((m) => m.startCloudSync());
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

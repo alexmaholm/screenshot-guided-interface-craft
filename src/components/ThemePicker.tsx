@@ -10,8 +10,15 @@ export function ThemePicker() {
       <h2 className="label-xs text-muted-foreground">Utseende</h2>
       <div className="grid grid-cols-2 gap-3">
         {THEMES.map((t) => (
-          <button key={t.id} aria-pressed={theme === t.id} onClick={() => { setTheme(t.id); setT(t.id); }}
-            className={`relative rounded-md border p-3 text-left ${theme === t.id ? "border-primary" : "border-border"}`}>
+          <button
+            key={t.id}
+            aria-pressed={theme === t.id}
+            onClick={() => {
+              setTheme(t.id);
+              setT(t.id);
+            }}
+            className={`relative rounded-md border p-3 text-left ${theme === t.id ? "border-primary" : "border-border"}`}
+          >
             <div className="mb-2 flex h-10 overflow-hidden rounded-sm border border-border">
               <span className="flex-[3]" style={{ background: t.swatch[0] }} />
               <span className="flex-1" style={{ background: t.swatch[1] }} />

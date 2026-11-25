@@ -9,7 +9,15 @@ describe("rest timer", () => {
     expect(clampRest(75)).toBe(75);
   });
   it("remembers the last chosen rest per exercise", () => {
-    const w = (sec: number): Workout => ({ id: String(sec), date: "2026-11-01", title: "", kind: "styrka", durationMin: 30, status: "klart", exercises: [{ name: "Bänkpress", restSec: sec, done: true }] });
+    const w = (sec: number): Workout => ({
+      id: String(sec),
+      date: "2026-11-01",
+      title: "",
+      kind: "styrka",
+      durationMin: 30,
+      status: "klart",
+      exercises: [{ name: "Bänkpress", restSec: sec, done: true }],
+    });
     expect(rememberedRest("Bänkpress", [w(60), w(150)], 45)).toBe(150);
     expect(rememberedRest("Latsdrag", [w(60)], 45)).toBe(45);
   });

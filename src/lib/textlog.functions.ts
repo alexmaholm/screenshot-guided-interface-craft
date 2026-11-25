@@ -22,37 +22,48 @@ Uppskatta rimliga portioner om mängd saknas. Returnera för HELA måltiden: kor
 export const estimateText = createServerFn({ method: "POST" })
   .inputValidator((input: { text: string }) => {
     const text = typeof input?.text === "string" ? input.text.trim() : "";
-    if (text.length < 2 || text.length > 500) throw new Error("Beskriv måltiden kort (max 500 tecken).");
+    if (text.length < 2 || text.length > 500)
+      throw new Error("Beskriv måltiden kort (max 500 tecken).");
     return { text };
   })
-  .handler(async ({ data }): Promise<{ ok: true; result: TextEstimate } | { ok: false; error: string }> => {
-    const { geminiModel } = await import("./gemini.server");
-    const model = await geminiModel();
-    if (!model) return { ok: false, error: "AI-beräkningen är inte konfigurerad." };
-    const { streamText, Output } = await import("ai");
-    try {
-      const result = streamText({
-        model,
-        system: SYSTEM,
-        output: Output.object({ schema }),
-        maxRetries: 0,
-        prompt: data.text,
-      });
-      const v = await result.output;
-      return {
-        ok: true,
-        result: {
-          ...v,
-          kcal: Math.round(v.kcal),
-          protein: round1(v.protein), carbs: round1(v.carbs), fat: round1(v.fat),
-          fiber: round1(v.fiber), sugar: round1(v.sugar), satFat: round1(v.satFat), salt: round1(v.salt),
-        },
-      };
-    } catch (e) {
-      const status = (e as { statusCode?: number }).statusCode;
-      if (status === 429) return { ok: false, error: "För många beräkningar just nu – försök igen om en stund." };
-      if (status === 402) return { ok: false, error: "AI-krediterna är slut för tillfället." };
-      console.error("estimateText", e);
-      return { ok: false, error: "Kunde inte beräkna. Försök igen eller fyll i manuellt." };
-    }
-  });
+  .handler(
+    async ({
+      data,
+    }): Promise<{ ok: true; result: TextEstimate } | { ok: false; error: string }> => {
+      const { geminiModel } = await import("./gemini.server");
+      const model = await geminiModel();
+      if (!model) return { ok: false, error: "AI-beräkningen är inte konfigurerad." };
+      const { streamText, Output } = await import("ai");
+      try {
+        const result = streamText({
+          model,
+          system: SYSTEM,
+          output: Output.object({ schema }),
+          maxRetries: 0,
+          prompt: data.text,
+        });
+        const v = await result.output;
+        return {
+          ok: true,
+          result: {
+            ...v,
+            kcal: Math.round(v.kcal),
+            protein: round1(v.protein),
+            carbs: round1(v.carbs),
+            fat: round1(v.fat),
+            fiber: round1(v.fiber),
+            sugar: round1(v.sugar),
+            satFat: round1(v.satFat),
+            salt: round1(v.salt),
+          },
+        };
+      } catch (e) {
+        const status = (e as { statusCode?: number }).statusCode;
+        if (status === 429)
+          return { ok: false, error: "För många beräkningar just nu – försök igen om en stund." };
+        if (status === 402) return { ok: false, error: "AI-krediterna är slut för tillfället." };
+        console.error("estimateText", e);
+        return { ok: false, error: "Kunde inte beräkna. Försök igen eller fyll i manuellt." };
+      }
+    },
+  );

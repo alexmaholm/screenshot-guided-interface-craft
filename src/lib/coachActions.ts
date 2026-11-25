@@ -1,17 +1,48 @@
-import { dateKey, uid, type Exercise, type Meal, type MealType, type State, type WorkoutKind } from "./balans";
+import {
+  dateKey,
+  uid,
+  type Exercise,
+  type Meal,
+  type MealType,
+  type State,
+  type WorkoutKind,
+} from "./balans";
 import { EXERCISES } from "./exercises";
 
 export const MEAL_TYPES: MealType[] = ["frukost", "lunch", "middag", "mellanmål"];
 const KINDS: WorkoutKind[] = ["styrka", "kondition", "rörlighet"];
 
-export interface CoachSet { reps?: number | undefined; kg?: number | undefined; timeSec?: number | undefined }
-export interface CoachExercise { name: string; sets: CoachSet[] }
+export interface CoachSet {
+  reps?: number | undefined;
+  kg?: number | undefined;
+  timeSec?: number | undefined;
+}
+export interface CoachExercise {
+  name: string;
+  sets: CoachSet[];
+}
 
 export type CoachAction =
-  | { kind: "log_meal"; type: MealType; name: string; amount: string; kcal: number; protein: number; carbs: number; fat: number }
+  | {
+      kind: "log_meal";
+      type: MealType;
+      name: string;
+      amount: string;
+      kcal: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    }
   | { kind: "log_water"; ml: number }
   | { kind: "log_weight"; kg: number }
-  | { kind: "log_workout"; status: "klart" | "planerat"; title: string; workoutKind: WorkoutKind; durationMin: number; exercises: CoachExercise[] };
+  | {
+      kind: "log_workout";
+      status: "klart" | "planerat";
+      title: string;
+      workoutKind: WorkoutKind;
+      durationMin: number;
+      exercises: CoachExercise[];
+    };
 
 const num = (v: unknown, max: number) => {
   const n = typeof v === "number" ? v : Number(v);
@@ -19,9 +50,36 @@ const num = (v: unknown, max: number) => {
 };
 const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
-type Raw = Partial<Record<"kind" | "ml" | "kg" | "name" | "type" | "amount" | "kcal" | "protein" | "carbs" | "fat" | "status" | "title" | "workoutKind" | "durationMin" | "exercises" | "sets" | "reps" | "timeSec", unknown>>;
+type Raw = Partial<
+  Record<
+    | "kind"
+    | "ml"
+    | "kg"
+    | "name"
+    | "type"
+    | "amount"
+    | "kcal"
+    | "protein"
+    | "carbs"
+    | "fat"
+    | "status"
+    | "title"
+    | "workoutKind"
+    | "durationMin"
+    | "exercises"
+    | "sets"
+    | "reps"
+    | "timeSec",
+    unknown
+  >
+>;
 
-const norm = (s: string) => s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9åäö]+/g, " ").trim();
+const norm = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9åäö]+/g, " ")
+    .trim();
 
 /** Maps a free-text exercise name to the library name (Swedish or English), else keeps the AI's name. */
 export function matchExerciseName(name: string, custom: { name: string }[] = []): string {
@@ -31,8 +89,16 @@ export function matchExerciseName(name: string, custom: { name: string }[] = [])
   const exact = all.find((e) => norm(e.name) === n || norm(e.nameEn) === n);
   if (exact) return exact.name;
   const partial = all
-    .filter((e) => norm(e.name).includes(n) || norm(e.nameEn).includes(n) || n.includes(norm(e.name)) || n.includes(norm(e.nameEn)))
-    .sort((a, b) => Math.abs(norm(a.name).length - n.length) - Math.abs(norm(b.name).length - n.length));
+    .filter(
+      (e) =>
+        norm(e.name).includes(n) ||
+        norm(e.nameEn).includes(n) ||
+        n.includes(norm(e.name)) ||
+        n.includes(norm(e.nameEn)),
+    )
+    .sort(
+      (a, b) => Math.abs(norm(a.name).length - n.length) - Math.abs(norm(b.name).length - n.length),
+    );
   return partial[0]?.name ?? name;
 }
 
@@ -46,7 +112,11 @@ function sanitizeSets(raw: unknown): CoachSet[] {
     const kg = r.kg == null ? null : num(r.kg, 600);
     const timeSec = r.timeSec == null ? null : num(r.timeSec, 7200);
     if (!reps && !timeSec) continue;
-    out.push({ reps: reps ? Math.round(reps) : undefined, kg: kg ?? undefined, timeSec: timeSec ? Math.round(timeSec) : undefined });
+    out.push({
+      reps: reps ? Math.round(reps) : undefined,
+      kg: kg ?? undefined,
+      timeSec: timeSec ? Math.round(timeSec) : undefined,
+    });
   }
   return out;
 }
@@ -67,26 +137,46 @@ export function sanitizeActions(raw: unknown, custom: { name: string }[] = []): 
     } else if (r.kind === "log_meal") {
       const name = str(r.name, 80);
       const type = MEAL_TYPES.includes(r.type as MealType) ? (r.type as MealType) : null;
-      const kcal = num(r.kcal, 5000), protein = num(r.protein, 400), carbs = num(r.carbs, 800), fat = num(r.fat, 400);
-      if (!name || !type || kcal === null || protein === null || carbs === null || fat === null) continue;
-      out.push({ kind: "log_meal", type, name, amount: str(r.amount, 40) || "1 portion", kcal: Math.round(kcal), protein, carbs, fat });
-    } else if (r.kind === "log_workout") {
-      const exercises = (Array.isArray(r.exercises) ? r.exercises : []).slice(0, 15).flatMap((e: unknown) => {
-        if (!e || typeof e !== "object") return [];
-        const x = e as Raw;
-        const name = str(x.name, 60);
-        const sets = sanitizeSets(x.sets);
-        return name && sets.length ? [{ name: matchExerciseName(name, custom), sets }] : [];
+      const kcal = num(r.kcal, 5000),
+        protein = num(r.protein, 400),
+        carbs = num(r.carbs, 800),
+        fat = num(r.fat, 400);
+      if (!name || !type || kcal === null || protein === null || carbs === null || fat === null)
+        continue;
+      out.push({
+        kind: "log_meal",
+        type,
+        name,
+        amount: str(r.amount, 40) || "1 portion",
+        kcal: Math.round(kcal),
+        protein,
+        carbs,
+        fat,
       });
+    } else if (r.kind === "log_workout") {
+      const exercises = (Array.isArray(r.exercises) ? r.exercises : [])
+        .slice(0, 15)
+        .flatMap((e: unknown) => {
+          if (!e || typeof e !== "object") return [];
+          const x = e as Raw;
+          const name = str(x.name, 60);
+          const sets = sanitizeSets(x.sets);
+          return name && sets.length ? [{ name: matchExerciseName(name, custom), sets }] : [];
+        });
       if (!exercises.length) continue;
-      const workoutKind = KINDS.includes(r.workoutKind as WorkoutKind) ? (r.workoutKind as WorkoutKind) : "styrka";
+      const workoutKind = KINDS.includes(r.workoutKind as WorkoutKind)
+        ? (r.workoutKind as WorkoutKind)
+        : "styrka";
       const dur = num(r.durationMin, 300);
       out.push({
         kind: "log_workout",
         status: r.status === "planerat" ? "planerat" : "klart",
         title: str(r.title, 60) || "Pass",
         workoutKind,
-        durationMin: dur && dur >= 5 ? Math.round(dur) : Math.max(10, exercises.reduce((n, e) => n + e.sets.length, 0) * 3),
+        durationMin:
+          dur && dur >= 5
+            ? Math.round(dur)
+            : Math.max(10, exercises.reduce((n, e) => n + e.sets.length, 0) * 3),
         exercises,
       });
     }
@@ -115,21 +205,47 @@ function toExercise(e: CoachExercise, done: boolean): Exercise {
 export function applyAction(st: State, a: CoachAction, date = dateKey()): State {
   if (a.kind === "log_water") {
     const h = st.habits[date] ?? { water: 0 };
-    return { ...st, habits: { ...st.habits, [date]: { ...h, water: h.water + mlToGlasses(a.ml) } } };
+    return {
+      ...st,
+      habits: { ...st.habits, [date]: { ...h, water: h.water + mlToGlasses(a.ml) } },
+    };
   }
   if (a.kind === "log_weight") {
-    return { ...st, body: [...st.body.filter((b) => b.date !== date), { date, weight: a.kg }].sort((x, y) => x.date.localeCompare(y.date)) };
+    return {
+      ...st,
+      body: [...st.body.filter((b) => b.date !== date), { date, weight: a.kg }].sort((x, y) =>
+        x.date.localeCompare(y.date),
+      ),
+    };
   }
   if (a.kind === "log_workout") {
     const done = a.status === "klart";
     return {
       ...st,
-      workouts: [...st.workouts, {
-        id: uid(), date, title: a.title, kind: a.workoutKind, durationMin: a.durationMin,
-        status: a.status, exercises: a.exercises.map((e) => toExercise(e, done)),
-      }],
+      workouts: [
+        ...st.workouts,
+        {
+          id: uid(),
+          date,
+          title: a.title,
+          kind: a.workoutKind,
+          durationMin: a.durationMin,
+          status: a.status,
+          exercises: a.exercises.map((e) => toExercise(e, done)),
+        },
+      ],
     };
   }
-  const meal: Meal = { id: uid(), date, type: a.type, name: a.name, amount: a.amount, kcal: a.kcal, protein: a.protein, carbs: a.carbs, fat: a.fat };
+  const meal: Meal = {
+    id: uid(),
+    date,
+    type: a.type,
+    name: a.name,
+    amount: a.amount,
+    kcal: a.kcal,
+    protein: a.protein,
+    carbs: a.carbs,
+    fat: a.fat,
+  };
   return { ...st, meals: [...st.meals, meal] };
 }
