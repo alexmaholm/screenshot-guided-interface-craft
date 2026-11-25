@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { fridgeIdeas, type FridgeDish } from "@/lib/fridge.functions";
+import { ensureSignedIn } from "@/lib/account-gate";
 import {
   dateKey,
   DIETS,
@@ -23,6 +24,7 @@ export function FridgeIdeas({ profile }: { profile: Profile }) {
   const [dishes, setDishes] = useState<FridgeDish[]>([]);
 
   const ask = async () => {
+    if (!(await ensureSignedIn())) return;
     setBusy(true);
     try {
       const focus = nutritionFocusOf(profile);

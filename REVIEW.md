@@ -10,8 +10,9 @@ Granskad version: `main` efter PR #1–#6 (commit `7ac3fe0` och senare).
 | K2 Synken kan skriva över molndata | **Åtgärdat.** Uppladdning först efter lyckad läsning. Fel görs om. |
 | V2 Last-write-wins, fel ignoreras, ingen flush | **Delvis åtgärdat.** Fel loggas och görs om, flush vid `pagehide` och när sidan döljs. Samtidiga ändringar på två enheter är fortfarande last-write-wins. |
 | V4 Engelska felsidor | **Åtgärdat.** 404 och fel-sidan är på svenska. |
-| K1 AI-endpoints utan inloggning | **Öppet.** Kräver beslut: inloggning eller server-gräns. |
-| V1 Inloggning ersätter lokal data | **Öppet.** Kräver beslut. |
+| K1 AI-endpoints utan inloggning | **Åtgärdat.** Alla fyra AI-funktioner kräver inloggning på servern (`requireSupabaseAuth`). Klienten öppnar en inloggningsdialog i stället för att anropa AI. |
+| V1 Inloggning ersätter lokal data | **Åtgärdat.** Vid inloggning sammanfogas lokal och molndata per id/datum i stället för att ersätta. Uppladdning sker villkorat på `updated_at`, så två enheter inte skriver över varandra. Känd begränsning: borttagningar återkommer om den andra enheten fortfarande har posten. |
+| Inloggning via Apple/Google | **Åtgärdat i kod.** Går nu via Supabases egen OAuth i stället för Lovables brygga. Providerna måste aktiveras i Supabase (Authentication → Providers). |
 | V5 Odokumenterade konstanter i `macroTargets` | **Öppet.** Kräver svar på frågan om avsikt. |
 | V6 Offline-kontroll i FridgeIdeas | Öppet. |
 | Ny: "Nytt pass" kräver konto | Observation. Uppmaning om konto dyker upp när man vill starta ett pass. Produktbeslut. |

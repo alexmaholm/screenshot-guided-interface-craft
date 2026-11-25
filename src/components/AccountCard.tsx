@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -15,8 +14,10 @@ export function SignInOptions({ onDone }: { onDone?: () => void }) {
   const [sent, setSent] = useState(false);
 
   async function oauth(provider: "apple" | "google") {
-    const r = await lovable.auth.signInWithOAuth(provider, {
-      redirect_uri: window.location.origin,
+    // Native Supabase OAuth. Providers must be enabled in the Supabase project (Authentication → Providers).
+    const r = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: window.location.origin },
     });
     if (r.error) toast.error("Inloggningen misslyckades. Försök igen.");
   }

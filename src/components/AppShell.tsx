@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { AiCoach } from "@/components/AiCoach";
 import { AppTour } from "@/components/AppTour";
 import { WelcomeAccount } from "@/components/WelcomeAccount";
+import { AccountGate } from "@/components/AccountGate";
 
 const TABS = [
   { to: "/", label: "Hem", icon: Home },
@@ -43,6 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <AiCoach />
       <AppTour />
       <WelcomeAccount />
+      <AccountGate />
       <nav
         aria-label="Huvudmeny"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
