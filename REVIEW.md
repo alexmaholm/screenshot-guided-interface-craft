@@ -2,6 +2,22 @@
 
 Granskad version: `main` efter PR #1–#6 (commit `7ac3fe0` och senare).
 
+## Status efter åtgärder (PR #7, branch `fix/startup-and-sync`)
+
+| Fynd | Status |
+| --- | --- |
+| K3 Krasch utan Supabase-variabler | **Åtgärdat.** Appen kör lokalt, startflödet verifierat utan variabler. |
+| K2 Synken kan skriva över molndata | **Åtgärdat.** Uppladdning först efter lyckad läsning. Fel görs om. |
+| V2 Last-write-wins, fel ignoreras, ingen flush | **Delvis åtgärdat.** Fel loggas och görs om, flush vid `pagehide` och när sidan döljs. Samtidiga ändringar på två enheter är fortfarande last-write-wins. |
+| V4 Engelska felsidor | **Åtgärdat.** 404 och fel-sidan är på svenska. |
+| K1 AI-endpoints utan inloggning | **Öppet.** Kräver beslut: inloggning eller server-gräns. |
+| V1 Inloggning ersätter lokal data | **Öppet.** Kräver beslut. |
+| V5 Odokumenterade konstanter i `macroTargets` | **Öppet.** Kräver svar på frågan om avsikt. |
+| V6 Offline-kontroll i FridgeIdeas | Öppet. |
+| Ny: "Nytt pass" kräver konto | Observation. Uppmaning om konto dyker upp när man vill starta ett pass. Produktbeslut. |
+
+Testat i webbläsaren efter åtgärderna: startflödet, hemskärmen, Mat (meny för måltid, även via `?ny=true`), Träning (kalender och knappar), Framsteg, Profil, Inställningar, Integritet, Villkor, Nytt lösenord och 404. Inga konsolfel i de nya laddningarna och ingen horisontell scroll.
+
 ## 1. Startstatus
 
 Dessa kontroller gjordes redan under arbetets gång och upprepades inte i den här granskningen.
