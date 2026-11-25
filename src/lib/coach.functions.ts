@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { sanitizeActions, type CoachAction } from "./coachActions";
 import type { CoachTurn } from "./coachTelemetry";
@@ -63,6 +64,7 @@ Regler:
 - Säg kort i svaret vad korten innehåller och att användaren bekräftar med Logga.`;
 
 export const askCoach = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: { question: string; context: string; history?: CoachTurn[] }) => {
     const question = typeof input?.question === "string" ? input.question.trim() : "";
     const context = typeof input?.context === "string" ? input.context.slice(0, 4000) : "";

@@ -33,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { estimateText } from "@/lib/textlog.functions";
 import { isOffline, OFFLINE_MSG } from "@/lib/online";
+import { ensureSignedIn } from "@/lib/account-gate";
 import {
   addDays,
   dateKey,
@@ -383,6 +384,7 @@ function AddMealDialog({
   );
 
   const runAi = async () => {
+    if (!(await ensureSignedIn())) return;
     if (isOffline()) {
       toast.error(OFFLINE_MSG);
       return;

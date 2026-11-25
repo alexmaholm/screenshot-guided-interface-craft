@@ -21,6 +21,7 @@ import { isPro } from "@/lib/tiers";
 import { toast } from "sonner";
 import { bestLifts, historyFor, recoveryLine } from "@/lib/coachTelemetry";
 import { isOffline, OFFLINE_MSG } from "@/lib/online";
+import { ensureSignedIn } from "@/lib/account-gate";
 
 const QUICK = [
   "Vad passar bra att äta nu för att nå mitt mål?",
@@ -236,6 +237,7 @@ export function AiCoach() {
   async function send(question: string) {
     if (!s || busy || question.trim().length < 2) return;
     mic.stop();
+    if (!(await ensureSignedIn())) return;
     if (isOffline()) {
       setChat((c) => [...c, { q: question, a: OFFLINE_MSG, error: true }]);
       return;

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { round1 } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ const SYSTEM = `Du är en svensk kostexpert. Användaren beskriver en måltid i 
 Uppskatta rimliga portioner om mängd saknas. Returnera för HELA måltiden: kort svenskt namn ("name"), kort mängdbeskrivning ("amount", t.ex. "2 ägg + 1 knäckemacka"), kcal, protein, kolhydrater, fett, fibrer, socker, mättat fett (satFat) och salt, alla i gram utom kcal. Avrunda till en decimal.`;
 
 export const estimateText = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: { text: string }) => {
     const text = typeof input?.text === "string" ? input.text.trim() : "";
     if (text.length < 2 || text.length > 500)

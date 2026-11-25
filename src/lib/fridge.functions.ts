@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const dish = z.object({
@@ -20,6 +21,7 @@ Föreslå exakt 3 olika, enkla rätter (max 30 min) som främst använder de ing
 kcal och protein (gram) per portion. Följ ALLTID användarens kost och restriktioner strikt. Skriv ren svensk text utan markdown.`;
 
 export const fridgeIdeas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(
     (input: { text: string; diet: string; restrictions: string[]; focus: string }) => {
       const text = typeof input?.text === "string" ? input.text.trim() : "";

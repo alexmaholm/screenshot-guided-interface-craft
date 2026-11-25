@@ -54,22 +54,35 @@ function createSupabaseFetch(supabaseUrl: string, supabaseKey: string): typeof f
   };
 }
 
-function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env["VITE_SUPABASE_URL"] || process.env["SUPABASE_URL"];
-  const SUPABASE_PUBLISHABLE_KEY =
-    import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] || process.env["SUPABASE_PUBLISHABLE_KEY"];
+/** Reads an env var on both server and browser. `process` does not exist in the browser build. */
+function readEnv(name: "SUPABASE_URL" | "SUPABASE_PUBLISHABLE_KEY"): string | undefined {
+  const viteName = `VITE_${name}` as const;
+  const fromVite = import.meta.env[viteName] as string | undefined;
+  if (fromVite) return fromVite;
+  return typeof process !== "undefined" ? process.env[name] : undefined;
+}
 
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    const missing = [
-      ...(!SUPABASE_URL ? ["SUPABASE_URL"] : []),
-      ...(!SUPABASE_PUBLISHABLE_KEY ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
-    ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(", ")}. Connect Supabase in Lovable Cloud.`;
-    console.error(`[Supabase] ${message}`);
-    throw new Error(message);
+const SUPABASE_URL_VALUE = readEnv("SUPABASE_URL");
+const SUPABASE_KEY_VALUE = readEnv("SUPABASE_PUBLISHABLE_KEY");
+
+/** False when cloud configuration is missing. The app then runs local-only. */
+export const supabaseConfigured = Boolean(SUPABASE_URL_VALUE && SUPABASE_KEY_VALUE);
+
+function createSupabaseClient() {
+  if (!SUPABASE_URL_VALUE || !SUPABASE_KEY_VALUE) {
+    console.warn(
+      "[Supabase] SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY saknas. Appen körs lokalt, utan konto och molnsynk.",
+    );
+    // Local-first: never throw at startup. Every request fails fast with an error object.
+    return createClient<Database>("http://localhost", "not-configured", {
+      global: {
+        fetch: () => Promise.reject(new Error("Molnet är inte konfigurerat.")),
+      },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
   }
+  const SUPABASE_URL = SUPABASE_URL_VALUE;
+  const SUPABASE_PUBLISHABLE_KEY = SUPABASE_KEY_VALUE;
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     global: {

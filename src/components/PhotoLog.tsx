@@ -27,6 +27,7 @@ import {
   type PlateQuestion,
 } from "@/lib/photolog";
 import { isOffline, OFFLINE_MSG } from "@/lib/online";
+import { ensureSignedIn } from "@/lib/account-gate";
 
 type Saved = {
   name: string;
@@ -84,6 +85,7 @@ export function PhotoLog({
   const [newName, setNewName] = useState("");
 
   const run = async (img: string, prev: { question: string; answer: string }[]) => {
+    if (!(await ensureSignedIn())) return;
     if (isOffline()) {
       setError(OFFLINE_MSG);
       return;

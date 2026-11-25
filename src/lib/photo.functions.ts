@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import type { PlateAnalysis } from "./photolog";
 
@@ -29,6 +30,7 @@ Om svar på tidigare frågor ges, använd dem och ställ inte samma frågor igen
 "title" är ett kort svenskt namn på rätten. Om bilden inte visar mat: tom items och en fråga om vad användaren åt.`;
 
 export const analyzePlate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(
     (input: {
       image: string;
