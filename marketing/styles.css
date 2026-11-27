@@ -1,0 +1,281 @@
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --border: #262626;
+  --text: #f5f5f5;
+  --muted: #a3a3a3;
+  --accent: #d4ff00;
+  --accent-ink: #0a0a0a;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e5e5e5;
+    --text: #0a0a0a;
+    --muted: #525252;
+    --accent: #a3d900;
+    --accent-ink: #0a0a0a;
+    color-scheme: light;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+header.site {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+header.site .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+header.site .brand svg {
+  width: 36px;
+  height: auto;
+}
+
+nav.site a {
+  color: var(--muted);
+  text-decoration: none;
+  margin-left: 18px;
+  font-size: 15px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+nav.site a:hover {
+  color: var(--text);
+}
+
+.hero {
+  padding: 48px 0 40px;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+h1 {
+  font-size: clamp(36px, 7vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 18px;
+  max-width: 14ch;
+}
+
+.lead {
+  font-size: clamp(17px, 2.4vw, 20px);
+  color: var(--muted);
+  max-width: 52ch;
+  margin: 0 0 28px;
+}
+
+.stores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.store {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.store.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: transparent;
+}
+
+.store[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+section.block {
+  padding: 40px 0;
+  border-top: 1px solid var(--border);
+}
+
+section.block h2 {
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  margin: 0 0 20px;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.card h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+.card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.steps {
+  counter-reset: step;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.steps li {
+  counter-increment: step;
+  display: flex;
+  gap: 14px;
+  color: var(--muted);
+}
+
+.steps li::before {
+  content: counter(step);
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+footer.site {
+  border-top: 1px solid var(--border);
+  padding: 28px 0 40px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+footer.site nav a {
+  margin-right: 16px;
+  color: var(--muted);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Legal pages */
+article.legal {
+  padding: 32px 0 48px;
+  max-width: 68ch;
+}
+
+article.legal h1 {
+  font-size: clamp(28px, 5vw, 40px);
+  max-width: none;
+}
+
+article.legal .updated {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0 0 28px;
+}
+
+article.legal h2 {
+  font-size: 18px;
+  margin: 28px 0 8px;
+}
+
+article.legal p {
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+article.legal a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
