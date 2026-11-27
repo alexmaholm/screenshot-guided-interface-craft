@@ -60,7 +60,7 @@ function Terms() {
         <p>Vi kan uppdatera villkoren. Vid större ändringar meddelar vi dig i appen.</p>
       </LegalSection>
       <LegalSection title="Kontakt">
-        <p>kontakt@aequiv.app · Svensk lag gäller.</p>
+        <p>support@aequiv.com · Svensk lag gäller.</p>
       </LegalSection>
     </LegalPage>
   );

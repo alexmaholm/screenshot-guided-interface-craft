@@ -68,7 +68,7 @@ function Privacy() {
         <p>Du har rätt att klaga hos Integritetsskyddsmyndigheten (IMY).</p>
       </LegalSection>
       <LegalSection title="Kontakt">
-        <p>Frågor om din data: kontakt@aequiv.app</p>
+        <p>Frågor om din data: support@aequiv.com</p>
       </LegalSection>
     </LegalPage>
   );
